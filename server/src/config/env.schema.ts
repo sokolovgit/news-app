@@ -1,15 +1,23 @@
 import { z } from 'zod';
 
+import { Environments } from '@/commons/enums';
+
 export const envValidationSchema = z.object({
   NODE_ENV: z
-    .enum(['development', 'production', 'test'])
-    .default('development'),
+    .enum([
+      Environments.DEVELOPMENT,
+      Environments.PRODUCTION,
+      Environments.TEST,
+    ])
+    .default(Environments.DEVELOPMENT),
 
   PORT: z.coerce.number().default(3000),
   HOST: z.string().default('0.0.0.0'),
 
-  DOCS_ENABLED: z.boolean().default(true),
+  DOCS_ENABLED: z.coerce.boolean().default(true),
   DOCS_PATH: z.string().default('api/docs'),
+
+  DATABASE_URL: z.url(),
 });
 
 export type EnvType = z.infer<typeof envValidationSchema>;
