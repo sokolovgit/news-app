@@ -1,8 +1,17 @@
-import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, varchar } from 'drizzle-orm/pg-core';
+
+import { Uuid } from '@/commons/utils';
+import { timestamps, primaryUuid } from '@/commons/database';
+
+export type UserId = Uuid<'users'>;
 
 export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  name: text('name').notNull(),
-  email: text('email').notNull().unique(),
-  createdAt: timestamp('created_at').defaultNow(),
+  id: primaryUuid<UserId>(),
+
+  email: varchar('email').unique(),
+
+  ...timestamps,
 });
+
+export type UserSelect = typeof users.$inferSelect;
+export type UserInsert = typeof users.$inferInsert;
