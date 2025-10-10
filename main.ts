@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { createDocument } from './plugins/swagger';
+import { ConfigService } from '@/config/config.service';
 
 async function bootstrap() {
   const logger = new Logger(AppModule.name);
@@ -17,10 +17,8 @@ async function bootstrap() {
 
   const config = app.get(ConfigService);
 
-  const port = config.get<string>('port') || '3000';
-  const host = config.get<string>('host') || '0.0.0.0';
-
-  const isDocsEnabled = config.get<boolean>('docs.enabled');
+  const { host, port } = config.server;
+  const { enabled: isDocsEnabled, path: docsPath } = config.docs;
 
   if (isDocsEnabled) {
     createDocument(app);
@@ -33,7 +31,6 @@ async function bootstrap() {
   logger.log(`🚀 Application is running on: ${appUrl}`);
 
   if (isDocsEnabled) {
-    const docsPath = config.get<string>('docs.path');
     logger.log(`📚 API Docs are available at: ${appUrl}/${docsPath}`);
   }
 }
