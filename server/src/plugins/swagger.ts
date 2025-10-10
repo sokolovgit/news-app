@@ -1,10 +1,11 @@
 import { INestApplication } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+import { ConfigService } from '@/config';
 
 export const createDocument = (app: INestApplication) => {
   const configService = app.get(ConfigService);
-  const docsPath = configService.get<string>('docs.path') || 'api/docs';
+  const docsPath = configService.docs.path;
 
   const config = new DocumentBuilder()
     .setTitle('API Documentation')
