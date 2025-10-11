@@ -3,11 +3,13 @@ import { DrizzlePGModule } from '@knaadh/nestjs-drizzle-pg';
 
 import { ConfigService } from '@/config';
 import { drizzleSchemas } from './drizzle-schemas';
+import { DRIZZLE_CONNECTION } from './constants';
 
 @Module({
   imports: [
     DrizzlePGModule.registerAsync({
       inject: [ConfigService],
+      tag: DRIZZLE_CONNECTION,
       useFactory: (config: ConfigService) => ({
         pg: {
           connection: 'client',
