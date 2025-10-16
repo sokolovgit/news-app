@@ -29,6 +29,6 @@ export class RegisterHandler {
       roles: [UserRole.USER],
     });
 
-    return { user };
+    return user;
   }
 }

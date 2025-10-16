@@ -1,9 +1,8 @@
 import { UserId } from '../schemas';
 import { UserRole } from '../enums';
-import { uuid } from '@/commons/utils';
 
 export type UserProperties = {
-  id?: UserId;
+  id: UserId;
   email: string;
   password?: string;
   roles: UserRole[];
@@ -14,8 +13,8 @@ export type UserProperties = {
 export class User {
   public constructor(private readonly props: UserProperties) {}
 
-  getId(): UserId | undefined {
-    return this.props.id ?? uuid<UserId>();
+  getId(): UserId {
+    return this.props.id;
   }
 
   getEmail(): string {
