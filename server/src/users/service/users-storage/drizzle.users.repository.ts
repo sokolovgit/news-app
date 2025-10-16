@@ -1,23 +1,24 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { UsersRepository } from '../abstracts';
 import { User } from '@/users/domain/entities';
-import { UserId, UserSelect } from '@/users/domain/schemas';
+import { UserId, users, UserSelect } from '@/users/domain/schemas';
+import { UsersRepository } from '../abstracts';
 
 import { DRIZZLE_CONNECTION, drizzleSchemas } from '@/database';
-import { UserEntityMapper } from './mappers';
+import { DrizzleUserEntityMapper } from './mappers';
 
 @Injectable()
 export class DrizzleUsersRepository extends UsersRepository {
-  private userEntityMapper: UserEntityMapper;
+  private mapper: DrizzleUserEntityMapper;
 
   constructor(
     @Inject(DRIZZLE_CONNECTION)
     private db: NodePgDatabase<typeof drizzleSchemas>,
   ) {
     super();
-    this.userEntityMapper = new UserEntityMapper();
+
+    this.mapper = new DrizzleUserEntityMapper();
   }
 
   async getUserById(id: UserId): Promise<User | null> {
@@ -25,6 +26,25 @@ export class DrizzleUsersRepository extends UsersRepository {
       where: (users, { eq }) => eq(users.id, id),
     });
 
-    return user ? this.userEntityMapper.toEntity(user) : null;
+    return user ? this.mapper.toEntity(user) : null;
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    const user: UserSelect | undefined = await this.db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.email, email),
+    });
+
+    return user ? this.mapper.toEntity(user) : null;
+  }
+
+  async save(user: User): Promise<User | null> {
+    const userData = this.mapper.toSchema(user);
+
+    const [savedUser] = await this.db
+      .insert(users)
+      .values(userData)
+      .returning();
+
+    return savedUser ? this.mapper.toEntity(savedUser) : null;
   }
 }
