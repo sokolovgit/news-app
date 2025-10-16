@@ -1,1 +1,1 @@
-export * from './auth-passwords.schema';
+export * from './oauth-accounts.schema';
