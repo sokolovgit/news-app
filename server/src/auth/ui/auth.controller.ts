@@ -28,6 +28,6 @@ export class AuthController {
   public async register(@Body() registerDto: RegisterDto) {
     const user = await this.registerHandler.handle(registerDto.toRequest());
 
-    return UserDto.fromUser(user);
+    return UserDto.fromUserEntity(user);
   }
 }

@@ -28,13 +28,17 @@ export class UserDto {
   })
   roles: UserRole[];
 
-  public static fromUser(user: User): UserDto {
-    const dto = new UserDto();
+  constructor(props: { id: string; email: string; roles: UserRole[] }) {
+    this.id = props.id;
+    this.email = props.email;
+    this.roles = props.roles;
+  }
 
-    dto.id = user.getId();
-    dto.email = user.getEmail();
-    dto.roles = user.getRoles();
-
-    return dto;
+  public static fromUserEntity(user: User): UserDto {
+    return new UserDto({
+      id: user.getId(),
+      email: user.getEmail(),
+      roles: user.getRoles(),
+    });
   }
 }
