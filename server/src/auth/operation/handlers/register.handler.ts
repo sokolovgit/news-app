@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { RegisterRequest } from '../requests';
 import { UsersService } from '@/users/service/users-service';
 
-import { PasswordsService } from '@/auth/service/passwords';
+import { PasswordsService } from '@/auth/service/passwords-service';
 import { UserRole } from '@/users/domain/enums';
 
 @Injectable()

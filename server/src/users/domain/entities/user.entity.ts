@@ -29,7 +29,7 @@ export class User {
     return this.props.roles.includes(role);
   }
 
-  getPassword(): string | undefined {
+  getHashedPassword(): string | undefined {
     return this.props.password;
   }
   getCreatedAt(): Date | undefined {

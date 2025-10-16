@@ -9,13 +9,13 @@ import {
 } from '@/commons/database';
 import { Uuid } from '@/commons/utils';
 import { UserId, users } from '@/users/domain/schemas';
-import { OAuthProviders } from '../enums';
+import { OAuthProvider } from '../enums';
 
 export type OAuthAccountId = Uuid<'oauth_accounts'>;
 
 export const pgOAuthProviders = pgEnum(
-  'oauth_providers',
-  Object.values(OAuthProviders) as [string, ...string[]],
+  'oauth_provider',
+  Object.values(OAuthProvider) as [string, ...string[]],
 );
 
 export const oauthAccounts = pgTable('oauth_accounts', {

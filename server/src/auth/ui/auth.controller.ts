@@ -1,11 +1,12 @@
+import {
+  ApiOperation,
+  ApiOkResponse,
+  ApiBadRequestResponse,
+} from '@nestjs/swagger';
 import { Body, Controller, Post } from '@nestjs/common';
+
 import { RegisterDto } from './dtos';
 import { RegisterHandler } from '../operation/handlers';
-import {
-  ApiBadRequestResponse,
-  ApiOkResponse,
-  ApiOperation,
-} from '@nestjs/swagger';
 import { UserDto } from '@/users/ui/dtos/user.dto';
 
 @Controller('auth')
@@ -30,4 +31,7 @@ export class AuthController {
 
     return UserDto.fromUserEntity(user);
   }
+
+  // @Post('login')
+  // public async login(@Body() loginDto: LoginDto) {}
 }

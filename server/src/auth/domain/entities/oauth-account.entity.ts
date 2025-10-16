@@ -1,11 +1,11 @@
 import { UserId } from '@/users/domain/schemas';
 import { OAuthAccountId } from '../schemas';
-import { OAuthProviders } from '../enums';
+import { OAuthProvider } from '../enums';
 
 export type OAuthAccountProperties = {
   id?: OAuthAccountId;
   userId: UserId;
-  provider: OAuthProviders;
+  provider: OAuthProvider;
   providerId: string;
   accessToken?: string;
   refreshToken?: string;
@@ -25,7 +25,7 @@ export class OAuthAccount {
     return this.props.userId;
   }
 
-  getProvider(): OAuthProviders {
+  getProvider(): OAuthProvider {
     return this.props.provider;
   }
 

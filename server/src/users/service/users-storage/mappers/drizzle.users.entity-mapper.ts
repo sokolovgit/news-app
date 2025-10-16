@@ -20,9 +20,9 @@ export class DrizzleUserEntityMapper
 
   toSchema(entity: User): UserInsert {
     return {
-      id: entity.getId()!,
+      id: entity.getId(),
       email: entity.getEmail(),
-      password: entity.getPassword() ?? null,
+      password: entity.getHashedPassword() ?? null,
       roles: entity.getRoles(),
       createdAt: entity.getCreatedAt(),
       updatedAt: entity.getUpdatedAt(),
