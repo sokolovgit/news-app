@@ -17,7 +17,11 @@ import { DRIZZLE_CONNECTION } from './constants';
             connectionString: config.database.url,
           },
         },
-        config: { logger: config.isDevelopment(), schema: drizzleSchemas },
+        config: {
+          logger: config.isDevelopment(),
+          schema: drizzleSchemas,
+          casing: 'snake_case',
+        },
       }),
     }),
   ],
