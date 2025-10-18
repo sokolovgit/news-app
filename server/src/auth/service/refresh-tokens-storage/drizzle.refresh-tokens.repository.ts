@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RefreshTokensRepository } from '../abstracts/refresh-tokens.repository';
-import { DRIZZLE_CONNECTION, drizzleSchemas } from '@/database';
+import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleRefreshTokenEntityMapper } from './mappers';
 import { RefreshToken } from '@/auth/domain/entities';
 import { eq } from 'drizzle-orm';
-import { users, UserSelect } from '@/users/domain/schemas';
+import { UserId, users, UserSelect } from '@/users/domain/schemas';
 import { RefreshTokenId, refreshTokens } from '@/auth/domain/schemas';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class DrizzleRefreshTokensRepository extends RefreshTokensRepository {
 
   constructor(
     @Inject(DRIZZLE_CONNECTION)
-    private db: NodePgDatabase<typeof drizzleSchemas>,
+    private db: NodePgDatabase<typeof drizzle>,
   ) {
     super();
     this.mapper = new DrizzleRefreshTokenEntityMapper();
@@ -49,6 +49,15 @@ export class DrizzleRefreshTokensRepository extends RefreshTokensRepository {
   async findRefreshTokenByToken(token: string): Promise<RefreshToken | null> {
     const refreshToken = await this.db.query.refreshTokens.findFirst({
       where: eq(refreshTokens.token, token),
+      with: { user: true },
+    });
+
+    return refreshToken ? this.mapper.toEntity(refreshToken) : null;
+  }
+
+  async findRefreshTokenByUserId(userId: UserId): Promise<RefreshToken | null> {
+    const refreshToken = await this.db.query.refreshTokens.findFirst({
+      where: eq(refreshTokens.userId, userId),
       with: { user: true },
     });
 

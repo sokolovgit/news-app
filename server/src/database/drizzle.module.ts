@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { DrizzlePGModule } from '@knaadh/nestjs-drizzle-pg';
-
 import { ConfigService } from '@/config';
-import { drizzleSchemas } from './drizzle-schemas';
+
+import { drizzle } from './drizzle-schemas';
 import { DRIZZLE_CONNECTION } from './constants';
 
 @Module({
@@ -19,7 +19,7 @@ import { DRIZZLE_CONNECTION } from './constants';
         },
         config: {
           logger: config.isDevelopment(),
-          schema: drizzleSchemas,
+          schema: drizzle,
           casing: 'snake_case',
         },
       }),

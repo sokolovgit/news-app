@@ -1,6 +1,26 @@
-import { users } from '@/users/domain/schemas';
-import { oauthAccounts, refreshTokens } from '@/auth/domain/schemas';
+import {
+  oauthAccounts,
+  oauthAccountRelations,
+  refreshTokens,
+  refreshTokenRelations,
+} from '@/auth/domain/schemas';
+import { userRelations, users } from '@/users/domain/schemas';
 
-export const drizzleSchemas = { users, oauthAccounts, refreshTokens };
+const relations = {
+  userRelations,
+  oauthAccountRelations,
+  refreshTokenRelations,
+};
 
-export type DrizzleSchemas = typeof drizzleSchemas;
+const drizzleSchemas = {
+  users,
+  oauthAccounts,
+  refreshTokens,
+};
+
+export const drizzle = {
+  ...drizzleSchemas,
+  ...relations,
+};
+
+export type Drizzle = typeof drizzle;

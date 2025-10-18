@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { DRIZZLE_CONNECTION, drizzleSchemas } from '@/database';
+import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 import { DrizzleOAuthAccountEntityMapper } from './mappers/drizzle.oauth-account.entity-mapper';
 import { OAuthAccountsRepository } from '../abstracts/oauth-accounts.repository';
 import { OAuthAccount } from '@/auth/domain/entities';
@@ -15,7 +15,7 @@ export class DrizzleOAuthAccountsRepository extends OAuthAccountsRepository {
 
   constructor(
     @Inject(DRIZZLE_CONNECTION)
-    private db: NodePgDatabase<typeof drizzleSchemas>,
+    private db: NodePgDatabase<typeof drizzle>,
   ) {
     super();
     this.mapper = new DrizzleOAuthAccountEntityMapper();

@@ -5,7 +5,7 @@ import { User } from '@/users/domain/entities';
 import { UserId, users, UserSelect } from '@/users/domain/schemas';
 import { UsersRepository } from '../abstracts';
 
-import { DRIZZLE_CONNECTION, drizzleSchemas } from '@/database';
+import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 import { DrizzleUserEntityMapper } from './mappers';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class DrizzleUsersRepository extends UsersRepository {
 
   constructor(
     @Inject(DRIZZLE_CONNECTION)
-    private db: NodePgDatabase<typeof drizzleSchemas>,
+    private db: NodePgDatabase<typeof drizzle>,
   ) {
     super();
 
