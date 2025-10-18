@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RegisterRequest } from '../requests';
 
-import { LocalAuthService } from '@/auth/service/local';
+import { LocalAuthService } from '@/auth/service/local-auth';
 
 @Injectable()
 export class RegisterHandler {

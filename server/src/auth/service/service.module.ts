@@ -3,39 +3,65 @@ import { Module } from '@nestjs/common';
 import { UsersModule } from '@/users/users.module';
 
 import { OAuthService } from './oauth/oauth-login.service';
-import { LocalAuthService } from './local';
-import { PasswordsService } from './passwords-service';
+import { LocalAuthService } from './local-auth';
+import { HashingService } from './hashing-service';
 import { OAuthAccountsService } from './oauth-accounts-service';
 
 import { OAuthAccountsRepository } from './abstracts/oauth-accounts.repository';
 import { DrizzleOAuthAccountsRepository } from './oauth-accounts-storage';
+import { RefreshTokensRepository } from './abstracts/refresh-tokens.repository';
+import { DrizzleRefreshTokensRepository } from './refresh-tokens-storage';
+
 import { OAuthLoginFactory } from './oauth/oauth-login.factory';
 import { OAuthLoginStrategy } from './oauth/interfaces';
 import { GoogleOAuthStrategy } from './oauth/strategies';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from '@/config';
+
+const repositories = [
+  {
+    provide: OAuthAccountsRepository,
+    useClass: DrizzleOAuthAccountsRepository,
+  },
+  {
+    provide: RefreshTokensRepository,
+    useClass: DrizzleRefreshTokensRepository,
+  },
+];
 
 const services = [
   OAuthService,
   LocalAuthService,
   OAuthAccountsService,
-  PasswordsService,
+  HashingService,
 ];
 
 const oauthLoginStrategies = [GoogleOAuthStrategy];
 
+const factories = [
+  {
+    provide: OAuthLoginFactory,
+    inject: [...oauthLoginStrategies],
+    useFactory: (...strategies: OAuthLoginStrategy[]) =>
+      new OAuthLoginFactory(strategies),
+  },
+];
+
 @Module({
-  imports: [UsersModule],
+  imports: [
+    UsersModule,
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.auth.secret,
+        signOptions: { expiresIn: config.auth.accessTokenExpirationInMs },
+      }),
+    }),
+  ],
   providers: [
+    ...repositories,
     ...oauthLoginStrategies,
-    {
-      provide: OAuthAccountsRepository,
-      useClass: DrizzleOAuthAccountsRepository,
-    },
-    {
-      provide: OAuthLoginFactory,
-      inject: [...oauthLoginStrategies],
-      useFactory: (...strategies: OAuthLoginStrategy[]) =>
-        new OAuthLoginFactory(strategies),
-    },
+    ...factories,
     ...services,
   ],
   exports: [...services],

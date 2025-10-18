@@ -6,14 +6,14 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { OAuthAccountsService } from '../oauth-accounts-service';
-import { PasswordsService } from '../passwords-service';
+import { HashingService } from '../hashing-service';
 import { UserRole } from '@/users/domain/enums';
 
 @Injectable()
 export class LocalAuthService {
   constructor(
     private readonly usersService: UsersService,
-    private readonly passwordsService: PasswordsService,
+    private readonly passwordsService: HashingService,
     private readonly oauthAccountsService: OAuthAccountsService,
   ) {}
 
@@ -40,7 +40,7 @@ export class LocalAuthService {
       );
     }
 
-    const isValidPassword = await this.passwordsService.comparePasswords(
+    const isValidPassword = await this.passwordsService.compareHashes(
       password,
       hashedPassword,
     );
@@ -59,7 +59,7 @@ export class LocalAuthService {
       throw new ConflictException('User with this email already exists');
     }
 
-    const hashedPassword = await this.passwordsService.hashPassword(password);
+    const hashedPassword = await this.passwordsService.hash(password);
 
     const user = await this.usersService.createUserOrThrow({
       email,

@@ -18,6 +18,8 @@ export const envValidationSchema = z.object({
   DOCS_PATH: z.string().default('api/docs'),
 
   DATABASE_URL: z.url(),
+
+  JWT_SECRET: z.string(),
 });
 
 export type EnvType = z.infer<typeof envValidationSchema>;
