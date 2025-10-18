@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotImplementedException,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import { UsersService } from '@/users/service/users-service';
 
@@ -9,18 +13,29 @@ import { OAuthProvider } from '@/auth/domain/enums';
 import { User } from '@/users/domain/entities';
 import { UserRole } from '@/users/domain/enums';
 import { OAuthAccountsService } from '../oauth-accounts-service';
+import { OAuthLoginFactory } from './oauth-login.factory';
 
 @Injectable()
 export class OAuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly oauthAccountsService: OAuthAccountsService,
+    private readonly oauthLoginFactory: OAuthLoginFactory,
   ) {}
 
-  async oauthLogin(
-    provider: OAuthProvider,
-    oauthUser: OAuthUser,
-  ): Promise<User> {
+  async oauthLogin(provider: OAuthProvider, code: string): Promise<User> {
+    const strategy = this.oauthLoginFactory.getStrategy(provider);
+
+    if (!strategy) {
+      throw new NotImplementedException('OAuth provider not implemented');
+    }
+
+    if (!code) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const oauthUser = await strategy.callback(code);
+
     const oauthAccount = await this.oauthAccountsService.findByProviderWithUser(
       provider,
       oauthUser.providerId,
@@ -38,7 +53,7 @@ export class OAuthService {
     return oauthAccount.getUser();
   }
 
-  async createOrLinkOAuthAccountAndUser(
+  private async createOrLinkOAuthAccountAndUser(
     provider: OAuthProvider,
     oauthUser: OAuthUser,
   ): Promise<OAuthAccount> {

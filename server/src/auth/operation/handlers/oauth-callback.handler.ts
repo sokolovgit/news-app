@@ -1,41 +1,26 @@
-import {
-  Injectable,
-  NotImplementedException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 
-import { OAuthService } from '@/auth/service/oauth-login/oauth.service';
-import { OAuthLoginFactory } from '@/auth/service/oauth-login/oauth-login.factory';
+import { OAuthService } from '@/auth/service/oauth/oauth-login.service';
 
 import { OAuthCallbackRequest } from '../requests';
 
 @Injectable()
 export class OAuthCallbackHandler {
-  constructor(
-    private readonly oauthService: OAuthService,
-    private readonly oauthLoginFactory: OAuthLoginFactory,
-  ) {}
+  constructor(private readonly oauthService: OAuthService) {}
 
   async handle(request: OAuthCallbackRequest) {
-    if (request.error) {
+    const { provider, code, error } = request;
+
+    if (error) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const strategy = this.oauthLoginFactory.getStrategy(request.provider);
-
-    if (!strategy) {
-      throw new NotImplementedException('OAuth provider not implemented');
-    }
-
-    if (!request.code) {
+    if (!code) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const oauthUser = await strategy.callback(request.code);
+    const user = await this.oauthService.oauthLogin(provider, code);
 
-    const user = await this.oauthService.oauthLogin(
-      request.provider,
-      oauthUser,
-    );
+    return user;
   }
 }

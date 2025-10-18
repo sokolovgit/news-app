@@ -1,7 +1,7 @@
 import { Injectable, NotImplementedException } from '@nestjs/common';
 
 import { OAuthProvider } from '@/auth/domain/enums';
-import { OAuthLoginFactory } from '@/auth/service/oauth-login/oauth-login.factory';
+import { OAuthLoginFactory } from '@/auth/service/oauth/oauth-login.factory';
 
 @Injectable()
 export class OAuthAuthorizationUrlHandler {
