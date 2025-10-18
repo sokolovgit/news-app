@@ -8,16 +8,22 @@ import {
 import { OAuthAccountsService } from '../oauth-accounts-service';
 import { HashingService } from '../hashing-service';
 import { UserRole } from '@/users/domain/enums';
+import { TokensService } from '../tokens';
+import { AuthenticationResult } from './types/authentication-result.type';
 
 @Injectable()
 export class LocalAuthService {
   constructor(
     private readonly usersService: UsersService,
+    private readonly tokensService: TokensService,
     private readonly passwordsService: HashingService,
     private readonly oauthAccountsService: OAuthAccountsService,
   ) {}
 
-  async localLogin(email: string, password: string) {
+  async localLogin(
+    email: string,
+    password: string,
+  ): Promise<AuthenticationResult> {
     const user = await this.usersService.getUserByEmail(email);
 
     if (!user) {
@@ -49,10 +55,15 @@ export class LocalAuthService {
       throw new UnauthorizedException('Invalid creadentials');
     }
 
-    return user;
+    const tokens = await this.tokensService.issueTokens(user);
+
+    return { user, tokens };
   }
 
-  async localRegister(email: string, password: string) {
+  async localRegister(
+    email: string,
+    password: string,
+  ): Promise<AuthenticationResult> {
     const existingUser = await this.usersService.getUserByEmail(email);
 
     if (existingUser) {
@@ -67,6 +78,8 @@ export class LocalAuthService {
       roles: [UserRole.USER],
     });
 
-    return user;
+    const tokens = await this.tokensService.issueTokens(user);
+
+    return { user, tokens };
   }
 }

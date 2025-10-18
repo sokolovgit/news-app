@@ -5,13 +5,15 @@ import {
 } from '@nestjs/swagger';
 import { Body, Controller, Post } from '@nestjs/common';
 
-import { RegisterDto } from './dtos';
-import { RegisterHandler } from '../operation/handlers';
-import { UserDto } from '@/users/ui/dtos/user.dto';
+import { LoginHandler, RegisterHandler } from '../operation/handlers';
+import { AuthenticationResultDto, LoginDto, RegisterDto } from './dtos';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly registerHandler: RegisterHandler) {}
+  constructor(
+    private readonly registerHandler: RegisterHandler,
+    private readonly loginHandler: LoginHandler,
+  ) {}
 
   @Post('register')
   @ApiOperation({
@@ -21,17 +23,40 @@ export class AuthController {
   })
   @ApiOkResponse({
     description: 'User registered successfully',
-    type: UserDto,
+    type: AuthenticationResultDto,
   })
   @ApiBadRequestResponse({
     description: 'Email is already taken',
   })
   public async register(@Body() registerDto: RegisterDto) {
-    const user = await this.registerHandler.handle(registerDto.toRequest());
+    const authenticationResult = await this.registerHandler.handle(
+      registerDto.toRequest(),
+    );
 
-    return UserDto.fromUserEntity(user);
+    return AuthenticationResultDto.fromAuthenticationResult(
+      authenticationResult,
+    );
   }
 
-  // @Post('login')
-  // public async login(@Body() loginDto: LoginDto) {}
+  @Post('login')
+  @ApiOperation({
+    summary: 'Login user',
+    description: 'Login a user with email and password',
+  })
+  @ApiOkResponse({
+    description: 'User logged in successfully',
+    type: AuthenticationResultDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid credentials',
+  })
+  public async login(@Body() loginDto: LoginDto) {
+    const authenticationResult = await this.loginHandler.handle(
+      loginDto.toRequest(),
+    );
+
+    return AuthenticationResultDto.fromAuthenticationResult(
+      authenticationResult,
+    );
+  }
 }

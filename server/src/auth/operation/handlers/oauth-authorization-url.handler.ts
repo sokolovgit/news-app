@@ -1,19 +1,13 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { OAuthProvider } from '@/auth/domain/enums';
-import { OAuthLoginFactory } from '@/auth/service/oauth/oauth-login.factory';
+import { OAuthService } from '@/auth/service/oauth/oauth-login.service';
 
 @Injectable()
 export class OAuthAuthorizationUrlHandler {
-  constructor(private readonly oauthLoginFactory: OAuthLoginFactory) {}
+  constructor(private readonly oauthService: OAuthService) {}
 
   handle(provider: OAuthProvider): string {
-    const strategy = this.oauthLoginFactory.getStrategy(provider);
-
-    if (!strategy) {
-      throw new NotImplementedException('OAuth provider not implemented');
-    }
-
-    return strategy.getAuthorizationUrl();
+    return this.oauthService.oauthAuthorizationUrl(provider);
   }
 }

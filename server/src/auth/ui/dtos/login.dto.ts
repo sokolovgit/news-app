@@ -1,3 +1,4 @@
+import { LoginRequest } from '@/auth/operation/requests';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, IsEmail, IsString } from 'class-validator';
 
@@ -19,4 +20,11 @@ export class LoginDto {
     required: true,
   })
   password: string;
+
+  toRequest(): LoginRequest {
+    return {
+      email: this.email,
+      password: this.password,
+    };
+  }
 }

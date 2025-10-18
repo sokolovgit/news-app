@@ -14,16 +14,22 @@ import { User } from '@/users/domain/entities';
 import { UserRole } from '@/users/domain/enums';
 import { OAuthAccountsService } from '../oauth-accounts-service';
 import { OAuthLoginFactory } from './oauth-login.factory';
+import { AuthenticationResult } from '../local-auth/types/authentication-result.type';
+import { TokensService } from '../tokens';
 
 @Injectable()
 export class OAuthService {
   constructor(
     private readonly usersService: UsersService,
+    private readonly tokensService: TokensService,
     private readonly oauthAccountsService: OAuthAccountsService,
     private readonly oauthLoginFactory: OAuthLoginFactory,
   ) {}
 
-  async oauthLogin(provider: OAuthProvider, code: string): Promise<User> {
+  async oauthLogin(
+    provider: OAuthProvider,
+    code: string,
+  ): Promise<AuthenticationResult> {
     const strategy = this.oauthLoginFactory.getStrategy(provider);
 
     if (!strategy) {
@@ -47,10 +53,20 @@ export class OAuthService {
         oauthUser,
       );
 
-      return newOAuthAccount.getUser();
+      return this.getAuthenticationResult(newOAuthAccount.getUser());
     }
 
-    return oauthAccount.getUser();
+    return this.getAuthenticationResult(oauthAccount.getUser());
+  }
+
+  oauthAuthorizationUrl(provider: OAuthProvider): string {
+    const strategy = this.oauthLoginFactory.getStrategy(provider);
+
+    if (!strategy) {
+      throw new NotImplementedException('OAuth provider not implemented');
+    }
+
+    return strategy.getAuthorizationUrl();
   }
 
   private async createOrLinkOAuthAccountAndUser(
@@ -88,5 +104,13 @@ export class OAuthService {
       });
 
     return newOAuthAccount;
+  }
+
+  private async getAuthenticationResult(
+    user: User,
+  ): Promise<AuthenticationResult> {
+    const tokens = await this.tokensService.issueTokens(user);
+
+    return { user, tokens };
   }
 }

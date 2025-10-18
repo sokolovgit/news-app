@@ -17,6 +17,7 @@ import { OAuthLoginStrategy } from './oauth/interfaces';
 import { GoogleOAuthStrategy } from './oauth/strategies';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@/config';
+import { TokensService } from './tokens';
 
 const repositories = [
   {
@@ -34,6 +35,7 @@ const services = [
   LocalAuthService,
   OAuthAccountsService,
   HashingService,
+  TokensService,
 ];
 
 const oauthLoginStrategies = [GoogleOAuthStrategy];
@@ -54,7 +56,7 @@ const factories = [
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.auth.secret,
-        signOptions: { expiresIn: config.auth.accessTokenExpirationInMs },
+        signOptions: { expiresIn: config.auth.accessTokenExpirationInSeconds },
       }),
     }),
   ],
