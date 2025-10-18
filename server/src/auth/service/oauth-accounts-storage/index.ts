@@ -1,1 +1,1 @@
-export * from './oauth-accounts.repository';
+export * from './drizzle.oauth-accounts.repository';

@@ -4,15 +4,16 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
+import { OAuthService } from '@/auth/service/oauth-login/oauth.service';
 import { OAuthLoginFactory } from '@/auth/service/oauth-login/oauth-login.factory';
+
 import { OAuthCallbackRequest } from '../requests';
-import { UsersService } from '@/users/service/users-service';
 
 @Injectable()
 export class OAuthCallbackHandler {
   constructor(
+    private readonly oauthService: OAuthService,
     private readonly oauthLoginFactory: OAuthLoginFactory,
-    private readonly usersService: UsersService,
   ) {}
 
   async handle(request: OAuthCallbackRequest) {
@@ -31,7 +32,10 @@ export class OAuthCallbackHandler {
     }
 
     const oauthUser = await strategy.callback(request.code);
-  }
 
-  private async oauthLogin()
+    const user = await this.oauthService.oauthLogin(
+      request.provider,
+      oauthUser,
+    );
+  }
 }

@@ -1,21 +1,30 @@
 import { UserId } from '@/users/domain/schemas';
-import { OAuthAccountId } from '../schemas';
+import { User } from '@/users/domain/entities';
 import { OAuthProvider } from '../enums';
+import { OAuthAccountId } from '../schemas';
 
-export type OAuthAccountProperties = {
+type OAuthAccountProperties = {
   id?: OAuthAccountId;
   userId: UserId;
   provider: OAuthProvider;
   providerId: string;
-  accessToken?: string;
-  refreshToken?: string;
-  expiresAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 };
 
+type OAuthAccountRelations = {
+  user: User;
+};
+
 export class OAuthAccount {
-  public constructor(private readonly props: OAuthAccountProperties) {}
+  public constructor(
+    private readonly props: OAuthAccountProperties,
+    private readonly relations: OAuthAccountRelations,
+  ) {
+    if (relations.user && relations.user.getId() !== props.userId) {
+      throw new Error('User ID mismatch in OAuthAccount');
+    }
+  }
 
   getId(): OAuthAccountId | undefined {
     return this.props.id;
@@ -33,23 +42,15 @@ export class OAuthAccount {
     return this.props.providerId;
   }
 
-  getAccessToken(): string | undefined {
-    return this.props.accessToken;
-  }
-
-  getRefreshToken(): string | undefined {
-    return this.props.refreshToken;
-  }
-
-  getExpiresAt(): Date | undefined {
-    return this.props.expiresAt;
-  }
-
   getCreatedAt(): Date | undefined {
     return this.props.createdAt;
   }
 
   getUpdatedAt(): Date | undefined {
     return this.props.updatedAt;
+  }
+
+  getUser(): User {
+    return this.relations.user;
   }
 }

@@ -1,5 +1,5 @@
 export type OAuthUser = {
-  id: string;
+  providerId: string;
   email: string;
   firstName: string;
   lastName: string;

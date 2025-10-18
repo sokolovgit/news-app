@@ -1,9 +1,11 @@
+import { UserId } from '@/users/domain/schemas';
 import { OAuthAccount } from '@/auth/domain/entities';
 import { OAuthProvider } from '@/auth/domain/enums';
-import { UserId } from '@/users/domain/schemas';
 
 export abstract class OAuthAccountsRepository {
-  abstract findByProviderAndId(
+  abstract save(oauthAccount: OAuthAccount): Promise<OAuthAccount | null>;
+
+  abstract findOAuthAccountByProviderAndIdWithUser(
     provider: OAuthProvider,
     providerId: string,
   ): Promise<OAuthAccount | null>;

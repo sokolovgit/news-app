@@ -1,12 +1,7 @@
 import { relations } from 'drizzle-orm';
-import { pgEnum, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { pgEnum, pgTable, varchar } from 'drizzle-orm/pg-core';
 
-import {
-  brandedUuid,
-  primaryUuid,
-  timestamps,
-  timestampConfig,
-} from '@/commons/database';
+import { brandedUuid, primaryUuid, timestamps } from '@/commons/database';
 import { Uuid } from '@/commons/utils';
 import { UserId, users } from '@/users/domain/schemas';
 import { OAuthProvider } from '../enums';
@@ -28,9 +23,6 @@ export const oauthAccounts = pgTable('oauth_accounts', {
 
   provider: pgOAuthProviders('provider').notNull(),
   providerId: varchar('provider_id').notNull().unique(),
-  accessToken: varchar('access_token'),
-  refreshToken: varchar('refresh_token'),
-  expiresAt: timestamp('expires_at', timestampConfig),
 
   ...timestamps,
 });
