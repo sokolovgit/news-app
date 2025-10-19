@@ -3,21 +3,26 @@ loadEnv();
 
 import * as cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
 import { createDocument } from './plugins/swagger';
 import { ConfigService } from './config';
+import { AllExceptionsFilter } from './commons/errors';
+import { LoggerService } from './commons/logger';
 
 async function bootstrap() {
-  const logger = new Logger(AppModule.name);
+  const app = await NestFactory.create(AppModule, {
+    logger: false,
+  });
 
-  const app = await NestFactory.create(AppModule);
+  const logger = app.get(LoggerService);
+  app.useLogger(logger);
+
+  app.useGlobalFilters(new AllExceptionsFilter(logger));
 
   app.use(cookieParser());
-
   app.setGlobalPrefix('api');
-
   app.enableCors();
 
   app.useGlobalPipes(
