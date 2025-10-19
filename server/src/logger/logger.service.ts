@@ -179,36 +179,127 @@ export class LoggerService implements NestLoggerService {
     const { method, originalUrl, ip } = req;
     const userAgent = req.get('user-agent') || 'unknown';
 
-    this.logger.info(
-      {
-        context: 'HTTP',
-        method,
-        url: originalUrl,
-        ip,
-        userAgent,
-      },
-      `-> ${method} ${originalUrl}`,
-    );
+    const logData: Record<string, unknown> = {
+      context: 'HTTP',
+      method,
+      url: originalUrl,
+      ip,
+      userAgent,
+    };
+
+    // Add headers
+    if (req.headers && Object.keys(req.headers).length > 0) {
+      logData.headers = req.headers;
+    }
+
+    // Add cookies if present
+    if (req.cookies && Object.keys(req.cookies).length > 0) {
+      logData.cookies = req.cookies;
+    }
+
+    // Add body if present
+    if (
+      req.body &&
+      typeof req.body === 'object' &&
+      Object.keys(req.body as Record<string, unknown>).length > 0
+    ) {
+      logData.body = req.body;
+    }
+
+    // Add params if present
+    if (
+      req.params &&
+      typeof req.params === 'object' &&
+      Object.keys(req.params).length > 0
+    ) {
+      logData.params = req.params;
+    }
+
+    // Add query if present
+    if (
+      req.query &&
+      typeof req.query === 'object' &&
+      Object.keys(req.query).length > 0
+    ) {
+      logData.query = req.query;
+    }
+
+    this.logger.info(logData, `-> ${method} ${originalUrl}`);
   }
 
   /**
    * Logs HTTP request/response information
    */
-  logRequest(req: Request, res: Response, responseTime: number): void {
+  logRequest(
+    req: Request,
+    res: Response,
+    responseTime: number,
+    responseBody?: unknown,
+  ): void {
     const { method, originalUrl, ip } = req;
     const userAgent = req.get('user-agent') || 'unknown';
     const { statusCode } = res;
 
+    const logData: Record<string, unknown> = {
+      context: 'HTTP',
+      method,
+      url: originalUrl,
+      statusCode,
+      responseTime: `${responseTime}ms`,
+      ip,
+      userAgent,
+    };
+
+    // Add request headers
+    if (req.headers && Object.keys(req.headers).length > 0) {
+      logData.requestHeaders = req.headers;
+    }
+
+    // Add request cookies if present
+    if (req.cookies && Object.keys(req.cookies).length > 0) {
+      logData.requestCookies = req.cookies;
+    }
+
+    // Add request body if present
+    if (
+      req.body &&
+      typeof req.body === 'object' &&
+      Object.keys(req.body as Record<string, unknown>).length > 0
+    ) {
+      logData.requestBody = req.body;
+    }
+
+    // Add params if present
+    if (
+      req.params &&
+      typeof req.params === 'object' &&
+      Object.keys(req.params).length > 0
+    ) {
+      logData.params = req.params;
+    }
+
+    // Add query if present
+    if (
+      req.query &&
+      typeof req.query === 'object' &&
+      Object.keys(req.query).length > 0
+    ) {
+      logData.query = req.query;
+    }
+
+    // Add response headers
+    const responseHeaders = res.getHeaders();
+    if (responseHeaders && Object.keys(responseHeaders).length > 0) {
+      logData.responseHeaders = responseHeaders;
+    }
+
+    // Add response body if present
+    if (responseBody !== undefined) {
+      logData.responseBody = responseBody;
+    }
+
     this.logger.info(
-      {
-        context: 'HTTP',
-        method,
-        url: originalUrl,
-        statusCode,
-        responseTime: `${responseTime}ms`,
-        ip,
-        userAgent,
-      },
+      logData,
       `<- ${method} ${originalUrl} ${statusCode} - ${responseTime}ms`,
     );
   }

@@ -15,7 +15,15 @@ export class AuthenticationService {
     try {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token);
       return await this.getUserFromPayload(payload);
-    } catch {
+    } catch (error) {
+      if ((error as { name?: string })?.name === 'TokenExpiredError') {
+        throw new BadRequestException('Token has expired');
+      } else if ((error as { name?: string })?.name === 'JsonWebTokenError') {
+        throw new BadRequestException('Invalid token signature');
+      } else if ((error as { name?: string })?.name === 'NotBeforeError') {
+        throw new BadRequestException('Token not yet valid');
+      }
+
       throw new BadRequestException('Invalid token');
     }
   }

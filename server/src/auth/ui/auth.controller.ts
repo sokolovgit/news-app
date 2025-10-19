@@ -3,7 +3,16 @@ import {
   ApiOkResponse,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
-import { Body, Controller, Get, Post, Res, UsePipes } from '@nestjs/common';
+import {
+  Get,
+  Res,
+  Body,
+  Post,
+  UsePipes,
+  HttpCode,
+  Controller,
+  HttpStatus,
+} from '@nestjs/common';
 import { Response } from 'express';
 
 import {
@@ -84,6 +93,7 @@ export class AuthController {
   @ApiBadRequestResponse({
     description: 'Invalid credentials',
   })
+  @HttpCode(HttpStatus.OK)
   public async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
