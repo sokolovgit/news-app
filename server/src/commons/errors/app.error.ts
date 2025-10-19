@@ -82,4 +82,3 @@ export class AppError extends Error {
     return parts.join(' ');
   }
 }
-

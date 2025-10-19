@@ -1,17 +1,18 @@
-import {
-  Injectable,
-  ConflictException,
-  UnauthorizedException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { UsersService } from '@/users/service/users-service';
 import { OAuthAccountsService } from '../oauth-accounts';
 import { HashingService } from '../hashing';
 import { TokensService } from '../tokens';
+import {
+  UserAlreadyExistsError,
+  InvalidCredentialsError,
+  OAuthAccountRequiredError,
+} from '@/auth/domain/errors';
 
 import { UserRole } from '@/users/domain/enums';
 import { AuthenticationResult } from './types/authentication-result.type';
+
 @Injectable()
 export class LocalAuthService {
   constructor(
@@ -28,7 +29,7 @@ export class LocalAuthService {
     const user = await this.usersService.getUserByEmail(email);
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new InvalidCredentialsError(email);
     }
 
     const hashedPassword = user.getHashedPassword();
@@ -39,12 +40,10 @@ export class LocalAuthService {
       );
 
       if (isOAuthUser) {
-        throw new InternalServerErrorException('');
+        throw new OAuthAccountRequiredError(email);
       }
 
-      throw new UnauthorizedException(
-        'Account created via OAuth. Set a password to use email/password login.',
-      );
+      throw new InvalidCredentialsError(email);
     }
 
     const isValidPassword = await this.passwordsService.compareHashes(
@@ -53,7 +52,7 @@ export class LocalAuthService {
     );
 
     if (!isValidPassword) {
-      throw new UnauthorizedException('Invalid creadentials');
+      throw new InvalidCredentialsError(email);
     }
 
     const tokens = await this.tokensService.issueTokens(user);
@@ -68,7 +67,7 @@ export class LocalAuthService {
     const existingUser = await this.usersService.getUserByEmail(email);
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new UserAlreadyExistsError(email);
     }
 
     const hashedPassword = await this.passwordsService.hash(password);

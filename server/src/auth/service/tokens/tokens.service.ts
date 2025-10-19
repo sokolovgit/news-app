@@ -1,12 +1,13 @@
 import * as dayjs from 'dayjs';
 
-import {
-  Injectable,
-  UnauthorizedException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { uuid } from '@/commons/utils';
+import { LoggerService } from '@/commons/logger';
+import {
+  InvalidRefreshTokenError,
+  TokenGenerationFailedError,
+} from '@/auth/domain/errors';
 
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@/config';
@@ -28,8 +29,12 @@ export class TokensService {
     private readonly configService: ConfigService,
     private readonly hashingService: HashingService,
     private readonly refreshTokensRepository: RefreshTokensRepository,
+    private readonly logger: LoggerService,
   ) {}
 
+  /**
+   * Creates a new refresh token in the database
+   */
   async createRefreshTokenOrThrow(
     props: CreateRefreshTokenProps,
   ): Promise<RefreshToken> {
@@ -47,21 +52,33 @@ export class TokensService {
       await this.refreshTokensRepository.save(newRefreshToken);
 
     if (!savedRefreshToken) {
-      throw new InternalServerErrorException('Failed to create refresh token');
+      throw new TokenGenerationFailedError(
+        props.userId,
+        'Database save failed',
+      );
     }
 
     return savedRefreshToken;
   }
 
+  /**
+   * Deletes a refresh token by its ID
+   */
   async deleteRefreshTokenByIdOrThrow(id: RefreshTokenId): Promise<void> {
     const isDeleted =
       await this.refreshTokensRepository.deleteRefreshTokenById(id);
 
     if (!isDeleted) {
-      throw new InternalServerErrorException('Failed to delete refresh token');
+      throw new TokenGenerationFailedError(
+        id,
+        'Failed to delete refresh token',
+      );
     }
   }
 
+  /**
+   * Issues new access and refresh tokens for a user
+   */
   async issueTokens(user: User): Promise<AuthTokens> {
     const payload: JwtPayload = {
       sub: user.getId(),
@@ -86,6 +103,9 @@ export class TokensService {
     };
   }
 
+  /**
+   * Validates a refresh token and returns it if valid
+   */
   async validateRefreshTokenOrThrow(token: string): Promise<RefreshToken> {
     const hashedToken = this.hashingService.hashToken(token);
 
@@ -93,24 +113,27 @@ export class TokensService {
       await this.refreshTokensRepository.findRefreshTokenByToken(hashedToken);
 
     if (!refreshToken) {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new InvalidRefreshTokenError('Token not found', 'TokensService');
     }
 
     const isExpired = dayjs().isAfter(dayjs(refreshToken.getExpiresAt()));
 
     if (isExpired) {
-      throw new UnauthorizedException('Expired refresh token');
+      throw new InvalidRefreshTokenError('Token expired', 'TokensService');
     }
 
     const user = refreshToken.getUser();
 
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new InvalidRefreshTokenError('User not found', 'TokensService');
     }
 
     return refreshToken;
   }
 
+  /**
+   * Refreshes tokens using a valid refresh token
+   */
   async refreshToken(token: string): Promise<AuthenticationResult> {
     const refreshToken = await this.validateRefreshTokenOrThrow(token);
     await this.deleteRefreshTokenByIdOrThrow(refreshToken.getId());
@@ -121,6 +144,9 @@ export class TokensService {
     return { user, tokens };
   }
 
+  /**
+   * Logs out a user by invalidating their refresh token
+   */
   async logout(token: string): Promise<void> {
     const refreshToken = await this.validateRefreshTokenOrThrow(token);
     await this.deleteRefreshTokenByIdOrThrow(refreshToken.getId());
