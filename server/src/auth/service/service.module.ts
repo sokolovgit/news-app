@@ -57,7 +57,7 @@ const factories = [
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.auth.secret,
+        secret: config.auth.accessTokenSecret,
         signOptions: { expiresIn: config.auth.accessTokenExpirationInSeconds },
       }),
     }),

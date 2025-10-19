@@ -16,7 +16,8 @@ export class ConfigService extends BaseConfigService<EnvType> {
   };
 
   auth = {
-    secret: this.env.JWT_SECRET,
+    accessTokenSecret: this.env.JWT_SECRET,
+    refreshTokenSecret: this.env.REFRESH_TOKEN_SECRET,
     accessTokenExpirationInSeconds: dayjs()
       .add(15, 'minutes')
       .diff(dayjs(), 'seconds'),

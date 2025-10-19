@@ -1,11 +1,4 @@
-import { RefreshToken } from '@/auth/domain/entities';
-
-export type RawTokenPair = {
+export type AuthTokens = {
   accessToken: string;
-  refreshToken: string;
-};
-
-export type TokenPair = {
-  accessToken: string;
-  refreshToken: RefreshToken;
+  plainRefreshToken: string;
 };

@@ -12,19 +12,13 @@ import {
   RefreshTokenHandler,
 } from '../operation/handlers';
 
-import {
-  LoginDto,
-  RegisterDto,
-  TokenPairDto,
-  AuthenticationResultDto,
-} from './dtos';
+import { LoginDto, RegisterDto, AuthenticationResultDto } from './dtos';
 import { UserDto } from '@/users/ui/dtos';
 
 import { User } from '@/users/domain/entities';
 import { Auth } from '../decorators/auth.decorator';
 import { CurrentUser } from '@/users/decorators';
 import { Cookies } from '@/commons/cookies/decorators';
-import { CookiesService } from '@/commons/cookies';
 import { ValidateRefreshTokenPipe } from '../pipes/validate-refresh-token.pipe';
 
 @Controller('auth')
@@ -33,7 +27,6 @@ export class AuthController {
     private readonly registerHandler: RegisterHandler,
     private readonly loginHandler: LoginHandler,
     private readonly refreshTokenHandler: RefreshTokenHandler,
-    private readonly cookiesService: CookiesService,
   ) {}
 
   @Get('me')
@@ -63,9 +56,13 @@ export class AuthController {
   @ApiBadRequestResponse({
     description: 'Email is already taken',
   })
-  public async register(@Body() registerDto: RegisterDto) {
+  public async register(
+    @Body() registerDto: RegisterDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const authenticationResult = await this.registerHandler.handle(
       registerDto.toRequest(),
+      response,
     );
 
     return AuthenticationResultDto.fromAuthenticationResult(
@@ -85,9 +82,13 @@ export class AuthController {
   @ApiBadRequestResponse({
     description: 'Invalid credentials',
   })
-  public async login(@Body() loginDto: LoginDto) {
+  public async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const authenticationResult = await this.loginHandler.handle(
       loginDto.toRequest(),
+      response,
     );
 
     return AuthenticationResultDto.fromAuthenticationResult(
@@ -111,13 +112,11 @@ export class AuthController {
     refreshToken: string,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const tokenPair = await this.refreshTokenHandler.handle({ refreshToken });
-
-    this.cookiesService.setRefreshTokenCookie(
-      tokenPair.refreshToken.getToken(),
+    const authTokens = await this.refreshTokenHandler.handle(
+      { refreshToken },
       response,
     );
 
-    return TokenPairDto.fromTokenPair(tokenPair);
+    return AuthenticationResultDto.fromAuthenticationResult(authTokens);
   }
 }

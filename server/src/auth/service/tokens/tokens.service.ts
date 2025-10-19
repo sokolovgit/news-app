@@ -14,11 +14,12 @@ import { HashingService } from '../hashing';
 
 import { RefreshTokensRepository } from '../abstracts/refresh-tokens.repository';
 
-import { CreateRefreshTokenProps, TokenPair, JwtPayload } from './types';
+import { CreateRefreshTokenProps, AuthTokens, JwtPayload } from './types';
 
 import { User } from '@/users/domain/entities';
 import { RefreshToken } from '@/auth/domain/entities';
 import { RefreshTokenId } from '@/auth/domain/schemas';
+import { AuthenticationResult } from '../local-auth/types/authentication-result.type';
 
 @Injectable()
 export class TokensService {
@@ -61,7 +62,7 @@ export class TokensService {
     }
   }
 
-  async issueTokens(user: User): Promise<TokenPair> {
+  async issueTokens(user: User): Promise<AuthTokens> {
     const payload: JwtPayload = {
       sub: user.getId(),
       email: user.getEmail(),
@@ -77,16 +78,16 @@ export class TokensService {
       await this.deleteRefreshTokenByIdOrThrow(foundRefreshToken.getId());
     }
 
-    const refreshToken = await this.generateRefreshToken(user);
+    const { plainToken } = await this.generateRefreshToken(user);
 
     return {
       accessToken,
-      refreshToken,
+      plainRefreshToken: plainToken,
     };
   }
 
   async validateRefreshToken(token: string): Promise<RefreshToken> {
-    const hashedToken = await this.hashingService.hash(token);
+    const hashedToken = this.hashingService.hashToken(token);
 
     const refreshToken =
       await this.refreshTokensRepository.findRefreshTokenByToken(hashedToken);
@@ -110,11 +111,14 @@ export class TokensService {
     return refreshToken;
   }
 
-  async refreshToken(token: string): Promise<TokenPair> {
+  async refreshToken(token: string): Promise<AuthenticationResult> {
     const refreshToken = await this.validateRefreshToken(token);
     await this.deleteRefreshTokenByIdOrThrow(refreshToken.getId());
 
-    return this.issueTokens(refreshToken.getUser());
+    const user = refreshToken.getUser();
+    const tokens = await this.issueTokens(user);
+
+    return { user, tokens };
   }
 
   async logout(token: string): Promise<void> {
@@ -122,9 +126,11 @@ export class TokensService {
     await this.deleteRefreshTokenByIdOrThrow(refreshToken.getId());
   }
 
-  private async generateRefreshToken(user: User): Promise<RefreshToken> {
+  private async generateRefreshToken(
+    user: User,
+  ): Promise<{ refreshToken: RefreshToken; plainToken: string }> {
     const token = uuid();
-    const hashedToken = await this.hashingService.hash(token);
+    const hashedToken = this.hashingService.hashToken(token);
 
     const expiresAt = dayjs()
       .add(this.configService.auth.refreshTokenExpiresInMs, 'ms')
@@ -137,6 +143,6 @@ export class TokensService {
       relations: { user },
     });
 
-    return refreshToken;
+    return { refreshToken, plainToken: token };
   }
 }

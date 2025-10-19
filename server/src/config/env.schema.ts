@@ -20,6 +20,7 @@ export const envValidationSchema = z.object({
   DATABASE_URL: z.url(),
 
   JWT_SECRET: z.string(),
+  REFRESH_TOKEN_SECRET: z.string(),
 });
 
 export type EnvType = z.infer<typeof envValidationSchema>;

@@ -1,6 +1,5 @@
 import { UserDto } from '@/users/ui/dtos';
 import { ApiProperty } from '@nestjs/swagger';
-import { TokenPairDto } from './token-pair.dto';
 import { AuthenticationResult } from '@/auth/service/local-auth/types/authentication-result.type';
 
 export class AuthenticationResultDto {
@@ -11,14 +10,15 @@ export class AuthenticationResultDto {
   user: UserDto;
 
   @ApiProperty({
-    description: 'The tokens associated with the authentication result',
-    type: TokenPairDto,
+    description: 'The access token for authenticated user',
+    format: 'jwt',
+    type: 'string',
   })
-  tokens: TokenPairDto;
+  accessToken: string;
 
-  constructor(props: { user: UserDto; tokens: TokenPairDto }) {
+  constructor(props: { user: UserDto; accessToken: string }) {
     this.user = props.user;
-    this.tokens = props.tokens;
+    this.accessToken = props.accessToken;
   }
 
   static fromAuthenticationResult(
@@ -28,7 +28,7 @@ export class AuthenticationResultDto {
 
     return new AuthenticationResultDto({
       user: UserDto.fromUserEntity(user),
-      tokens: TokenPairDto.fromTokenPair(tokens),
+      accessToken: tokens.accessToken,
     });
   }
 }
