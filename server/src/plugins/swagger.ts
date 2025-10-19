@@ -8,8 +8,8 @@ export const createDocument = (app: INestApplication) => {
   const docsPath = configService.docs.path;
 
   const config = new DocumentBuilder()
-    .setTitle('API Documentation')
-    .setDescription('The API description')
+    .setTitle('News App API Documentation')
+    .setDescription('News App API Documentation')
     .setVersion('1.0')
     .addBearerAuth(
       {

@@ -75,8 +75,9 @@ export class LoggerService implements NestLoggerService {
         options: {
           colorize: true,
           translateTime: 'SYS:yyyy-mm-dd HH:MM:ss.l o',
-          ignore: 'pid,hostname',
+          ignore: 'pid,hostname,context',
           singleLine: false,
+          messageFormat: '{if context}[{context}] {end}{msg}',
         },
       };
     }
@@ -172,6 +173,25 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
+   * Logs incoming HTTP request
+   */
+  logIncomingRequest(req: Request): void {
+    const { method, originalUrl, ip } = req;
+    const userAgent = req.get('user-agent') || 'unknown';
+
+    this.logger.info(
+      {
+        context: 'HTTP',
+        method,
+        url: originalUrl,
+        ip,
+        userAgent,
+      },
+      `-> ${method} ${originalUrl}`,
+    );
+  }
+
+  /**
    * Logs HTTP request/response information
    */
   logRequest(req: Request, res: Response, responseTime: number): void {
@@ -189,7 +209,7 @@ export class LoggerService implements NestLoggerService {
         ip,
         userAgent,
       },
-      `${method} ${originalUrl} ${statusCode}`,
+      `<- ${method} ${originalUrl} ${statusCode} - ${responseTime}ms`,
     );
   }
 
