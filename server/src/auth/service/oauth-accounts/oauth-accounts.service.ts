@@ -7,8 +7,8 @@ import { OAuthAccountsRepository } from '../abstracts/oauth-accounts.repository'
 import { UserId } from '@/users/domain/schemas';
 
 import { OAuthAccount } from '@/auth/domain/entities';
-import { OAuthAccountId } from '@/auth/domain/schemas';
 import { OAuthProvider } from '@/auth/domain/enums';
+import { OAuthAccountId } from '@/auth/domain/schemas';
 
 import { CreateOAuthAccountProps } from './types';
 

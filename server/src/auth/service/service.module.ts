@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 
 import { UsersModule } from '@/users/users.module';
 
 import { OAuthService } from './oauth/oauth-login.service';
+import { ConfigService } from '@/config';
+import { TokensService } from './tokens';
+import { HashingService } from './hashing';
 import { LocalAuthService } from './local-auth';
-import { HashingService } from './hashing-service';
-import { OAuthAccountsService } from './oauth-accounts-service';
+import { OAuthAccountsService } from './oauth-accounts';
+import { AuthenticationService } from './authentication';
 
 import { OAuthAccountsRepository } from './abstracts/oauth-accounts.repository';
 import { DrizzleOAuthAccountsRepository } from './oauth-accounts-storage';
@@ -15,9 +19,6 @@ import { DrizzleRefreshTokensRepository } from './refresh-tokens-storage';
 import { OAuthLoginFactory } from './oauth/oauth-login.factory';
 import { OAuthLoginStrategy } from './oauth/interfaces';
 import { GoogleOAuthStrategy } from './oauth/strategies';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigService } from '@/config';
-import { TokensService } from './tokens';
 
 const repositories = [
   {
@@ -36,6 +37,7 @@ const services = [
   OAuthAccountsService,
   HashingService,
   TokensService,
+  AuthenticationService,
 ];
 
 const oauthLoginStrategies = [GoogleOAuthStrategy];

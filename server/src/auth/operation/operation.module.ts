@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ServiceModule } from '../service/service.module';
 import {
   LoginHandler,
   RegisterHandler,
   OAuthCallbackHandler,
   OAuthAuthorizationUrlHandler,
 } from './handlers';
+import { ServiceModule } from '../service/service.module';
 
 const handlers = [
   RegisterHandler,
@@ -17,6 +17,6 @@ const handlers = [
 @Module({
   imports: [ServiceModule],
   providers: [...handlers],
-  exports: [...handlers],
+  exports: [ServiceModule, ...handlers],
 })
 export class OperationModule {}

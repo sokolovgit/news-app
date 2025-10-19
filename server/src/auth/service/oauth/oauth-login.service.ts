@@ -1,21 +1,22 @@
 import {
   Injectable,
-  NotImplementedException,
   UnauthorizedException,
+  NotImplementedException,
 } from '@nestjs/common';
 
 import { UsersService } from '@/users/service/users-service';
+import { TokensService } from '../tokens';
+import { OAuthAccountsService } from '../oauth-accounts';
 
 import { OAuthUser } from './types';
 import { OAuthAccount } from '@/auth/domain/entities';
 import { OAuthProvider } from '@/auth/domain/enums';
+import { OAuthLoginFactory } from './oauth-login.factory';
 
 import { User } from '@/users/domain/entities';
 import { UserRole } from '@/users/domain/enums';
-import { OAuthAccountsService } from '../oauth-accounts-service';
-import { OAuthLoginFactory } from './oauth-login.factory';
+
 import { AuthenticationResult } from '../local-auth/types/authentication-result.type';
-import { TokensService } from '../tokens';
 
 @Injectable()
 export class OAuthService {

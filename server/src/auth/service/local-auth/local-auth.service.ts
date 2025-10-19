@@ -1,16 +1,17 @@
-import { UsersService } from '@/users/service/users-service';
 import {
   Injectable,
+  ConflictException,
   UnauthorizedException,
   InternalServerErrorException,
-  ConflictException,
 } from '@nestjs/common';
-import { OAuthAccountsService } from '../oauth-accounts-service';
-import { HashingService } from '../hashing-service';
-import { UserRole } from '@/users/domain/enums';
-import { TokensService } from '../tokens';
-import { AuthenticationResult } from './types/authentication-result.type';
 
+import { UsersService } from '@/users/service/users-service';
+import { OAuthAccountsService } from '../oauth-accounts';
+import { HashingService } from '../hashing';
+import { TokensService } from '../tokens';
+
+import { UserRole } from '@/users/domain/enums';
+import { AuthenticationResult } from './types/authentication-result.type';
 @Injectable()
 export class LocalAuthService {
   constructor(

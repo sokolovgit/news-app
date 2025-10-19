@@ -5,19 +5,20 @@ import {
   UnauthorizedException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 
-import { ConfigService } from '@/config';
-import { RefreshTokensRepository } from '../abstracts/refresh-tokens.repository';
-import { User } from '@/users/domain/entities';
-import { TokenPair } from './types/token-pairs.type';
-import { HashingService } from '../hashing-service';
-import { JwtPayload } from './types/jwt-payload.type';
 import { uuid } from '@/commons/utils';
 
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@/config';
+import { HashingService } from '../hashing';
+
+import { RefreshTokensRepository } from '../abstracts/refresh-tokens.repository';
+
+import { CreateRefreshTokenProps, TokenPair, JwtPayload } from './types';
+
+import { User } from '@/users/domain/entities';
 import { RefreshToken } from '@/auth/domain/entities';
 import { RefreshTokenId } from '@/auth/domain/schemas';
-import { CreateRefreshTokenProps } from './types';
 
 @Injectable()
 export class TokensService {
