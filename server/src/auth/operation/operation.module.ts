@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import {
   LoginHandler,
+  LogoutHandler,
   RegisterHandler,
   RefreshTokenHandler,
   OAuthCallbackHandler,
@@ -9,8 +10,9 @@ import {
 import { ServiceModule } from '../service/service.module';
 
 const handlers = [
-  RegisterHandler,
   LoginHandler,
+  LogoutHandler,
+  RegisterHandler,
   RefreshTokenHandler,
   OAuthCallbackHandler,
   OAuthAuthorizationUrlHandler,

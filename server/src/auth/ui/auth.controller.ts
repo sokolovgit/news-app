@@ -10,6 +10,7 @@ import {
   LoginHandler,
   RegisterHandler,
   RefreshTokenHandler,
+  LogoutHandler,
 } from '../operation/handlers';
 
 import { LoginDto, RegisterDto, AuthenticationResultDto } from './dtos';
@@ -26,6 +27,7 @@ export class AuthController {
   constructor(
     private readonly registerHandler: RegisterHandler,
     private readonly loginHandler: LoginHandler,
+    private readonly logoutHandler: LogoutHandler,
     private readonly refreshTokenHandler: RefreshTokenHandler,
   ) {}
 
@@ -118,5 +120,20 @@ export class AuthController {
     );
 
     return AuthenticationResultDto.fromAuthenticationResult(authTokens);
+  }
+
+  @Post('logout')
+  @ApiOperation({
+    summary: 'Logout user',
+    description: 'Logout a user by deleting the refresh token',
+  })
+  @ApiOkResponse({
+    description: 'User logged out successfully',
+  })
+  public async logout(
+    @Cookies('refresh-token') refreshToken: string,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.logoutHandler.handle({ refreshToken }, response);
   }
 }

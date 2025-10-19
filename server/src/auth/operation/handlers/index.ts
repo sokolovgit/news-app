@@ -1,5 +1,6 @@
 export * from './register.handler';
 export * from './login.handler';
+export * from './logout.handler';
 export * from './refresh-token.handler';
 
 export * from './oauth-callback.handler';

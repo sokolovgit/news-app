@@ -86,7 +86,7 @@ export class TokensService {
     };
   }
 
-  async validateRefreshToken(token: string): Promise<RefreshToken> {
+  async validateRefreshTokenOrThrow(token: string): Promise<RefreshToken> {
     const hashedToken = this.hashingService.hashToken(token);
 
     const refreshToken =
@@ -112,7 +112,7 @@ export class TokensService {
   }
 
   async refreshToken(token: string): Promise<AuthenticationResult> {
-    const refreshToken = await this.validateRefreshToken(token);
+    const refreshToken = await this.validateRefreshTokenOrThrow(token);
     await this.deleteRefreshTokenByIdOrThrow(refreshToken.getId());
 
     const user = refreshToken.getUser();
@@ -122,7 +122,7 @@ export class TokensService {
   }
 
   async logout(token: string): Promise<void> {
-    const refreshToken = await this.validateRefreshToken(token);
+    const refreshToken = await this.validateRefreshTokenOrThrow(token);
     await this.deleteRefreshTokenByIdOrThrow(refreshToken.getId());
   }
 
