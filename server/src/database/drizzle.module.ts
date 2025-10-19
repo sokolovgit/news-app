@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
 import { DrizzlePGModule } from '@knaadh/nestjs-drizzle-pg';
 import { ConfigService } from '@/config';
+import { LoggerService } from '@/commons/logger';
 
 import { drizzle } from './drizzle-schemas';
 import { DRIZZLE_CONNECTION } from './constants';
+import { DrizzleLogger } from './drizzle.logger';
 
 @Module({
   imports: [
     DrizzlePGModule.registerAsync({
-      inject: [ConfigService],
+      inject: [ConfigService, LoggerService],
       tag: DRIZZLE_CONNECTION,
-      useFactory: (config: ConfigService) => ({
+      useFactory: (config: ConfigService, logger: LoggerService) => ({
         pg: {
           connection: 'client',
           config: {
@@ -18,7 +20,7 @@ import { DRIZZLE_CONNECTION } from './constants';
           },
         },
         config: {
-          logger: config.isDevelopment(),
+          logger: config.isDevelopment() ? new DrizzleLogger(logger) : false,
           schema: drizzle,
           casing: 'snake_case',
         },
@@ -26,14 +28,5 @@ import { DRIZZLE_CONNECTION } from './constants';
     }),
   ],
   exports: [DrizzlePGModule],
-  providers: [
-    // {
-    //   provide: 'MIGRATIONS',
-    //   useFactory: async () => {
-    //     // Use drizzle-kit or manual SQL here
-    //     console.log('Migrations applied');
-    //   },
-    // },
-  ],
 })
 export class DrizzleModule {}
