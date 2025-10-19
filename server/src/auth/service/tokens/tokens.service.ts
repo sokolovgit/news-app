@@ -113,19 +113,19 @@ export class TokensService {
       await this.refreshTokensRepository.findRefreshTokenByToken(hashedToken);
 
     if (!refreshToken) {
-      throw new InvalidRefreshTokenError('Token not found', 'TokensService');
+      throw new InvalidRefreshTokenError('Token not found');
     }
 
     const isExpired = dayjs().isAfter(dayjs(refreshToken.getExpiresAt()));
 
     if (isExpired) {
-      throw new InvalidRefreshTokenError('Token expired', 'TokensService');
+      throw new InvalidRefreshTokenError('Token expired');
     }
 
     const user = refreshToken.getUser();
 
     if (!user) {
-      throw new InvalidRefreshTokenError('User not found', 'TokensService');
+      throw new InvalidRefreshTokenError('User not found');
     }
 
     return refreshToken;

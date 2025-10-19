@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@/config';
 import { Response } from 'express';
+import { Request } from 'express';
 
 @Injectable()
 export class CookiesService {
@@ -23,5 +24,19 @@ export class CookiesService {
       secure: this.configService.isProduction(),
       sameSite: 'strict',
     });
+  }
+
+  getRefreshToken(request: Request): string | undefined {
+    if (!request.cookies || typeof request.cookies !== 'object') {
+      return undefined;
+    }
+
+    const refreshToken = request.cookies['refresh-token'] as string | undefined;
+
+    if (!refreshToken || typeof refreshToken !== 'string') {
+      return undefined;
+    }
+
+    return refreshToken;
   }
 }

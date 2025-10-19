@@ -12,6 +12,8 @@ import { User } from '@/users/domain/entities';
 import { UserRole } from '@/users/domain/enums';
 import { AuthMetadata } from './types';
 import { AUTH_METADATA_KEY } from '../decorators/auth.decorator';
+
+import { CookiesService } from '@/cookies';
 import { AuthenticationService } from '../service/authentication';
 
 @Injectable()
@@ -20,25 +22,33 @@ export class AuthGuard implements CanActivate {
     @Inject(Reflector.name)
     private readonly reflector: Reflector,
     private readonly authenticationService: AuthenticationService,
+    private readonly cookiesService: CookiesService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const authMetadata = this.getAuthMetadataFromContext(context);
+    const request = context.switchToHttp().getRequest<Request>();
 
     if (!authMetadata) {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<Request>();
+    const refreshToken = this.cookiesService.getRefreshToken(request);
 
-    const jwt = this.getAccessTokenFromRequest(request);
-
-    if (!jwt) {
+    if (!refreshToken) {
       return false;
     }
 
-    const user =
-      await this.authenticationService.validateAndGetUserOrThrow(jwt);
+    const accessToken = this.getAccessTokenFromRequest(request);
+
+    if (!accessToken) {
+      return false;
+    }
+
+    const user = await this.authenticationService.validateAndGetUserOrThrow(
+      accessToken,
+      refreshToken,
+    );
 
     if (!user) {
       return false;
