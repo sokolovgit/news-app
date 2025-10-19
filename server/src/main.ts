@@ -1,6 +1,7 @@
 import { loadEnv } from './config/load-env';
 loadEnv();
 
+import * as cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 
@@ -12,6 +13,8 @@ async function bootstrap() {
   const logger = new Logger(AppModule.name);
 
   const app = await NestFactory.create(AppModule);
+
+  app.use(cookieParser());
 
   app.setGlobalPrefix('api');
 
