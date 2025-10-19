@@ -2,9 +2,9 @@ import { Injectable, LoggerService as NestLoggerService } from '@nestjs/common';
 import { Request, Response } from 'express';
 import pino, { Logger, LoggerOptions } from 'pino';
 
-import { ConfigService } from '@/config';
-import { AppError } from '@/commons/errors';
 import { uuid } from '@/commons/utils';
+import { AppError } from '@/commons/errors';
+import { ConfigService } from '@/config';
 
 type LogMetadata = Record<string, unknown>;
 
