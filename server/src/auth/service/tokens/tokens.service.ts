@@ -70,16 +70,14 @@ export class TokensService {
 
     const accessToken = await this.jwtService.signAsync(payload);
 
-    let refreshToken: RefreshToken;
-
     const foundRefreshToken =
       await this.refreshTokensRepository.findRefreshTokenByUserId(user.getId());
 
-    if (!foundRefreshToken) {
-      refreshToken = await this.generateRefreshToken(user);
-    } else {
-      refreshToken = foundRefreshToken;
+    if (foundRefreshToken) {
+      await this.deleteRefreshTokenByIdOrThrow(foundRefreshToken.getId());
     }
+
+    const refreshToken = await this.generateRefreshToken(user);
 
     return {
       accessToken,

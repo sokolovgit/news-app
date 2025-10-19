@@ -3,22 +3,37 @@ import {
   ApiOkResponse,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UsePipes } from '@nestjs/common';
+import { Response } from 'express';
 
-import { LoginHandler, RegisterHandler } from '../operation/handlers';
+import {
+  LoginHandler,
+  RegisterHandler,
+  RefreshTokenHandler,
+} from '../operation/handlers';
 
+import {
+  LoginDto,
+  RegisterDto,
+  TokenPairDto,
+  AuthenticationResultDto,
+} from './dtos';
 import { UserDto } from '@/users/ui/dtos';
-import { AuthenticationResultDto, LoginDto, RegisterDto } from './dtos';
 
 import { User } from '@/users/domain/entities';
 import { Auth } from '../decorators/auth.decorator';
 import { CurrentUser } from '@/users/decorators';
+import { Cookies } from '@/commons/cookies/decorators';
+import { CookiesService } from '@/commons/cookies';
+import { ValidateRefreshTokenPipe } from '../pipes/validate-refresh-token.pipe';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly registerHandler: RegisterHandler,
     private readonly loginHandler: LoginHandler,
+    private readonly refreshTokenHandler: RefreshTokenHandler,
+    private readonly cookiesService: CookiesService,
   ) {}
 
   @Get('me')
@@ -78,5 +93,31 @@ export class AuthController {
     return AuthenticationResultDto.fromAuthenticationResult(
       authenticationResult,
     );
+  }
+
+  @Post('refresh')
+  @ApiOperation({
+    summary: 'Refresh token',
+    description:
+      'Refresh a token. The refresh token is sent in the cookies "refresh-token"',
+  })
+  @ApiOkResponse({
+    description: 'Token refreshed successfully',
+    type: AuthenticationResultDto,
+  })
+  @UsePipes(ValidateRefreshTokenPipe)
+  public async refresh(
+    @Cookies('refresh-token')
+    refreshToken: string,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const tokenPair = await this.refreshTokenHandler.handle({ refreshToken });
+
+    this.cookiesService.setRefreshTokenCookie(
+      tokenPair.refreshToken.getToken(),
+      response,
+    );
+
+    return TokenPairDto.fromTokenPair(tokenPair);
   }
 }

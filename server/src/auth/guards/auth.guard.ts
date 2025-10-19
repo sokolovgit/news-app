@@ -5,8 +5,8 @@ import {
   ExecutionContext,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Request } from 'express';
 import { merge } from 'lodash';
+import { Request } from 'express';
 
 import { User } from '@/users/domain/entities';
 import { UserRole } from '@/users/domain/enums';

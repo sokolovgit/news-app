@@ -1,4 +1,4 @@
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCookieAuth } from '@nestjs/swagger';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 
 import { UserRole } from '@/users/domain/enums';
@@ -10,7 +10,8 @@ export const Auth = (roles: UserRole[] = [UserRole.USER]) => {
   const metadata: AuthMetadata = { roles };
 
   return applyDecorators(
-    ApiBearerAuth(),
+    ApiBearerAuth('access-token'),
+    ApiCookieAuth('refresh-token'),
     SetMetadata(AUTH_METADATA_KEY, metadata),
   );
 };

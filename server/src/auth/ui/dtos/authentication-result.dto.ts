@@ -5,13 +5,13 @@ import { AuthenticationResult } from '@/auth/service/local-auth/types/authentica
 
 export class AuthenticationResultDto {
   @ApiProperty({
-    description: 'The authenticated user',
+    description: 'The user associated with the authentication result',
     type: UserDto,
   })
   user: UserDto;
 
   @ApiProperty({
-    description: 'The tokens for authenticated user',
+    description: 'The tokens associated with the authentication result',
     type: TokenPairDto,
   })
   tokens: TokenPairDto;
