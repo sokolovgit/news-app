@@ -16,4 +16,12 @@ export class CookiesService {
       maxAge,
     });
   }
+
+  clearRefreshTokenCookie(response: Response): void {
+    response.clearCookie('refresh-token', {
+      httpOnly: true,
+      secure: this.configService.isProduction(),
+      sameSite: 'strict',
+    });
+  }
 }

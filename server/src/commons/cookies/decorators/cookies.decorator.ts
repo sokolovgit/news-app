@@ -5,8 +5,6 @@ export const Cookies = createParamDecorator(
   (data: string, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<Request>();
 
-    console.log(request.cookies);
-
     if (typeof data === 'string' && data.length > 0) {
       return request.cookies &&
         typeof request.cookies === 'object' &&
