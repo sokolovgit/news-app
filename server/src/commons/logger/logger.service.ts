@@ -19,7 +19,7 @@ interface ErrorLogContext {
   context?: string;
   errorName?: string;
   statusCode?: number;
-  stack?: string;
+  stack?: string | string[];
   metadata?: LogMetadata;
 }
 
@@ -31,7 +31,7 @@ interface ProcessLogContext {
   error?: string;
   errorName?: string;
   statusCode?: number;
-  stack?: string;
+  stack?: string | string[];
   metadata?: LogMetadata;
 }
 
@@ -91,12 +91,14 @@ export class LoggerService implements NestLoggerService {
     error: Error,
     fallbackContext?: string,
   ): ErrorLogContext {
+    const isDevelopment = this.configService.isDevelopment();
+
     if (error instanceof AppError) {
       return {
         context: error.context || fallbackContext,
         errorName: error.name,
         statusCode: error.statusCode,
-        stack: error.stack,
+        stack: this.formatStack(error.stack, isDevelopment),
         metadata: error.metadata,
       };
     }
@@ -104,8 +106,28 @@ export class LoggerService implements NestLoggerService {
     return {
       context: fallbackContext,
       errorName: error.name,
-      stack: error.stack,
+      stack: this.formatStack(error.stack, isDevelopment),
     };
+  }
+
+  /**
+   * Formats stack trace for better readability in development
+   */
+  private formatStack(
+    stack: string | undefined,
+    isDevelopment: boolean,
+  ): string | string[] | undefined {
+    if (!stack) {
+      return undefined;
+    }
+
+    // In development, split stack into array for better formatting
+    if (isDevelopment) {
+      return stack.split('\n');
+    }
+
+    // In production, keep as single line string
+    return stack;
   }
 
   /**
