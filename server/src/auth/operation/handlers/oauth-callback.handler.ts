@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Response } from 'express';
 
 import { OAuthService } from '@/auth/service/oauth/oauth-login.service';
-import { CookiesService } from '@/commons/cookies';
+import { CookiesService } from '@/cookies';
 
 import { OAuthCallbackRequest } from '../requests';
 import { AuthenticationResult } from '@/auth/service/local-auth/types/authentication-result.type';

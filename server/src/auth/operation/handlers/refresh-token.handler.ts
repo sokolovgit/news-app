@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
 
-import { CookiesService } from '@/commons/cookies';
+import { CookiesService } from '@/cookies';
 import { TokensService } from '@/auth/service/tokens';
 import { LoggerService } from '@/logger';
 

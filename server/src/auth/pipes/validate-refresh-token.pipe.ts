@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
-import { CookiesService } from '@/commons/cookies';
+import { CookiesService } from '@/cookies';
 
 @Injectable()
 export class ValidateRefreshTokenPipe implements PipeTransform {

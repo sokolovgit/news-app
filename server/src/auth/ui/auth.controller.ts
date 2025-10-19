@@ -19,7 +19,7 @@ import { UserDto } from '@/users/ui/dtos';
 import { User } from '@/users/domain/entities';
 import { Auth } from '../decorators/auth.decorator';
 import { CurrentUser } from '@/users/decorators';
-import { Cookies } from '@/commons/cookies/decorators';
+import { Cookies } from '@/cookies/decorators';
 import { ValidateRefreshTokenPipe } from '../pipes/validate-refresh-token.pipe';
 
 @Controller('auth')
