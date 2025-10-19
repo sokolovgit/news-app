@@ -9,7 +9,7 @@ import { AppModule } from './app.module';
 import { createDocument } from './plugins/swagger';
 import { ConfigService } from './config';
 import { AllExceptionsFilter } from './commons/errors';
-import { LoggerService } from './commons/logger';
+import { LoggerService } from './logger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

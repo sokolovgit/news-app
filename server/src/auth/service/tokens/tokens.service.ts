@@ -3,7 +3,7 @@ import * as dayjs from 'dayjs';
 import { Injectable } from '@nestjs/common';
 
 import { uuid } from '@/commons/utils';
-import { LoggerService } from '@/commons/logger';
+import { LoggerService } from '@/logger';
 import {
   InvalidRefreshTokenError,
   TokenGenerationFailedError,

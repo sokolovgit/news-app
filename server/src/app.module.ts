@@ -6,7 +6,7 @@ import { DrizzleModule } from './database';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CookiesModule } from './commons/cookies';
-import { LoggerModule, RequestLoggerMiddleware } from './commons/logger';
+import { LoggerModule, RequestLoggerMiddleware } from './logger';
 
 @Module({
   imports: [

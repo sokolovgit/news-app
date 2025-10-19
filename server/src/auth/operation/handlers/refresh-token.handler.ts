@@ -3,7 +3,7 @@ import { Response } from 'express';
 
 import { CookiesService } from '@/commons/cookies';
 import { TokensService } from '@/auth/service/tokens';
-import { LoggerService } from '@/commons/logger';
+import { LoggerService } from '@/logger';
 
 import { RefreshTokenRequest } from '../requests';
 import { AuthenticationResult } from '@/auth/service/local-auth/types/authentication-result.type';

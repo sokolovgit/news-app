@@ -1,5 +1,5 @@
 import { Logger } from 'drizzle-orm';
-import { LoggerService } from '@/commons/logger';
+import { LoggerService } from '@/logger';
 
 export class DrizzleLogger implements Logger {
   constructor(private readonly logger: LoggerService) {}

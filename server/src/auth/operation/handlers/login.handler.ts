@@ -5,7 +5,7 @@ import { LoginRequest } from '../requests/login.request';
 import { LocalAuthService } from '@/auth/service/local-auth';
 import { AuthenticationResult } from '@/auth/service/local-auth/types/authentication-result.type';
 import { CookiesService } from '@/commons/cookies';
-import { LoggerService } from '@/commons/logger';
+import { LoggerService } from '@/logger';
 
 @Injectable()
 export class LoginHandler {

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import { LoggerService } from '@/commons/logger';
+import { LoggerService } from '@/logger';
 import { AppError } from '../app.error';
 
 interface ErrorResponse {

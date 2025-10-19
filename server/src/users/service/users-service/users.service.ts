@@ -5,7 +5,7 @@ import { UserId } from '@/users/domain/schemas';
 import { UserCreationFailedError } from '@/users/domain/errors';
 import { UsersRepository } from '../abstracts';
 import { CreateUserProps } from './types/create-user.type';
-import { LoggerService } from '@/commons/logger';
+import { LoggerService } from '@/logger';
 import { uuid } from '@/commons/utils';
 
 @Injectable()

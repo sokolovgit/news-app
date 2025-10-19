@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { DrizzlePGModule } from '@knaadh/nestjs-drizzle-pg';
 import { ConfigService } from '@/config';
-import { LoggerService } from '@/commons/logger';
+import { LoggerService } from '@/logger';
 
 import { drizzle } from './drizzle-schemas';
 import { DRIZZLE_CONNECTION } from './constants';
