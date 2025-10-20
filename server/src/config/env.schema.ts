@@ -17,7 +17,12 @@ export const envValidationSchema = z.object({
   DOCS_ENABLED: z.coerce.boolean().default(true),
   DOCS_PATH: z.string().default('api/docs'),
 
+  BULLBOARD_ENABLED: z.coerce.boolean().default(true),
+  BULLBOARD_PATH: z.string().default('bullboard'),
+
   DATABASE_URL: z.url(),
+
+  REDIS_URL: z.url(),
 
   JWT_SECRET: z.string(),
   REFRESH_TOKEN_SECRET: z.string(),

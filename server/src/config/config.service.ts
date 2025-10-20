@@ -29,8 +29,17 @@ export class ConfigService extends BaseConfigService<EnvType> {
     path: this.env.DOCS_PATH,
   };
 
+  bullboard = {
+    enabled: this.env.BULLBOARD_ENABLED,
+    path: this.env.BULLBOARD_PATH,
+  };
+
   database = {
     url: this.env.DATABASE_URL,
+  };
+
+  redis = {
+    url: this.env.REDIS_URL,
   };
 
   isProduction(): boolean {
