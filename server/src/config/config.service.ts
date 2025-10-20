@@ -3,9 +3,9 @@ import * as dayjs from 'dayjs';
 import { Injectable } from '@nestjs/common';
 
 import { Environments } from '@/commons/enums';
-import { BaseConfigService } from '@/commons/config';
 
 import { EnvType } from './env.schema';
+import { BaseConfigService } from './base-config.service';
 
 @Injectable()
 export class ConfigService extends BaseConfigService<EnvType> {

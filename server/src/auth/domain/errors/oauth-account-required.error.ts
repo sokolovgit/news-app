@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { AppError } from '@/commons/errors';
+import { AppError } from '@/errors';
 
 /**
  * Thrown when a user tries to login with password but account was created via OAuth.

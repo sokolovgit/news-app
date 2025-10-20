@@ -7,7 +7,7 @@ import { ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
 import { ConfigService } from './config';
-import { AllExceptionsFilter } from './commons/errors';
+import { AllExceptionsFilter } from './errors';
 import { LoggerService } from './logger';
 import { setupSwagger, setupBullBoard } from './plugins';
 

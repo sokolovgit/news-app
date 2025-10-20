@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import pino, { Logger, LoggerOptions } from 'pino';
 
 import { uuid } from '@/commons/utils';
-import { AppError } from '@/commons/errors';
+import { AppError } from '@/errors';
 import { ConfigService } from '@/config';
 
 type LogMetadata = Record<string, unknown>;

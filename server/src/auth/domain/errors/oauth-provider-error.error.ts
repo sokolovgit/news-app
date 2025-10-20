@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { AppError } from '@/commons/errors';
+import { AppError } from '@/errors';
 import { OAuthProvider } from '../enums';
 
 /**

@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { AppError } from '@/commons/errors';
+import { AppError } from '@/errors';
 
 /**
  * Thrown when user creation fails at the database level.

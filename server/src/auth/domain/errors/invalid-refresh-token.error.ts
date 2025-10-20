@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { AppError } from '@/commons/errors';
+import { AppError } from '@/errors';
 
 /**
  * Thrown when refresh token is invalid, expired, or not found.

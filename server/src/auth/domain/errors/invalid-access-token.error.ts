@@ -1,4 +1,4 @@
-import { AppError } from '@/commons/errors';
+import { AppError } from '@/errors';
 import { HttpStatus } from '@nestjs/common';
 
 export class InvalidAccessTokenError extends AppError {

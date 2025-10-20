@@ -1,7 +1,6 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 
-import { ConfigModule } from './commons/config';
-import { ConfigService, envValidationSchema } from './config';
+import { ConfigService, envValidationSchema, ConfigModule } from './config';
 import { DrizzleModule } from './database';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
