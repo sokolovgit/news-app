@@ -6,8 +6,6 @@ import { UserDto } from './dtos';
 
 @Controller('users')
 export class UsersController {
-  constructor() {}
-
   @Get()
   @Auth()
   public getUsers(@CurrentUser() user: User) {

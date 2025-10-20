@@ -13,6 +13,7 @@ import { UserRole } from '@/users/domain/enums';
 import { AuthMetadata } from './types';
 import { AUTH_METADATA_KEY } from '../decorators/auth.decorator';
 
+import { LoggerService } from '@/logger';
 import { CookiesService } from '@/cookies';
 import { AuthenticationService } from '../service/authentication';
 
@@ -23,27 +24,39 @@ export class AuthGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly authenticationService: AuthenticationService,
     private readonly cookiesService: CookiesService,
+    private readonly logger: LoggerService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    this.logger.debug('Checking authentication');
+
     const authMetadata = this.getAuthMetadataFromContext(context);
     const request = context.switchToHttp().getRequest<Request>();
 
     if (!authMetadata) {
+      this.logger.debug('No auth metadata found, allowing access');
       return true;
     }
+
+    this.logger.debug('Auth required, extracting refresh token');
 
     const refreshToken = this.cookiesService.getRefreshToken(request);
 
     if (!refreshToken) {
+      this.logger.debug('No refresh token found in cookies');
       return false;
     }
+
+    this.logger.debug('Refresh token found, extracting access token');
 
     const accessToken = this.getAccessTokenFromRequest(request);
 
     if (!accessToken) {
+      this.logger.debug('No access token found in Authorization header');
       return false;
     }
+
+    this.logger.debug('Access token found, validating tokens');
 
     const user = await this.authenticationService.validateAndGetUserOrThrow(
       accessToken,
@@ -51,8 +64,11 @@ export class AuthGuard implements CanActivate {
     );
 
     if (!user) {
+      this.logger.debug('User validation failed');
       return false;
     }
+
+    this.logger.debug(`User validated: ${user.getId()}`);
 
     request.user = user;
 
@@ -62,8 +78,11 @@ export class AuthGuard implements CanActivate {
     );
 
     if (!hasRequiredRoles) {
+      this.logger.debug(`User ${user.getId()} does not have required roles`);
       return false;
     }
+
+    this.logger.debug(`User ${user.getId()} authorized successfully`);
 
     return true;
   }

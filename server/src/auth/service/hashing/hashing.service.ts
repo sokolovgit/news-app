@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { createHmac } from 'crypto';
 import { ConfigService } from '@/config';
+import { LoggerService } from '@/logger';
 
 @Injectable()
 export class HashingService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly logger: LoggerService,
+  ) {}
 
   /**
    * Hashes a string using bcrypt.
@@ -13,7 +17,10 @@ export class HashingService {
    * @returns The hashed string
    */
   async hash(toHash: string): Promise<string> {
-    return await bcrypt.hash(toHash, 10);
+    this.logger.debug('Hashing password with bcrypt');
+    const hashed = await bcrypt.hash(toHash, 10);
+    this.logger.debug('Password hashed successfully');
+    return hashed;
   }
 
   /**
@@ -23,7 +30,10 @@ export class HashingService {
    * @returns True if the strings match, false otherwise
    */
   async compareHashes(toCompare: string, hash: string): Promise<boolean> {
-    return await bcrypt.compare(toCompare, hash);
+    this.logger.debug('Comparing password with hash');
+    const isMatch = await bcrypt.compare(toCompare, hash);
+    this.logger.debug(`Password comparison result: ${isMatch}`);
+    return isMatch;
   }
 
   /**
@@ -38,8 +48,11 @@ export class HashingService {
    * @returns The HMAC-SHA256 hash as a hex string
    */
   hashToken(token: string): string {
+    this.logger.debug('Hashing token with HMAC-SHA256');
     const secret = this.configService.auth.refreshTokenSecret;
-    return createHmac('sha256', secret).update(token).digest('hex');
+    const hashed = createHmac('sha256', secret).update(token).digest('hex');
+    this.logger.debug('Token hashed successfully');
+    return hashed;
   }
 
   /**
@@ -49,9 +62,11 @@ export class HashingService {
    * @returns True if the strings match, false otherwise
    */
   compareToken(toCompare: string, hash: string): boolean {
+    this.logger.debug('Comparing token with hash');
     const secret = this.configService.auth.refreshTokenSecret;
-    return (
-      createHmac('sha256', secret).update(toCompare).digest('hex') === hash
-    );
+    const isMatch =
+      createHmac('sha256', secret).update(toCompare).digest('hex') === hash;
+    this.logger.debug(`Token comparison result: ${isMatch}`);
+    return isMatch;
   }
 }

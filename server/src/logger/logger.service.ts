@@ -132,22 +132,59 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
+   * Automatically detects the calling context from the call stack
+   * @returns The name of the class that called the logger
+   */
+  private detectContext(): string | undefined {
+    const stack = new Error().stack;
+    if (!stack) {
+      return undefined;
+    }
+
+    const lines = stack.split('\n');
+    // Skip the first 3 lines (Error, detectContext, and the logger method)
+    for (let i = 3; i < lines.length; i++) {
+      const line = lines[i];
+
+      // Match patterns like "at ClassName.methodName" or "at new ClassName"
+      const match = line.match(/at\s+(?:new\s+)?(\w+)\.(\w+)/);
+      if (match) {
+        const className = match[1];
+        // Skip common framework classes
+        if (
+          className !== 'Object' &&
+          className !== 'Promise' &&
+          className !== 'Module' &&
+          !className.startsWith('Function')
+        ) {
+          return className;
+        }
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
    * Logs a standard info message
    */
   log(message: string, context?: string): void {
-    this.logger.info({ context }, message);
+    const finalContext = context || this.detectContext();
+    this.logger.info({ context: finalContext }, message);
   }
 
   /**
    * Logs an error with appropriate context
    */
   error(message: string | Error, trace?: string, context?: string): void {
+    const finalContext = context || this.detectContext();
+
     if (typeof message === 'string') {
-      this.logger.error({ context, trace }, message);
+      this.logger.error({ context: finalContext, trace }, message);
       return;
     }
 
-    const errorContext = this.extractErrorContext(message, context);
+    const errorContext = this.extractErrorContext(message, finalContext);
     this.logger.error(errorContext, message.message);
   }
 
@@ -155,21 +192,24 @@ export class LoggerService implements NestLoggerService {
    * Logs a warning message
    */
   warn(message: string, context?: string): void {
-    this.logger.warn({ context }, message);
+    const finalContext = context || this.detectContext();
+    this.logger.warn({ context: finalContext }, message);
   }
 
   /**
    * Logs a debug message
    */
   debug(message: string, context?: string): void {
-    this.logger.debug({ context }, message);
+    const finalContext = context || this.detectContext();
+    this.logger.debug({ context: finalContext }, message);
   }
 
   /**
    * Logs a verbose/trace message
    */
   verbose(message: string, context?: string): void {
-    this.logger.trace({ context }, message);
+    const finalContext = context || this.detectContext();
+    this.logger.trace({ context: finalContext }, message);
   }
 
   /**

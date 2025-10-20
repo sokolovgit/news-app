@@ -38,6 +38,8 @@ export class TokensService {
   async createRefreshTokenOrThrow(
     props: CreateRefreshTokenProps,
   ): Promise<RefreshToken> {
+    this.logger.debug(`Creating refresh token for user ID: ${props.userId}`);
+
     const newRefreshToken = new RefreshToken(
       {
         id: props.id ?? uuid<RefreshTokenId>(),
@@ -52,11 +54,18 @@ export class TokensService {
       await this.refreshTokensRepository.save(newRefreshToken);
 
     if (!savedRefreshToken) {
+      this.logger.debug(
+        `Failed to save refresh token for user ID: ${props.userId}`,
+      );
       throw new TokenGenerationFailedError(
         props.userId,
         'Database save failed',
       );
     }
+
+    this.logger.debug(
+      `Refresh token created successfully for user ID: ${props.userId}`,
+    );
 
     return savedRefreshToken;
   }
@@ -65,37 +74,57 @@ export class TokensService {
    * Deletes a refresh token by its ID
    */
   async deleteRefreshTokenByIdOrThrow(id: RefreshTokenId): Promise<void> {
+    this.logger.debug(`Deleting refresh token with ID: ${id}`);
+
     const isDeleted =
       await this.refreshTokensRepository.deleteRefreshTokenById(id);
 
     if (!isDeleted) {
+      this.logger.debug(`Failed to delete refresh token with ID: ${id}`);
       throw new TokenGenerationFailedError(
         id,
         'Failed to delete refresh token',
       );
     }
+
+    this.logger.debug(`Refresh token deleted successfully with ID: ${id}`);
   }
 
   /**
    * Issues new access and refresh tokens for a user
    */
   async issueTokens(user: User): Promise<AuthTokens> {
+    this.logger.debug(`Issuing tokens for user ID: ${user.getId()}`);
+
     const payload: JwtPayload = {
       sub: user.getId(),
       email: user.getEmail(),
       roles: user.getRoles(),
     };
 
+    this.logger.debug(`Signing access token for user ID: ${user.getId()}`);
+
     const accessToken = await this.jwtService.signAsync(payload);
+
+    this.logger.debug(
+      `Checking for existing refresh token for user ID: ${user.getId()}`,
+    );
 
     const foundRefreshToken =
       await this.refreshTokensRepository.findRefreshTokenByUserId(user.getId());
 
     if (foundRefreshToken) {
+      this.logger.debug(
+        `Found existing refresh token, deleting it for user ID: ${user.getId()}`,
+      );
       await this.deleteRefreshTokenByIdOrThrow(foundRefreshToken.getId());
     }
 
     const { plainToken } = await this.generateRefreshToken(user);
+
+    this.logger.debug(
+      `Tokens issued successfully for user ID: ${user.getId()}`,
+    );
 
     return {
       accessToken,
@@ -107,26 +136,43 @@ export class TokensService {
    * Validates a refresh token and returns it if valid
    */
   async validateRefreshTokenOrThrow(token: string): Promise<RefreshToken> {
+    this.logger.debug('Validating refresh token');
+
     const hashedToken = this.hashingService.hashToken(token);
+
+    this.logger.debug('Looking up refresh token in database');
 
     const refreshToken =
       await this.refreshTokensRepository.findRefreshTokenByToken(hashedToken);
 
     if (!refreshToken) {
+      this.logger.debug('Refresh token not found in database');
       throw new InvalidRefreshTokenError('Token not found');
     }
+
+    this.logger.debug(`Found refresh token with ID: ${refreshToken.getId()}`);
 
     const isExpired = dayjs().isAfter(dayjs(refreshToken.getExpiresAt()));
 
     if (isExpired) {
+      this.logger.debug(
+        `Refresh token expired for token ID: ${refreshToken.getId()}`,
+      );
       throw new InvalidRefreshTokenError('Token expired');
     }
 
     const user = refreshToken.getUser();
 
     if (!user) {
+      this.logger.debug(
+        `User not found for refresh token ID: ${refreshToken.getId()}`,
+      );
       throw new InvalidRefreshTokenError('User not found');
     }
+
+    this.logger.debug(
+      `Refresh token validated successfully for user ID: ${user.getId()}`,
+    );
 
     return refreshToken;
   }
@@ -135,11 +181,23 @@ export class TokensService {
    * Refreshes tokens using a valid refresh token
    */
   async refreshToken(token: string): Promise<AuthenticationResult> {
+    this.logger.debug('Starting token refresh process');
+
     const refreshToken = await this.validateRefreshTokenOrThrow(token);
+
+    this.logger.debug(
+      `Deleting old refresh token for user ID: ${refreshToken.getUser().getId()}`,
+    );
+
     await this.deleteRefreshTokenByIdOrThrow(refreshToken.getId());
 
     const user = refreshToken.getUser();
+
+    this.logger.debug(`Issuing new tokens for user ID: ${user.getId()}`);
+
     const tokens = await this.issueTokens(user);
+
+    this.logger.debug(`Token refresh completed for user ID: ${user.getId()}`);
 
     return { user, tokens };
   }
@@ -148,13 +206,28 @@ export class TokensService {
    * Logs out a user by invalidating their refresh token
    */
   async logout(token: string): Promise<void> {
+    this.logger.debug('Starting logout process');
+
     const refreshToken = await this.validateRefreshTokenOrThrow(token);
+
+    this.logger.debug(
+      `Deleting refresh token for user ID: ${refreshToken.getUser().getId()}`,
+    );
+
     await this.deleteRefreshTokenByIdOrThrow(refreshToken.getId());
+
+    this.logger.debug(
+      `Logout completed for user ID: ${refreshToken.getUser().getId()}`,
+    );
   }
 
   private async generateRefreshToken(
     user: User,
   ): Promise<{ refreshToken: RefreshToken; plainToken: string }> {
+    this.logger.debug(
+      `Generating new refresh token for user ID: ${user.getId()}`,
+    );
+
     const token = uuid();
     const hashedToken = this.hashingService.hashToken(token);
 
@@ -162,12 +235,20 @@ export class TokensService {
       .add(this.configService.auth.refreshTokenExpiresInMs, 'ms')
       .toDate();
 
+    this.logger.debug(
+      `Refresh token will expire at: ${expiresAt.toISOString()}`,
+    );
+
     const refreshToken = await this.createRefreshTokenOrThrow({
       userId: user.getId(),
       token: hashedToken,
       expiresAt,
       relations: { user },
     });
+
+    this.logger.debug(
+      `Refresh token generated successfully for user ID: ${user.getId()}`,
+    );
 
     return { refreshToken, plainToken: token };
   }
