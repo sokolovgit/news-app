@@ -1,11 +1,14 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 
-import { ConfigService, envValidationSchema, ConfigModule } from './config';
-import { DrizzleModule } from './database';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
-import { CookiesModule } from './cookies';
 import { LoggerModule, RequestLoggerMiddleware } from './logger';
+import { ConfigService, envValidationSchema, ConfigModule } from './config';
+
+import { AuthModule } from './auth/auth.module';
+import { MailsModule } from './mails/mails.module';
+import { UsersModule } from './users/users.module';
+import { DrizzleModule } from './database';
+import { CookiesModule } from './cookies';
 
 @Module({
   imports: [
@@ -13,11 +16,20 @@ import { LoggerModule, RequestLoggerMiddleware } from './logger';
       providers: [ConfigService],
       validationSchema: envValidationSchema,
     }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          url: config.redis.url,
+        },
+      }),
+    }),
     LoggerModule.forRootAsync(),
     CookiesModule.forRoot(),
     DrizzleModule,
     UsersModule,
     AuthModule,
+    MailsModule,
   ],
 })
 export class AppModule implements NestModule {
