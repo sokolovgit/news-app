@@ -6,17 +6,19 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
-import { createDocument } from './plugins/swagger';
 import { ConfigService } from './config';
 import { AllExceptionsFilter } from './commons/errors';
 import { LoggerService } from './logger';
+import { setupSwagger, setupBullBoard } from './plugins';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: false,
   });
 
+  const config = app.get(ConfigService);
   const logger = app.get(LoggerService);
+
   app.useLogger(logger);
 
   app.useGlobalFilters(new AllExceptionsFilter(logger));
@@ -31,21 +33,25 @@ async function bootstrap() {
     }),
   );
 
-  const config = app.get(ConfigService);
-
-  const { host, port } = config.server;
-
   const isDocsEnabled = config.docs.enabled;
 
   if (isDocsEnabled) {
-    createDocument(app);
+    setupSwagger(app);
   }
+
+  const isBullboardEnabled = config.bullboard.enabled;
+
+  if (isBullboardEnabled) {
+    setupBullBoard(app);
+  }
+
+  const { host, port } = config.server;
 
   await app.listen(port, host);
 
   const appUrl = await app.getUrl();
 
-  logger.log(`🚀 Application is running on: ${appUrl}`);
+  logger.log(`🚀 Application is running on: ${appUrl}`, 'N');
 
   if (isDocsEnabled) {
     const docsPath = config.docs.path;

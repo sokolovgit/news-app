@@ -3,7 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { ConfigService } from '@/config';
 
-export const createDocument = (app: INestApplication) => {
+export const setupSwagger = (app: INestApplication) => {
   const configService = app.get(ConfigService);
   const docsPath = configService.docs.path;
 
