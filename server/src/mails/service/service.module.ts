@@ -15,6 +15,7 @@ import { MailSendingStrategy } from './mail-service/interfaces';
 import { BullMailQueueService } from './mail-queue/bull.mail-queue.service';
 import { BullModule } from '@nestjs/bullmq';
 import { EmailQueue } from '../domain/enums';
+import { LoggerModule } from '@/logger';
 
 const mailProviderServices = [
   {
@@ -50,6 +51,7 @@ const queues = [
   imports: [
     NodemailerTransporterModule.forRootAsync(),
     BullModule.registerQueue(...queues),
+    LoggerModule,
   ],
   providers: [
     ...mailProviderServices,
