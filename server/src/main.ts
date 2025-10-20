@@ -51,11 +51,19 @@ async function bootstrap() {
 
   const appUrl = await app.getUrl();
 
-  logger.log(`🚀 Application is running on: ${appUrl}`, 'N');
+  logger.log(`Application is running on: ${appUrl}`, 'NestApplication');
 
   if (isDocsEnabled) {
     const docsPath = config.docs.path;
-    logger.log(`📚 API Docs are available at: ${appUrl}/${docsPath}`);
+    logger.log(`API Docs are available at: ${appUrl}/${docsPath}`, 'Swagger');
+  }
+
+  if (isBullboardEnabled) {
+    const bullboardPath = config.bullboard.path;
+    logger.log(
+      `Bullboard is available at: ${appUrl}/${bullboardPath}`,
+      'Bullboard',
+    );
   }
 }
 
