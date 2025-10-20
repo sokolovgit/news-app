@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { createBullBoard } from '@bull-board/api';
 import { INestApplication } from '@nestjs/common';
 
@@ -8,6 +6,7 @@ import { ExpressAdapter } from '@bull-board/express';
 
 import { Queue } from 'bullmq';
 import { ConfigService } from '@/config';
+import { EmailQueue } from '@/mails/domain/enums';
 
 export const setupBullBoard = (app: INestApplication): void => {
   const configService = app.get(ConfigService);
@@ -20,9 +19,23 @@ export const setupBullBoard = (app: INestApplication): void => {
   serverAdapter.setBasePath(`/${bullBoardPath}`);
 
   createBullBoard({
-    queues: [],
+    queues: buildBullBoardQueues(redisUrl),
     serverAdapter,
   });
 
   app.use(`/${bullBoardPath}`, serverAdapter.getRouter());
+};
+
+const buildBullBoardQueues = (redisUrl: string): BullMQAdapter[] => {
+  const queues = [...Object.values(EmailQueue)];
+
+  return queues.map((queueName) => {
+    return new BullMQAdapter(
+      new Queue(queueName, {
+        connection: {
+          url: redisUrl,
+        },
+      }),
+    );
+  });
 };
