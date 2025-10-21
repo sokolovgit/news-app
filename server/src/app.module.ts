@@ -1,8 +1,9 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 
+import { ConfigModule } from './commons/config';
+import { ConfigService, envValidationSchema } from './config';
 import { LoggerModule, RequestLoggerMiddleware } from './logger';
-import { ConfigService, envValidationSchema, ConfigModule } from './config';
 
 import { AuthModule } from './auth/auth.module';
 import { MailsModule } from './mails/mails.module';

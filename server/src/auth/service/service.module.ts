@@ -15,10 +15,13 @@ import { OAuthAccountsRepository } from './abstracts/oauth-accounts.repository';
 import { DrizzleOAuthAccountsRepository } from './oauth-accounts-storage';
 import { RefreshTokensRepository } from './abstracts/refresh-tokens.repository';
 import { DrizzleRefreshTokensRepository } from './refresh-tokens-storage';
+import { EmailVerificationsRepository } from './abstracts/email-verifications.repository';
+import { DrizzleEmailVerificationsRepository } from './email-verifications-storage';
 
 import { OAuthLoginFactory } from './oauth/oauth-login.factory';
 import { OAuthLoginStrategy } from './oauth/interfaces';
 import { GoogleOAuthStrategy } from './oauth/strategies';
+import { EmailVerificationsService } from './email-verifications';
 
 const repositories = [
   {
@@ -29,6 +32,10 @@ const repositories = [
     provide: RefreshTokensRepository,
     useClass: DrizzleRefreshTokensRepository,
   },
+  {
+    provide: EmailVerificationsRepository,
+    useClass: DrizzleEmailVerificationsRepository,
+  },
 ];
 
 const services = [
@@ -38,6 +45,7 @@ const services = [
   HashingService,
   TokensService,
   AuthenticationService,
+  EmailVerificationsService,
 ];
 
 const oauthLoginStrategies = [GoogleOAuthStrategy];

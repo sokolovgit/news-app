@@ -63,11 +63,6 @@ export class AuthGuard implements CanActivate {
       refreshToken,
     );
 
-    if (!user) {
-      this.logger.debug('User validation failed');
-      return false;
-    }
-
     this.logger.debug(`User validated: ${user.getId()}`);
 
     request.user = user;

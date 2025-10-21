@@ -6,9 +6,11 @@ import { UsersService } from '@/users/service/users-service';
 import { TokensService } from '../tokens';
 import { LoggerService } from '@/logger';
 import {
+  EmailNotVerifiedError,
   InvalidAccessTokenError,
   InvalidRefreshTokenError,
 } from '@/auth/domain/errors';
+import { EmailVerificationsService } from '../email-verifications';
 
 @Injectable()
 export class AuthenticationService {
@@ -16,13 +18,14 @@ export class AuthenticationService {
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
     private readonly tokensService: TokensService,
+    private readonly emailVerificationsService: EmailVerificationsService,
     private readonly logger: LoggerService,
   ) {}
 
   async validateAndGetUserOrThrow(
     accessToken: string,
     refreshToken: string,
-  ): Promise<User | null> {
+  ): Promise<User> {
     this.logger.debug('Validating access token and refresh token');
 
     try {
@@ -50,6 +53,19 @@ export class AuthenticationService {
         `Authentication validated successfully for user: ${user.getId()}`,
       );
 
+      const isEmailVerified =
+        await this.emailVerificationsService.isEmailVerified(user.getId());
+
+      if (!isEmailVerified) {
+        this.logger.debug(
+          `Email not verified for user: ${user.getId()} and email: ${user.getEmail()}`,
+        );
+        throw new EmailNotVerifiedError('Email not verified');
+      }
+      this.logger.debug(
+        `Email verified for user: ${user.getId()} and email: ${user.getEmail()}`,
+      );
+
       return user;
     } catch (error) {
       const errorName = (error as { name?: string })?.name;
@@ -66,6 +82,8 @@ export class AuthenticationService {
           throw new InvalidAccessTokenError('Access token not yet valid');
         case 'InvalidRefreshTokenError':
           throw new InvalidRefreshTokenError('Invalid refresh token');
+        case 'EmailNotVerifiedError':
+          throw new EmailNotVerifiedError('Email not verified');
         default:
           throw new InvalidAccessTokenError('Invalid access token');
       }

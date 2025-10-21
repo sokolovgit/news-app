@@ -3,7 +3,7 @@ import { DrizzlePGModule } from '@knaadh/nestjs-drizzle-pg';
 import { ConfigService } from '@/config';
 import { LoggerService } from '@/logger';
 
-import { drizzle } from './drizzle-schemas';
+import { drizzle } from './drizzle-definition';
 import { DRIZZLE_CONNECTION } from './constants';
 import { DrizzleLogger } from './drizzle.logger';
 

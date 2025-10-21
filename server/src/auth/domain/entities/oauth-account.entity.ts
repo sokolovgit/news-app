@@ -20,11 +20,7 @@ export class OAuthAccount {
   public constructor(
     private readonly props: OAuthAccountProperties,
     private readonly relations: OAuthAccountRelations,
-  ) {
-    if (relations.user && relations.user.getId() !== props.userId) {
-      throw new Error('User ID mismatch in OAuthAccount');
-    }
-  }
+  ) {}
 
   getId(): OAuthAccountId | undefined {
     return this.props.id;
