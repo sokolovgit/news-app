@@ -1,7 +1,8 @@
-import { loadEnv } from './config/load-env';
+import { loadEnv } from './config';
 loadEnv();
 
 import * as cookieParser from 'cookie-parser';
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 

@@ -6,7 +6,7 @@ import { JobsOptions } from 'bullmq';
 import { Environments } from '@/commons/enums';
 
 import { EnvType } from './env.schema';
-import { BaseConfigService } from './base-config.service';
+import { BaseConfigService } from '../commons/config/base-config.service';
 
 import { EmailQueue } from '@/mails/domain/enums';
 
