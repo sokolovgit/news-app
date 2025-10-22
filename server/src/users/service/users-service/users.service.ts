@@ -71,7 +71,9 @@ export class UsersService {
       throw new UserCreationFailedError(props.email, 'Database save failed');
     }
 
-    this.logger.debug(`User created successfully with ID: ${savedUser.getId()}`);
+    this.logger.debug(
+      `User created successfully with ID: ${savedUser.getId()}`,
+    );
 
     return savedUser;
   }

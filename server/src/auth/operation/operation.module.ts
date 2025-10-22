@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
+import { MailsModule } from '@/mails/mails.module';
+import { UsersModule } from '@/users/users.module';
 import { ServiceModule } from '../service/service.module';
 import {
+  GetMeHandler,
   LoginHandler,
   LogoutHandler,
   RegisterHandler,
@@ -11,6 +14,7 @@ import {
 } from './handlers';
 
 const handlers = [
+  GetMeHandler,
   LoginHandler,
   LogoutHandler,
   RegisterHandler,
@@ -21,7 +25,7 @@ const handlers = [
 ];
 
 @Module({
-  imports: [ServiceModule],
+  imports: [ServiceModule, MailsModule, UsersModule],
   providers: [...handlers],
   exports: [ServiceModule, ...handlers],
 })

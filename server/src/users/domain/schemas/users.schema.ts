@@ -3,7 +3,11 @@ import { pgEnum, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { Uuid } from '@/commons/utils';
 import { timestamps, primaryUuid } from '@/commons/database';
 import { relations } from 'drizzle-orm';
-import { oauthAccounts, refreshTokens } from '@/auth/domain/schemas';
+import {
+  oauthAccounts,
+  refreshTokens,
+  emailVerifications,
+} from '@/auth/domain/schemas';
 import { UserRole } from '@/users/domain/enums';
 
 export type UserId = Uuid<'users'>;
@@ -26,9 +30,10 @@ export const users = pgTable('users', {
   ...timestamps,
 });
 
-export const userRelations = relations(users, ({ many }) => ({
+export const userRelations = relations(users, ({ many, one }) => ({
   oauthAccounts: many(oauthAccounts),
-  refreshTokens: many(refreshTokens),
+  refreshToken: one(refreshTokens),
+  emailVerification: one(emailVerifications),
 }));
 
 export type UserRoleType = (typeof UserRole)[keyof typeof UserRole];

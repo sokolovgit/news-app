@@ -18,6 +18,7 @@ import {
 import { Response } from 'express';
 
 import {
+  GetMeHandler,
   LoginHandler,
   RegisterHandler,
   RefreshTokenHandler,
@@ -25,8 +26,7 @@ import {
   VerifyEmailHandler,
 } from '../operation/handlers';
 
-import { UserDto } from '@/users/ui/dtos';
-import { LoginDto, RegisterDto, AuthenticationResultDto } from './dtos';
+import { LoginDto, RegisterDto, AuthenticationResultDto, MeDto } from './dtos';
 
 import { User } from '@/users/domain/entities';
 import { CurrentUser } from '@/users/decorators';
@@ -39,6 +39,7 @@ import { ValidateRefreshTokenPipe } from '../pipes';
 @Controller('auth')
 export class AuthController {
   constructor(
+    private readonly getMeHandler: GetMeHandler,
     private readonly registerHandler: RegisterHandler,
     private readonly loginHandler: LoginHandler,
     private readonly logoutHandler: LogoutHandler,
@@ -54,10 +55,12 @@ export class AuthController {
   })
   @ApiOkResponse({
     description: 'User retrieved successfully',
-    type: UserDto,
+    type: MeDto,
   })
-  public me(@CurrentUser() user: User) {
-    return UserDto.fromUserEntity(user);
+  public async me(@CurrentUser() user: User) {
+    const me = await this.getMeHandler.handle(user.getId());
+
+    return MeDto.fromGetMeResponse(me);
   }
 
   @Post('register')

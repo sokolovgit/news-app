@@ -13,9 +13,7 @@ import { LoggerService } from './logger';
 import { setupSwagger, setupBullBoard } from './plugins';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger: false,
-  });
+  const app = await NestFactory.create(AppModule);
 
   const config = app.get(ConfigService);
   const logger = app.get(LoggerService);
