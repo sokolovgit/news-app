@@ -8,20 +8,23 @@ import {
   UserAlreadyExistsError,
   InvalidCredentialsError,
   OAuthAccountRequiredError,
+  EmailNotVerifiedError,
 } from '@/auth/domain/errors';
 
 import { UserRole } from '@/users/domain/enums';
 import { AuthenticationResult } from './types/authentication-result.type';
 import { LoggerService } from '@/logger';
+import { EmailVerificationsService } from '../email-verifications';
 
 @Injectable()
 export class LocalAuthService {
   constructor(
+    private readonly logger: LoggerService,
     private readonly usersService: UsersService,
     private readonly tokensService: TokensService,
     private readonly passwordsService: HashingService,
     private readonly oauthAccountsService: OAuthAccountsService,
-    private readonly logger: LoggerService,
+    private readonly emailVerificationsService: EmailVerificationsService,
   ) {}
 
   async localLogin(
@@ -75,6 +78,14 @@ export class LocalAuthService {
       `Password validated successfully for user ID: ${user.getId()}, issuing tokens`,
     );
 
+    const isEmailVerified =
+      await this.emailVerificationsService.isEmailVerified(user.getId());
+
+    if (!isEmailVerified) {
+      this.logger.debug(`Email not verified for user ID: ${user.getId()}`);
+      throw new EmailNotVerifiedError(email);
+    }
+
     const tokens = await this.tokensService.issueTokens(user);
 
     return { user, tokens };
@@ -107,6 +118,10 @@ export class LocalAuthService {
 
     this.logger.debug(
       `User created successfully with ID: ${user.getId()}, issuing tokens`,
+    );
+
+    await this.emailVerificationsService.sendEmailVerificationEmail(
+      user.getId(),
     );
 
     const tokens = await this.tokensService.issueTokens(user);

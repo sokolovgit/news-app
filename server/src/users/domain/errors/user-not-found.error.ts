@@ -10,12 +10,8 @@ export class UserNotFoundError extends AppError {
     identifierType: 'id' | 'email' = 'id',
     context?: string,
   ) {
-    super(
-      'User not found',
-      HttpStatus.NOT_FOUND,
-      context,
-      { [identifierType]: identifier },
-    );
+    super('User not found', HttpStatus.NOT_FOUND, context, {
+      [identifierType]: identifier,
+    });
   }
 }
-

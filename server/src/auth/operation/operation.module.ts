@@ -7,6 +7,7 @@ import {
   RefreshTokenHandler,
   OAuthCallbackHandler,
   OAuthAuthorizationUrlHandler,
+  VerifyEmailHandler,
 } from './handlers';
 
 const handlers = [
@@ -14,6 +15,7 @@ const handlers = [
   LogoutHandler,
   RegisterHandler,
   RefreshTokenHandler,
+  VerifyEmailHandler,
   OAuthCallbackHandler,
   OAuthAuthorizationUrlHandler,
 ];

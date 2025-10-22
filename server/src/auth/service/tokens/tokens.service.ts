@@ -9,13 +9,13 @@ import {
   TokenGenerationFailedError,
 } from '@/auth/domain/errors';
 
-import { JwtService } from '@nestjs/jwt';
+import { JwtService } from '../jwt-service';
 import { ConfigService } from '@/config';
 import { HashingService } from '../hashing';
 
 import { RefreshTokensRepository } from '../abstracts/refresh-tokens.repository';
 
-import { CreateRefreshTokenProps, AuthTokens, JwtPayload } from './types';
+import { CreateRefreshTokenProps, AuthTokens } from './types';
 
 import { User } from '@/users/domain/entities';
 import { RefreshToken } from '@/auth/domain/entities';
@@ -96,15 +96,9 @@ export class TokensService {
   async issueTokens(user: User): Promise<AuthTokens> {
     this.logger.debug(`Issuing tokens for user ID: ${user.getId()}`);
 
-    const payload: JwtPayload = {
-      sub: user.getId(),
-      email: user.getEmail(),
-      roles: user.getRoles(),
-    };
-
     this.logger.debug(`Signing access token for user ID: ${user.getId()}`);
 
-    const accessToken = await this.jwtService.signAsync(payload);
+    const accessToken = await this.jwtService.generateJwtTokenFromUser(user);
 
     this.logger.debug(
       `Checking for existing refresh token for user ID: ${user.getId()}`,
@@ -205,19 +199,20 @@ export class TokensService {
   /**
    * Logs out a user by invalidating their refresh token
    */
-  async logout(token: string): Promise<void> {
+  async revokeRefreshToken(refreshToken: string): Promise<void> {
     this.logger.debug('Starting logout process');
 
-    const refreshToken = await this.validateRefreshTokenOrThrow(token);
+    const refreshTokenEntity =
+      await this.validateRefreshTokenOrThrow(refreshToken);
 
     this.logger.debug(
-      `Deleting refresh token for user ID: ${refreshToken.getUser().getId()}`,
+      `Deleting refresh token for user ID: ${refreshTokenEntity.getUser().getId()}`,
     );
 
-    await this.deleteRefreshTokenByIdOrThrow(refreshToken.getId());
+    await this.deleteRefreshTokenByIdOrThrow(refreshTokenEntity.getId());
 
     this.logger.debug(
-      `Logout completed for user ID: ${refreshToken.getUser().getId()}`,
+      `Logout completed for user ID: ${refreshTokenEntity.getUser().getId()}`,
     );
   }
 

@@ -18,10 +18,12 @@ import { DrizzleRefreshTokensRepository } from './refresh-tokens-storage';
 import { EmailVerificationsRepository } from './abstracts/email-verifications.repository';
 import { DrizzleEmailVerificationsRepository } from './email-verifications-storage';
 
+import { JwtService } from './jwt-service';
 import { OAuthLoginFactory } from './oauth/oauth-login.factory';
 import { OAuthLoginStrategy } from './oauth/interfaces';
 import { GoogleOAuthStrategy } from './oauth/strategies';
 import { EmailVerificationsService } from './email-verifications';
+import { MailsModule } from '@/mails/mails.module';
 
 const repositories = [
   {
@@ -39,6 +41,7 @@ const repositories = [
 ];
 
 const services = [
+  JwtService,
   OAuthService,
   LocalAuthService,
   OAuthAccountsService,
@@ -62,6 +65,7 @@ const factories = [
 @Module({
   imports: [
     UsersModule,
+    MailsModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

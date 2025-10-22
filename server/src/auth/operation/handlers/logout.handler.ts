@@ -31,7 +31,7 @@ export class LogoutHandler {
       'Revoking refresh token',
     );
 
-    await this.tokensService.logout(refreshToken);
+    await this.tokensService.revokeRefreshToken(refreshToken);
 
     this.logger.logProcessProgress(
       processId,

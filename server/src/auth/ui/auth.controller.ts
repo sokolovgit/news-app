@@ -2,6 +2,7 @@ import {
   ApiOperation,
   ApiOkResponse,
   ApiBadRequestResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import {
   Get,
@@ -12,6 +13,7 @@ import {
   HttpCode,
   Controller,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { Response } from 'express';
 
@@ -20,16 +22,19 @@ import {
   RegisterHandler,
   RefreshTokenHandler,
   LogoutHandler,
+  VerifyEmailHandler,
 } from '../operation/handlers';
 
-import { LoginDto, RegisterDto, AuthenticationResultDto } from './dtos';
 import { UserDto } from '@/users/ui/dtos';
+import { LoginDto, RegisterDto, AuthenticationResultDto } from './dtos';
 
 import { User } from '@/users/domain/entities';
-import { Auth } from '../decorators/auth.decorator';
 import { CurrentUser } from '@/users/decorators';
+
+import { Auth } from '../decorators/auth.decorator';
 import { Cookies } from '@/cookies/decorators';
-import { ValidateRefreshTokenPipe } from '../pipes/validate-refresh-token.pipe';
+
+import { ValidateRefreshTokenPipe } from '../pipes';
 
 @Controller('auth')
 export class AuthController {
@@ -38,6 +43,7 @@ export class AuthController {
     private readonly loginHandler: LoginHandler,
     private readonly logoutHandler: LogoutHandler,
     private readonly refreshTokenHandler: RefreshTokenHandler,
+    private readonly verifyEmailHandler: VerifyEmailHandler,
   ) {}
 
   @Get('me')
@@ -55,6 +61,7 @@ export class AuthController {
   }
 
   @Post('register')
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Register user',
     description:
@@ -82,6 +89,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Login user',
     description: 'Login a user with email and password',
@@ -109,6 +117,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Refresh token',
     description:
@@ -133,6 +142,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Logout user',
     description: 'Logout a user by deleting the refresh token',
@@ -145,5 +155,24 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     await this.logoutHandler.handle({ refreshToken }, response);
+  }
+
+  @Post('verify-email')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Verify email',
+    description: 'Verify an email by sending a verification email',
+  })
+  @ApiOkResponse({
+    description: 'Email verified successfully',
+  })
+  @ApiQuery({
+    name: 'token',
+    required: true,
+    description: 'The token to verify the email',
+    type: String,
+  })
+  public async verifyEmail(@Query('token') token: string) {
+    await this.verifyEmailHandler.handle(token);
   }
 }

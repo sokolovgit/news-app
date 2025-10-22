@@ -1,25 +1,24 @@
 import { User } from '@/users/domain/entities';
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from '../tokens/types';
-import { UsersService } from '@/users/service/users-service';
+
+import { JwtService } from '../jwt-service';
 import { TokensService } from '../tokens';
 import { LoggerService } from '@/logger';
+import { EmailVerificationsService } from '../email-verifications';
+
 import {
   EmailNotVerifiedError,
   InvalidAccessTokenError,
   InvalidRefreshTokenError,
 } from '@/auth/domain/errors';
-import { EmailVerificationsService } from '../email-verifications';
 
 @Injectable()
 export class AuthenticationService {
   constructor(
+    private readonly logger: LoggerService,
     private readonly jwtService: JwtService,
-    private readonly usersService: UsersService,
     private readonly tokensService: TokensService,
     private readonly emailVerificationsService: EmailVerificationsService,
-    private readonly logger: LoggerService,
   ) {}
 
   async validateAndGetUserOrThrow(
@@ -31,17 +30,7 @@ export class AuthenticationService {
     try {
       this.logger.debug('Verifying access token');
 
-      const payload =
-        await this.jwtService.verifyAsync<JwtPayload>(accessToken);
-
-      this.logger.debug(`Access token verified for user ID: ${payload.sub}`);
-
-      const user = await this.getUserFromPayload(payload);
-
-      if (!user) {
-        this.logger.debug(`User not found for ID: ${payload.sub}`);
-        throw new InvalidAccessTokenError('Malformed access token');
-      }
+      const user = await this.getUserFromAccessTokenOrThrow(accessToken);
 
       this.logger.debug(
         `User found: ${user.getId()}, validating refresh token`,
@@ -90,10 +79,11 @@ export class AuthenticationService {
     }
   }
 
-  private async getUserFromPayload(payload: JwtPayload): Promise<User | null> {
-    this.logger.debug(
-      `Getting user from JWT payload for user ID: ${payload.sub}`,
-    );
-    return await this.usersService.getUserById(payload.sub);
+  private async getUserFromAccessTokenOrThrow(
+    accessToken: string,
+  ): Promise<User> {
+    const payload = await this.jwtService.verifyJwtTokenOrThrow(accessToken);
+
+    return await this.jwtService.getUserFromJwtPayloadOrThrow(payload);
   }
 }

@@ -14,8 +14,11 @@ export const loadEnv = (
       quiet: process.env.NODE_ENV === Environments.PRODUCTION,
     },
   },
-) =>
-  expand({
+) => {
+  const result = expand({
     ...config(options.config),
     ...options.expand,
   });
+  console.log('Environment variables loaded successfully');
+  return result;
+};

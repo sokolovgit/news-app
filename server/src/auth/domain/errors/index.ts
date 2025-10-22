@@ -6,3 +6,6 @@ export * from './token-generation-failed.error';
 export * from './oauth-provider-error.error';
 export * from './invalid-access-token.error';
 export * from './email-not-verified.error';
+export * from './invalid-email-verification-token.error';
+export * from './email-already-verified.error';
+export * from './failed-to-verify-email.error';
