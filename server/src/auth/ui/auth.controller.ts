@@ -2,31 +2,36 @@ import {
   ApiOperation,
   ApiOkResponse,
   ApiBadRequestResponse,
-  ApiQuery,
 } from '@nestjs/swagger';
 import {
   Get,
   Res,
   Body,
   Post,
+  Query,
   UsePipes,
   HttpCode,
   Controller,
   HttpStatus,
-  Query,
 } from '@nestjs/common';
 import { Response } from 'express';
 
 import {
   GetMeHandler,
   LoginHandler,
-  RegisterHandler,
-  RefreshTokenHandler,
   LogoutHandler,
+  RegisterHandler,
   VerifyEmailHandler,
+  RefreshTokenHandler,
 } from '../operation/handlers';
 
-import { LoginDto, RegisterDto, AuthenticationResultDto, MeDto } from './dtos';
+import {
+  MeDto,
+  LoginDto,
+  RegisterDto,
+  VerifyEmailDto,
+  AuthenticationResultDto,
+} from './dtos';
 
 import { User } from '@/users/domain/entities';
 import { CurrentUser } from '@/users/decorators';
@@ -169,13 +174,7 @@ export class AuthController {
   @ApiOkResponse({
     description: 'Email verified successfully',
   })
-  @ApiQuery({
-    name: 'token',
-    required: true,
-    description: 'The token to verify the email',
-    type: String,
-  })
-  public async verifyEmail(@Query('token') token: string) {
-    await this.verifyEmailHandler.handle(token);
+  public async verifyEmail(@Query() verifyEmailQuery: VerifyEmailDto) {
+    await this.verifyEmailHandler.handle(verifyEmailQuery.token);
   }
 }
