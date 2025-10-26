@@ -23,12 +23,9 @@ export class DrizzleUsersRepository extends UsersRepository {
     id: UserId,
     relations: UserLoadOptions = {},
   ): Promise<User | null> {
-    const withRelations = this.buildRelations(relations);
-    console.log(withRelations);
-
     const userData = await this.db.query.users.findFirst({
       where: eq(users.id, id),
-      with: withRelations,
+      with: this.buildRelations(relations),
     });
 
     return userData
@@ -40,12 +37,9 @@ export class DrizzleUsersRepository extends UsersRepository {
     email: string,
     relations: UserLoadOptions = {},
   ): Promise<User | null> {
-    const withRelations = this.buildRelations(relations);
-    console.log(withRelations);
-
     const userData = await this.db.query.users.findFirst({
       where: eq(users.email, email),
-      with: withRelations,
+      with: this.buildRelations(relations),
     });
 
     return userData

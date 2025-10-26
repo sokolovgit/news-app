@@ -30,8 +30,6 @@ export class AuthenticationService {
 
       const user = await this.getUserFromAccessTokenOrThrow(accessToken);
 
-      console.log('--------------------1', user.toString());
-
       this.logger.debug(
         `User found: ${user.getId()}, validating refresh token`,
       );
@@ -83,6 +81,8 @@ export class AuthenticationService {
   ): Promise<User> {
     const payload = await this.jwtService.verifyJwtTokenOrThrow(accessToken);
 
-    return await this.jwtService.getUserFromJwtPayloadOrThrow(payload);
+    return await this.jwtService.getUserFromJwtPayloadOrThrow(payload, {
+      withEmailVerification: true,
+    });
   }
 }

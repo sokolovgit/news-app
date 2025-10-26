@@ -24,7 +24,9 @@ export class GetMeHandler {
       userId,
     });
 
-    const user = await this.usersService.getUserById(userId);
+    const user = await this.usersService.getUserById(userId, {
+      withEmailVerification: true,
+    });
 
     if (!user) {
       this.logger.logProcessProgress(processId, process, 'User not found', {
@@ -34,31 +36,7 @@ export class GetMeHandler {
       throw new UserNotFoundError('User not found');
     }
 
-    this.logger.logProcessProgress(processId, process, 'User found', {
-      userId,
-    });
-
-    this.logger.logProcessProgress(
-      processId,
-      process,
-      'Checking if email is verified',
-      {
-        userId,
-      },
-    );
-
-    const emailVerified =
-      await this.emailVerificationsService.isEmailVerified(userId);
-
-    this.logger.logProcessProgress(
-      processId,
-      process,
-      `Email verified: ${emailVerified}`,
-      {
-        userId,
-        emailVerified,
-      },
-    );
+    const emailVerified = user.isEmailVerified();
 
     return { user, emailVerified };
   }
