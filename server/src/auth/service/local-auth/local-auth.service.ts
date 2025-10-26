@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
 
 import { UsersService } from '@/users/service/users-service';
-import { OAuthAccountsService } from '../oauth-accounts';
-import { HashingService } from '../hashing';
+import { LoggerService } from '@/logger';
 import { TokensService } from '../tokens';
+import { HashingService } from '../hashing';
+import { EmailVerificationsService } from '../email-verifications';
+
 import {
+  EmailNotVerifiedError,
   UserAlreadyExistsError,
   InvalidCredentialsError,
   OAuthAccountRequiredError,
-  EmailNotVerifiedError,
 } from '@/auth/domain/errors';
 
 import { UserRole } from '@/users/domain/enums';
 import { AuthenticationResult } from './types/authentication-result.type';
-import { LoggerService } from '@/logger';
-import { EmailVerificationsService } from '../email-verifications';
 
 @Injectable()
 export class LocalAuthService {
@@ -23,7 +23,6 @@ export class LocalAuthService {
     private readonly usersService: UsersService,
     private readonly tokensService: TokensService,
     private readonly passwordsService: HashingService,
-    private readonly oauthAccountsService: OAuthAccountsService,
     private readonly emailVerificationsService: EmailVerificationsService,
   ) {}
 

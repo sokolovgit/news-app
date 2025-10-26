@@ -24,8 +24,8 @@ export class OAuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly tokensService: TokensService,
-    private readonly oauthAccountsService: OAuthAccountsService,
     private readonly oauthLoginFactory: OAuthLoginFactory,
+    private readonly oauthAccountsService: OAuthAccountsService,
   ) {}
 
   async oauthLogin(
