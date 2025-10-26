@@ -1,9 +1,10 @@
 import { RefreshTokenId } from '@/auth/domain/schemas';
+import { LoadState } from '@/commons/types';
 import { User } from '@/users/domain/entities';
 import { UserId } from '@/users/domain/schemas';
 
 type CreateRefreshTokenRelations = {
-  user: User;
+  user: LoadState<User>;
 };
 
 export type CreateRefreshTokenProps = {

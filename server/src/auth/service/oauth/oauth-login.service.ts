@@ -4,6 +4,7 @@ import {
   NotImplementedException,
 } from '@nestjs/common';
 
+import { LoadState } from '@/commons/types';
 import { UsersService } from '@/users/service/users-service';
 import { TokensService } from '../tokens';
 import { OAuthAccountsService } from '../oauth-accounts';
@@ -54,10 +55,23 @@ export class OAuthService {
         oauthUser,
       );
 
-      return this.getAuthenticationResult(newOAuthAccount.getUser());
+      const user = newOAuthAccount.getUser();
+
+      if (!user) {
+        throw new UnauthorizedException(
+          'Failed to get user from OAuth account',
+        );
+      }
+
+      return this.getAuthenticationResult(user);
     }
 
-    return this.getAuthenticationResult(oauthAccount.getUser());
+    const user = oauthAccount.getUser();
+    if (!user) {
+      throw new UnauthorizedException('Failed to get user from OAuth account');
+    }
+
+    return this.getAuthenticationResult(user);
   }
 
   oauthAuthorizationUrl(provider: OAuthProvider): string {
@@ -85,7 +99,9 @@ export class OAuthService {
           userId: existingUser.getId(),
           provider,
           providerId: oauthUser.providerId,
-          relations: { user: existingUser },
+          relations: {
+            user: LoadState.loaded(existingUser),
+          },
         });
 
       return newOAuthAccount;
@@ -101,7 +117,9 @@ export class OAuthService {
         provider,
         providerId: oauthUser.providerId,
         userId: newUser.getId(),
-        relations: { user: newUser },
+        relations: {
+          user: LoadState.loaded(newUser),
+        },
       });
 
     return newOAuthAccount;

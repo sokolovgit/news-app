@@ -1,23 +1,14 @@
-import { RefreshToken } from '@/auth/domain/entities';
+import { RefreshToken, RefreshTokenLoadOptions } from '@/auth/domain/entities';
 import { RefreshTokenInsert, RefreshTokenSelect } from '@/auth/domain/schemas';
-import { ToEntityMapper, ToSchemaMapper } from '@/commons/database';
+import { loadRelation } from '@/commons/database';
 import { UserSelect } from '@/users/domain/schemas';
 import { DrizzleUserEntityMapper } from '@/users/service/users-storage/mappers';
 
-export class DrizzleRefreshTokenEntityMapper
-  implements
-    ToEntityMapper<RefreshTokenSelect, RefreshToken>,
-    ToSchemaMapper<RefreshToken, RefreshTokenInsert>
-{
-  private userMapper: DrizzleUserEntityMapper;
-
-  constructor() {
-    this.userMapper = new DrizzleUserEntityMapper();
-  }
-
-  toEntity(data: RefreshTokenSelect & { user: UserSelect }): RefreshToken {
-    const user = this.userMapper.toEntity(data.user);
-
+export class DrizzleRefreshTokenEntityMapper {
+  static toEntity(
+    data: RefreshTokenSelect & { user?: UserSelect | null },
+    loadOptions: RefreshTokenLoadOptions = {},
+  ): RefreshToken {
     return new RefreshToken(
       {
         id: data.id,
@@ -27,11 +18,15 @@ export class DrizzleRefreshTokenEntityMapper
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
       },
-      { user },
+      {
+        user: loadRelation(loadOptions.withUser, data.user, (user) =>
+          DrizzleUserEntityMapper.toEntity(user),
+        ),
+      },
     );
   }
 
-  toSchema(entity: RefreshToken): RefreshTokenInsert {
+  static toSchema(entity: RefreshToken): RefreshTokenInsert {
     return {
       id: entity.getId(),
       userId: entity.getUserId(),

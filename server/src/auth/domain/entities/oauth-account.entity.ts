@@ -2,6 +2,7 @@ import { UserId } from '@/users/domain/schemas';
 import { User } from '@/users/domain/entities';
 import { OAuthProvider } from '../enums';
 import { OAuthAccountId } from '../schemas';
+import { LoadState } from '@/commons/types';
 
 type OAuthAccountProperties = {
   id?: OAuthAccountId;
@@ -13,10 +14,19 @@ type OAuthAccountProperties = {
 };
 
 type OAuthAccountRelations = {
-  user: User;
+  user: LoadState<User>;
+};
+
+export type OAuthAccountLoadOptions = {
+  withUser?: boolean;
 };
 
 export class OAuthAccount {
+  private readonly userAccessor = this.relations.user.bindTo(
+    this.constructor.name,
+    User.name,
+  );
+
   public constructor(
     private readonly props: OAuthAccountProperties,
     private readonly relations: OAuthAccountRelations,
@@ -46,7 +56,7 @@ export class OAuthAccount {
     return this.props.updatedAt;
   }
 
-  getUser(): User {
-    return this.relations.user;
+  getUser(): User | null {
+    return this.userAccessor.getOrThrow();
   }
 }

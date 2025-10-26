@@ -6,20 +6,20 @@ import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 
 import { EmailVerificationsRepository } from '../abstracts/email-verifications.repository';
 import { DrizzleEmailVerificationEntityMapper } from './mappers';
-import { EmailVerification } from '@/auth/domain/entities';
+import {
+  EmailVerification,
+  EmailVerificationLoadOptions,
+} from '@/auth/domain/entities';
 import { UserId, users, UserSelect } from '@/users/domain/schemas';
 import { emailVerifications } from '@/auth/domain/schemas';
 
 @Injectable()
 export class DrizzleEmailVerificationsRepository extends EmailVerificationsRepository {
-  private mapper: DrizzleEmailVerificationEntityMapper;
-
   constructor(
     @Inject(DRIZZLE_CONNECTION)
     private db: NodePgDatabase<typeof drizzle>,
   ) {
     super();
-    this.mapper = new DrizzleEmailVerificationEntityMapper();
   }
 
   async save(
@@ -34,7 +34,8 @@ export class DrizzleEmailVerificationsRepository extends EmailVerificationsRepos
         throw new Error('Cannot save EmailVerification: User does not exist');
       }
 
-      const emailVerificationData = this.mapper.toSchema(emailVerification);
+      const emailVerificationData =
+        DrizzleEmailVerificationEntityMapper.toSchema(emailVerification);
 
       const [savedEmailVerification] = await tx
         .insert(emailVerifications)
@@ -46,7 +47,7 @@ export class DrizzleEmailVerificationsRepository extends EmailVerificationsRepos
         .returning();
 
       return savedEmailVerification
-        ? this.mapper.toEntity({
+        ? DrizzleEmailVerificationEntityMapper.toEntity({
             ...savedEmailVerification,
             user: user,
           })
@@ -54,15 +55,21 @@ export class DrizzleEmailVerificationsRepository extends EmailVerificationsRepos
     });
   }
 
-  async findByUserId(userId: UserId): Promise<EmailVerification | null> {
+  async findByUserId(
+    userId: UserId,
+    loadOptions: EmailVerificationLoadOptions = {},
+  ): Promise<EmailVerification | null> {
     const emailVerification = await this.db.query.emailVerifications.findFirst({
       where: eq(emailVerifications.id, userId),
-      with: {
-        user: true,
-      },
+      with: this.buildWithRelations(loadOptions),
     });
 
-    return emailVerification ? this.mapper.toEntity(emailVerification) : null;
+    return emailVerification
+      ? DrizzleEmailVerificationEntityMapper.toEntity(
+          emailVerification,
+          loadOptions,
+        )
+      : null;
   }
 
   async existsByUserId(userId: UserId): Promise<boolean> {
@@ -72,5 +79,11 @@ export class DrizzleEmailVerificationsRepository extends EmailVerificationsRepos
         id: true,
       },
     }));
+  }
+
+  private buildWithRelations(options: EmailVerificationLoadOptions) {
+    return {
+      ...(options.withUser && { user: true }),
+    } as Record<string, boolean | undefined>;
   }
 }

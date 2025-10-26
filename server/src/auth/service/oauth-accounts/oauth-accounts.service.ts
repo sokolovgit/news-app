@@ -19,16 +19,17 @@ export class OAuthAccountsService {
   ) {}
 
   async isOAuthUserByUserId(userId: UserId): Promise<boolean> {
-    return await this.oauthAccountsRepository.oauthAccountExistsForUser(userId);
+    return await this.oauthAccountsRepository.existsForUser(userId);
   }
 
   async findByProviderWithUser(
     provider: OAuthProvider,
     providerId: string,
   ): Promise<OAuthAccount | null> {
-    return await this.oauthAccountsRepository.findOAuthAccountByProviderAndIdWithUser(
+    return await this.oauthAccountsRepository.findByProvider(
       provider,
       providerId,
+      { withUser: true },
     );
   }
 

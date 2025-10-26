@@ -3,6 +3,7 @@ import * as dayjs from 'dayjs';
 import { Injectable } from '@nestjs/common';
 
 import { uuid } from '@/commons/utils';
+import { LoadState } from '@/commons/types';
 import { LoggerService } from '@/logger';
 import {
   InvalidRefreshTokenError,
@@ -47,7 +48,9 @@ export class TokensService {
         token: props.token,
         expiresAt: props.expiresAt,
       },
-      { user: props.relations.user },
+      {
+        user: props.relations.user,
+      },
     );
 
     const savedRefreshToken =
@@ -137,7 +140,12 @@ export class TokensService {
     this.logger.debug('Looking up refresh token in database');
 
     const refreshToken =
-      await this.refreshTokensRepository.findRefreshTokenByToken(hashedToken);
+      await this.refreshTokensRepository.findRefreshTokenByHashedToken(
+        hashedToken,
+        {
+          withUser: true,
+        },
+      );
 
     if (!refreshToken) {
       this.logger.debug('Refresh token not found in database');
@@ -179,13 +187,20 @@ export class TokensService {
 
     const refreshToken = await this.validateRefreshTokenOrThrow(token);
 
+    const user = refreshToken.getUser();
+
+    if (!user) {
+      this.logger.debug(
+        `User not found for refresh token ID: ${refreshToken.getId()}`,
+      );
+      throw new InvalidRefreshTokenError('User not found');
+    }
+
     this.logger.debug(
-      `Deleting old refresh token for user ID: ${refreshToken.getUser().getId()}`,
+      `Deleting old refresh token for user ID: ${user.getId()}`,
     );
 
     await this.deleteRefreshTokenByIdOrThrow(refreshToken.getId());
-
-    const user = refreshToken.getUser();
 
     this.logger.debug(`Issuing new tokens for user ID: ${user.getId()}`);
 
@@ -205,15 +220,20 @@ export class TokensService {
     const refreshTokenEntity =
       await this.validateRefreshTokenOrThrow(refreshToken);
 
-    this.logger.debug(
-      `Deleting refresh token for user ID: ${refreshTokenEntity.getUser().getId()}`,
-    );
+    const user = refreshTokenEntity.getUser();
+
+    if (!user) {
+      this.logger.debug(
+        `User not found for refresh token ID: ${refreshTokenEntity.getId()}`,
+      );
+      throw new InvalidRefreshTokenError('User not found');
+    }
+
+    this.logger.debug(`Deleting refresh token for user ID: ${user.getId()}`);
 
     await this.deleteRefreshTokenByIdOrThrow(refreshTokenEntity.getId());
 
-    this.logger.debug(
-      `Logout completed for user ID: ${refreshTokenEntity.getUser().getId()}`,
-    );
+    this.logger.debug(`Logout completed for user ID: ${user.getId()}`);
   }
 
   private async generateRefreshToken(
@@ -238,7 +258,9 @@ export class TokensService {
       userId: user.getId(),
       token: hashedToken,
       expiresAt,
-      relations: { user },
+      relations: {
+        user: LoadState.loaded(user),
+      },
     });
 
     this.logger.debug(

@@ -3,21 +3,18 @@ import { RefreshTokensRepository } from '../abstracts/refresh-tokens.repository'
 import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleRefreshTokenEntityMapper } from './mappers';
-import { RefreshToken } from '@/auth/domain/entities';
+import { RefreshToken, RefreshTokenLoadOptions } from '@/auth/domain/entities';
 import { eq } from 'drizzle-orm';
 import { UserId, users, UserSelect } from '@/users/domain/schemas';
 import { RefreshTokenId, refreshTokens } from '@/auth/domain/schemas';
 
 @Injectable()
 export class DrizzleRefreshTokensRepository extends RefreshTokensRepository {
-  private mapper: DrizzleRefreshTokenEntityMapper;
-
   constructor(
     @Inject(DRIZZLE_CONNECTION)
     private db: NodePgDatabase<typeof drizzle>,
   ) {
     super();
-    this.mapper = new DrizzleRefreshTokenEntityMapper();
   }
 
   async save(refreshToken: RefreshToken): Promise<RefreshToken | null> {
@@ -30,7 +27,8 @@ export class DrizzleRefreshTokensRepository extends RefreshTokensRepository {
         throw new Error('Cannot save RefreshToken: User does not exist');
       }
 
-      const refreshTokenData = this.mapper.toSchema(refreshToken);
+      const refreshTokenData =
+        DrizzleRefreshTokenEntityMapper.toSchema(refreshToken);
 
       const [savedRefreshToken] = await tx
         .insert(refreshTokens)
@@ -38,7 +36,7 @@ export class DrizzleRefreshTokensRepository extends RefreshTokensRepository {
         .returning();
 
       return savedRefreshToken
-        ? this.mapper.toEntity({
+        ? DrizzleRefreshTokenEntityMapper.toEntity({
             ...savedRefreshToken,
             user: user,
           })
@@ -46,22 +44,32 @@ export class DrizzleRefreshTokensRepository extends RefreshTokensRepository {
     });
   }
 
-  async findRefreshTokenByToken(token: string): Promise<RefreshToken | null> {
+  async findRefreshTokenByHashedToken(
+    token: string,
+    loadOptions: RefreshTokenLoadOptions = {},
+  ): Promise<RefreshToken | null> {
     const refreshToken = await this.db.query.refreshTokens.findFirst({
       where: eq(refreshTokens.token, token),
-      with: { user: true },
+      with: this.buildWithRelations(loadOptions),
     });
 
-    return refreshToken ? this.mapper.toEntity(refreshToken) : null;
+    return refreshToken
+      ? DrizzleRefreshTokenEntityMapper.toEntity(refreshToken, loadOptions)
+      : null;
   }
 
-  async findRefreshTokenByUserId(userId: UserId): Promise<RefreshToken | null> {
+  async findRefreshTokenByUserId(
+    userId: UserId,
+    loadOptions: RefreshTokenLoadOptions = {},
+  ): Promise<RefreshToken | null> {
     const refreshToken = await this.db.query.refreshTokens.findFirst({
       where: eq(refreshTokens.userId, userId),
-      with: { user: true },
+      with: this.buildWithRelations(loadOptions),
     });
 
-    return refreshToken ? this.mapper.toEntity(refreshToken) : null;
+    return refreshToken
+      ? DrizzleRefreshTokenEntityMapper.toEntity(refreshToken, loadOptions)
+      : null;
   }
 
   async deleteRefreshTokenById(id: RefreshTokenId): Promise<boolean> {
@@ -70,5 +78,11 @@ export class DrizzleRefreshTokensRepository extends RefreshTokensRepository {
       .where(eq(refreshTokens.id, id));
 
     return result.rowCount ? result.rowCount > 0 : false;
+  }
+
+  private buildWithRelations(options: RefreshTokenLoadOptions) {
+    return {
+      ...(options.withUser && { user: true }),
+    } as Record<string, boolean | undefined>;
   }
 }

@@ -151,6 +151,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UsePipes(ValidateRefreshTokenPipe)
   @ApiOperation({
     summary: 'Logout user',
     description: 'Logout a user by deleting the refresh token',

@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 
-import { User } from '@/users/domain/entities';
-import { UserId } from '@/users/domain/schemas';
-import { UserCreationFailedError } from '@/users/domain/errors';
-import { UsersRepository } from '../abstracts';
-import { CreateUserProps } from './types/create-user.type';
-import { LoggerService } from '@/logger';
 import { uuid } from '@/commons/utils';
+import { LoadState } from '@/commons/types';
+
+import { LoggerService } from '@/logger';
+
+import { UserId } from '@/users/domain/schemas';
+import { UsersRepository } from '../abstracts';
+import { User, UserLoadOptions } from '@/users/domain/entities';
+import { UserCreationFailedError } from '@/users/domain/errors';
+
+import { CreateUserProps } from './types/create-user.type';
 
 @Injectable()
 export class UsersService {
@@ -18,10 +22,15 @@ export class UsersService {
   /**
    * Retrieves a user by their ID
    */
-  async getUserById(userId: UserId): Promise<User | null> {
-    this.logger.debug(`Fetching user by ID: ${userId}`);
+  async getUserById(
+    userId: UserId,
+    loadOptions?: UserLoadOptions,
+  ): Promise<User | null> {
+    this.logger.debug(
+      `Fetching user by ID: ${userId} with load options: ${JSON.stringify(loadOptions)}`,
+    );
 
-    const user = await this.usersRepository.getUserById(userId);
+    const user = await this.usersRepository.getUserById(userId, loadOptions);
 
     if (user) {
       this.logger.debug(`User found with ID: ${userId}`);
@@ -35,10 +44,15 @@ export class UsersService {
   /**
    * Retrieves a user by their email address
    */
-  async getUserByEmail(email: string): Promise<User | null> {
-    this.logger.debug(`Fetching user by email: ${email}`);
+  async getUserByEmail(
+    email: string,
+    loadOptions?: UserLoadOptions,
+  ): Promise<User | null> {
+    this.logger.debug(
+      `Fetching user by email: ${email} with load options: ${JSON.stringify(loadOptions)}`,
+    );
 
-    const user = await this.usersRepository.getUserByEmail(email);
+    const user = await this.usersRepository.getUserByEmail(email, loadOptions);
 
     if (user) {
       this.logger.debug(`User found with email: ${email}, ID: ${user.getId()}`);
@@ -55,12 +69,19 @@ export class UsersService {
   async createUserOrThrow(props: CreateUserProps): Promise<User> {
     this.logger.debug(`Creating new user with email: ${props.email}`);
 
-    const newUser = new User({
-      id: props.id ?? uuid<UserId>(),
-      email: props.email,
-      password: props.password,
-      roles: props.roles,
-    });
+    const newUser = new User(
+      {
+        id: props.id ?? uuid<UserId>(),
+        email: props.email,
+        password: props.password,
+        roles: props.roles,
+      },
+      {
+        emailVerification: LoadState.notLoaded(),
+        oauthAccounts: LoadState.notLoaded(),
+        refreshToken: LoadState.notLoaded(),
+      },
+    );
 
     this.logger.debug(`Saving new user to database with email: ${props.email}`);
 

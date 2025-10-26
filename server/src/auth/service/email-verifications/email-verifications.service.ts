@@ -20,6 +20,7 @@ import {
   InvalidEmailVerificationTokenError,
 } from '@/auth/domain/errors';
 import { UserNotFoundError } from '@/users/domain/errors';
+import { LoadState } from '@/commons/types';
 
 @Injectable()
 export class EmailVerificationsService {
@@ -42,7 +43,7 @@ export class EmailVerificationsService {
         createdAt: props.createdAt,
         updatedAt: props.updatedAt,
       },
-      { user: props.relations.user },
+      { user: LoadState.notLoaded() },
     );
 
     const savedEmailVerification =
@@ -65,25 +66,21 @@ export class EmailVerificationsService {
     let user: User;
 
     try {
-      user = await this.jwtService.getUserFromJwtTokenOrThrow(token);
+      user = await this.jwtService.getUserFromJwtTokenOrThrow(token, {
+        withEmailVerification: true,
+      });
     } catch (error) {
       this.logger.error(`Error getting user from JWT token: ${error}`);
       throw new InvalidEmailVerificationTokenError();
     }
 
-    const existingEmailVerification =
-      await this.emailVerificationsRepository.findByUserId(user.getId());
-
-    if (existingEmailVerification) {
+    if (user.isEmailVerified()) {
       throw new EmailAlreadyVerifiedError('Email already verified');
     }
 
     try {
       await this.createEmailVerificationOrThrow({
         id: user.getId(),
-        relations: {
-          user: user,
-        },
       });
     } catch (error) {
       this.logger.error(`Error saving email verification: ${error}`);
@@ -92,16 +89,15 @@ export class EmailVerificationsService {
   }
 
   async sendEmailVerificationEmail(userId: UserId): Promise<void> {
-    const user = await this.usersService.getUserById(userId);
+    const user = await this.usersService.getUserById(userId, {
+      withEmailVerification: true,
+    });
 
     if (!user) {
       throw new UserNotFoundError(userId);
     }
 
-    const emailVerification =
-      await this.emailVerificationsRepository.findByUserId(userId);
-
-    if (emailVerification) {
+    if (user.isEmailVerified()) {
       throw new EmailAlreadyVerifiedError('Email already verified');
     }
 

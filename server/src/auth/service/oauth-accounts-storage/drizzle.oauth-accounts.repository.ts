@@ -3,7 +3,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 import { DrizzleOAuthAccountEntityMapper } from './mappers/drizzle.oauth-account.entity-mapper';
 import { OAuthAccountsRepository } from '../abstracts/oauth-accounts.repository';
-import { OAuthAccount } from '@/auth/domain/entities';
+import { OAuthAccount, OAuthAccountLoadOptions } from '@/auth/domain/entities';
 import { OAuthProvider } from '@/auth/domain/enums';
 import { oauthAccounts } from '@/auth/domain/schemas';
 import { UserId, users, UserSelect } from '@/users/domain/schemas';
@@ -11,14 +11,11 @@ import { eq, and } from 'drizzle-orm';
 
 @Injectable()
 export class DrizzleOAuthAccountsRepository extends OAuthAccountsRepository {
-  private mapper: DrizzleOAuthAccountEntityMapper;
-
   constructor(
     @Inject(DRIZZLE_CONNECTION)
     private db: NodePgDatabase<typeof drizzle>,
   ) {
     super();
-    this.mapper = new DrizzleOAuthAccountEntityMapper();
   }
 
   async save(oauthAccount: OAuthAccount): Promise<OAuthAccount | null> {
@@ -31,7 +28,8 @@ export class DrizzleOAuthAccountsRepository extends OAuthAccountsRepository {
         throw new Error('Cannot save OAuthAccount: User does not exist');
       }
 
-      const oauthAccountData = this.mapper.toSchema(oauthAccount);
+      const oauthAccountData =
+        DrizzleOAuthAccountEntityMapper.toSchema(oauthAccount);
 
       const [savedOAuthAccount] = await tx
         .insert(oauthAccounts)
@@ -43,7 +41,7 @@ export class DrizzleOAuthAccountsRepository extends OAuthAccountsRepository {
         .returning();
 
       return savedOAuthAccount
-        ? this.mapper.toEntity({
+        ? DrizzleOAuthAccountEntityMapper.toEntity({
             ...savedOAuthAccount,
             user: user,
           })
@@ -51,7 +49,7 @@ export class DrizzleOAuthAccountsRepository extends OAuthAccountsRepository {
     });
   }
 
-  async oauthAccountExistsForUser(userId: UserId): Promise<boolean> {
+  async existsForUser(userId: UserId): Promise<boolean> {
     return !!(await this.db.query.oauthAccounts.findFirst({
       where: eq(oauthAccounts.userId, userId),
       columns: {
@@ -60,27 +58,27 @@ export class DrizzleOAuthAccountsRepository extends OAuthAccountsRepository {
     }));
   }
 
-  async findOAuthAccountByProviderAndIdWithUser(
+  async findByProvider(
     provider: OAuthProvider,
     providerId: string,
+    loadOptions: OAuthAccountLoadOptions = {},
   ): Promise<OAuthAccount | null> {
     const oauthAccount = await this.db.query.oauthAccounts.findFirst({
       where: and(
         eq(oauthAccounts.provider, provider),
         eq(oauthAccounts.providerId, providerId),
       ),
-      with: { user: true },
+      with: this.buildWithRelations(loadOptions),
     });
 
-    return oauthAccount ? this.mapper.toEntity(oauthAccount) : null;
+    return oauthAccount
+      ? DrizzleOAuthAccountEntityMapper.toEntity(oauthAccount, loadOptions)
+      : null;
   }
 
-  async findOAuthAccountsByUserId(userId: UserId): Promise<OAuthAccount[]> {
-    const accounts = await this.db.query.oauthAccounts.findMany({
-      where: eq(oauthAccounts.userId, userId),
-      with: { user: true },
-    });
-
-    return accounts.map((account) => this.mapper.toEntity(account));
+  private buildWithRelations(options: OAuthAccountLoadOptions) {
+    return {
+      ...(options.withUser && { user: true }),
+    } as Record<string, boolean | undefined>;
   }
 }

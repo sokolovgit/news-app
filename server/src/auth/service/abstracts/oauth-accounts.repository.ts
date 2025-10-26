@@ -1,14 +1,15 @@
 import { UserId } from '@/users/domain/schemas';
-import { OAuthAccount } from '@/auth/domain/entities';
+import { OAuthAccount, OAuthAccountLoadOptions } from '@/auth/domain/entities';
 import { OAuthProvider } from '@/auth/domain/enums';
 
 export abstract class OAuthAccountsRepository {
   abstract save(oauthAccount: OAuthAccount): Promise<OAuthAccount | null>;
 
-  abstract findOAuthAccountByProviderAndIdWithUser(
+  abstract findByProvider(
     provider: OAuthProvider,
     providerId: string,
+    loadOptions?: OAuthAccountLoadOptions,
   ): Promise<OAuthAccount | null>;
 
-  abstract oauthAccountExistsForUser(userId: UserId): Promise<boolean>;
+  abstract existsForUser(userId: UserId): Promise<boolean>;
 }

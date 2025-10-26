@@ -1,25 +1,15 @@
-import { ToEntityMapper, ToSchemaMapper } from '@/commons/database';
-
-import { OAuthAccount } from '@/auth/domain/entities';
+import { OAuthAccount, OAuthAccountLoadOptions } from '@/auth/domain/entities';
 import { OAuthProvider } from '@/auth/domain/enums';
 import { OAuthAccountInsert, OAuthAccountSelect } from '@/auth/domain/schemas';
+import { loadRelation } from '@/commons/database';
 import { UserSelect } from '@/users/domain/schemas';
 import { DrizzleUserEntityMapper } from '@/users/service/users-storage/mappers';
 
-export class DrizzleOAuthAccountEntityMapper
-  implements
-    ToEntityMapper<OAuthAccountSelect, OAuthAccount>,
-    ToSchemaMapper<OAuthAccount, OAuthAccountInsert>
-{
-  private userMapper: DrizzleUserEntityMapper;
-
-  constructor() {
-    this.userMapper = new DrizzleUserEntityMapper();
-  }
-
-  toEntity(data: OAuthAccountSelect & { user: UserSelect }): OAuthAccount {
-    const user = this.userMapper.toEntity(data.user);
-
+export class DrizzleOAuthAccountEntityMapper {
+  static toEntity(
+    data: OAuthAccountSelect & { user?: UserSelect | null },
+    loadOptions: OAuthAccountLoadOptions = {},
+  ): OAuthAccount {
     return new OAuthAccount(
       {
         id: data.id,
@@ -29,11 +19,15 @@ export class DrizzleOAuthAccountEntityMapper
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
       },
-      { user },
+      {
+        user: loadRelation(loadOptions.withUser, data.user, (user) =>
+          DrizzleUserEntityMapper.toEntity(user),
+        ),
+      },
     );
   }
 
-  toSchema(entity: OAuthAccount): OAuthAccountInsert {
+  static toSchema(entity: OAuthAccount): OAuthAccountInsert {
     return {
       id: entity.getId(),
       userId: entity.getUserId(),

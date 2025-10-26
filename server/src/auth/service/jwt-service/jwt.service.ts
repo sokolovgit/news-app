@@ -6,7 +6,7 @@ import { UsersService } from '@/users/service/users-service';
 
 import { JwtPayload } from '../tokens/types';
 
-import { User } from '@/users/domain/entities';
+import { User, UserLoadOptions } from '@/users/domain/entities';
 import { UserNotFoundError } from '@/users/domain/errors';
 
 @Injectable()
@@ -34,13 +34,19 @@ export class JwtService {
     }
   }
 
-  async getUserFromJwtPayloadOrThrow(payload: JwtPayload): Promise<User> {
+  async getUserFromJwtPayloadOrThrow(
+    payload: JwtPayload,
+    loadOptions: UserLoadOptions = {},
+  ): Promise<User> {
     try {
       this.logger.debug(
         `Getting user from JWT payload for user ID: ${payload.sub}`,
       );
 
-      const user = await this.usersService.getUserById(payload.sub);
+      const user = await this.usersService.getUserById(
+        payload.sub,
+        loadOptions,
+      );
 
       if (!user) {
         this.logger.debug(`User not found for ID: ${payload.sub}`);
@@ -54,9 +60,13 @@ export class JwtService {
     }
   }
 
-  async getUserFromJwtTokenOrThrow(jwt: string): Promise<User> {
+  async getUserFromJwtTokenOrThrow(
+    jwt: string,
+    loadOptions: UserLoadOptions = {},
+  ): Promise<User> {
     const payload = await this.verifyJwtTokenOrThrow(jwt);
-    return await this.getUserFromJwtPayloadOrThrow(payload);
+
+    return await this.getUserFromJwtPayloadOrThrow(payload, loadOptions);
   }
 
   async generateJwtTokenFromUser(user: User): Promise<string> {

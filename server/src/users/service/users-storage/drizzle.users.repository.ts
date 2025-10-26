@@ -1,8 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
+
+import { eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { User } from '@/users/domain/entities';
-import { UserId, users, UserSelect } from '@/users/domain/schemas';
+import { User, UserLoadOptions } from '@/users/domain/entities';
+import { UserId, users } from '@/users/domain/schemas';
 import { UsersRepository } from '../abstracts';
 
 import { DRIZZLE_CONNECTION, drizzle } from '@/database';
@@ -10,41 +12,63 @@ import { DrizzleUserEntityMapper } from './mappers';
 
 @Injectable()
 export class DrizzleUsersRepository extends UsersRepository {
-  private mapper: DrizzleUserEntityMapper;
-
   constructor(
     @Inject(DRIZZLE_CONNECTION)
     private db: NodePgDatabase<typeof drizzle>,
   ) {
     super();
-
-    this.mapper = new DrizzleUserEntityMapper();
   }
 
-  async getUserById(id: UserId): Promise<User | null> {
-    const user: UserSelect | undefined = await this.db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.id, id),
+  async getUserById(
+    id: UserId,
+    options: UserLoadOptions = {},
+  ): Promise<User | null> {
+    const withRelations = this.buildWithRelations(options);
+    console.log(withRelations);
+
+    const userData = await this.db.query.users.findFirst({
+      where: eq(users.id, id),
+      with: withRelations,
     });
 
-    return user ? this.mapper.toEntity(user) : null;
+    return userData
+      ? DrizzleUserEntityMapper.toEntity(userData, options)
+      : null;
   }
 
-  async getUserByEmail(email: string): Promise<User | null> {
-    const user: UserSelect | undefined = await this.db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.email, email),
+  async getUserByEmail(
+    email: string,
+    options: UserLoadOptions = {},
+  ): Promise<User | null> {
+    const withRelations = this.buildWithRelations(options);
+    console.log(withRelations);
+
+    const userData = await this.db.query.users.findFirst({
+      where: eq(users.email, email),
+      with: withRelations,
     });
 
-    return user ? this.mapper.toEntity(user) : null;
+    return userData
+      ? DrizzleUserEntityMapper.toEntity(userData, options)
+      : null;
   }
 
   async save(user: User): Promise<User | null> {
-    const userData = this.mapper.toSchema(user);
+    const userData = DrizzleUserEntityMapper.toSchema(user);
 
     const [savedUser] = await this.db
       .insert(users)
       .values(userData)
       .returning();
 
-    return savedUser ? this.mapper.toEntity(savedUser) : null;
+    return savedUser ? DrizzleUserEntityMapper.toEntity(savedUser, {}) : null;
+  }
+
+  private buildWithRelations(options: UserLoadOptions) {
+    return {
+      ...(options.withEmailVerification && { emailVerification: true }),
+      ...(options.withOAuthAccounts && { oauthAccounts: true }),
+      ...(options.withRefreshToken && { refreshToken: true }),
+    } as Record<string, boolean | undefined>;
   }
 }
