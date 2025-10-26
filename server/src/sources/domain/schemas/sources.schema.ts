@@ -7,7 +7,7 @@ import {
   timestampConfig,
 } from '@/commons/database';
 import { Uuid } from '@/commons/utils';
-import { SourceCollectors, Sources } from '../enums';
+import { Collector, PublicSource } from '../enums';
 
 import { UserId, users } from '@/users/domain/schemas';
 import { relations } from 'drizzle-orm';
@@ -15,13 +15,13 @@ import { relations } from 'drizzle-orm';
 export type SourceId = Uuid<'sources'>;
 
 export const pgSources = pgEnum(
-  'source_type',
-  Object.values(Sources) as [string, ...string[]],
+  'sources_enum',
+  Object.values(PublicSource) as [string, ...string[]],
 );
 
 export const pgCollectors = pgEnum(
-  'collector_type',
-  Object.values(SourceCollectors) as [string, ...string[]],
+  'collectors_enum',
+  Object.values(Collector) as [string, ...string[]],
 );
 
 export const sources = pgTable('sources', {
@@ -31,8 +31,8 @@ export const sources = pgTable('sources', {
     onDelete: 'set null',
   }),
 
-  sourceType: pgSources('source').notNull(),
-  collectorType: pgCollectors('collector').notNull(),
+  source: pgSources('source').notNull(),
+  collector: pgCollectors('collector').notNull(),
 
   name: varchar('name').notNull(),
   url: varchar('url').notNull(),
@@ -48,10 +48,6 @@ export const sourceRelations = relations(sources, ({ one }) => ({
     references: [users.id],
   }),
 }));
-
-export type SourceType = (typeof Sources)[keyof typeof Sources];
-export type CollectorType =
-  (typeof SourceCollectors)[keyof typeof SourceCollectors];
 
 export type SourceSelect = typeof sources.$inferSelect;
 export type SourceInsert = typeof sources.$inferInsert;

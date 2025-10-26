@@ -1,4 +1,4 @@
-export enum SourceCollectors {
+export enum Collector {
   RSS = 'rss',
   API = 'api',
   SCRAPER = 'scraper',

@@ -1,12 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 import { eq } from 'drizzle-orm';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { DRIZZLE_CONNECTION, drizzle } from '@/database';
+
 import { SourcesRepository } from '../abstracts';
-import { Source, SourceLoadOptions } from '@/sources/domain/entities';
-import { SourceId, sources } from '@/sources/domain/schemas';
 import { DrizzleSourcesEntityMapper } from './mappers';
+
+import { SourceId, sources } from '@/sources/domain/schemas';
+import { Source, SourceLoadOptions } from '@/sources/domain/entities';
 
 @Injectable()
 export class DrizzleSourcesRepository extends SourcesRepository {

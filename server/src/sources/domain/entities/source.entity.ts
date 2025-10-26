@@ -1,5 +1,5 @@
 import { LoadState } from '@/commons/types';
-import { SourceCollectors, Sources } from '../enums';
+import { Collector, PublicSource } from '../enums';
 
 import { User } from '@/users/domain/entities';
 import { UserId } from '@/users/domain/schemas';
@@ -8,8 +8,8 @@ import { SourceId } from '../schemas';
 export type SourceProperties = {
   id: SourceId;
   addedBy?: UserId;
-  sourceType: Sources;
-  collectorType: SourceCollectors;
+  source: PublicSource;
+  collector: Collector;
   name: string;
   url: string;
   lastFetchedAt?: Date;
@@ -48,12 +48,12 @@ export class Source {
     return this.addedByAccessor.getOrThrow();
   }
 
-  getSourceType(): Sources {
-    return this.props.sourceType;
+  getSource(): PublicSource {
+    return this.props.source;
   }
 
-  getCollectorType(): SourceCollectors {
-    return this.props.collectorType;
+  getCollector(): Collector {
+    return this.props.collector;
   }
 
   getName(): string {

@@ -1,5 +1,5 @@
-import { Source, SourceLoadOptions } from '@/sources/domain/entities';
 import { SourceId } from '@/sources/domain/schemas';
+import { Source, SourceLoadOptions } from '@/sources/domain/entities';
 
 export abstract class SourcesRepository {
   abstract getSourceById(
