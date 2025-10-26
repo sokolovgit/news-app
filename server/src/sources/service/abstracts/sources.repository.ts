@@ -1,0 +1,11 @@
+import { Source, SourceLoadOptions } from '@/sources/domain/entities';
+import { SourceId } from '@/sources/domain/schemas';
+
+export abstract class SourcesRepository {
+  abstract getSourceById(
+    id: SourceId,
+    relations?: SourceLoadOptions,
+  ): Promise<Source | null>;
+
+  abstract save(source: Source): Promise<Source | null>;
+}

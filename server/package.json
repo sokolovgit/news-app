@@ -19,7 +19,7 @@
     "db:studio": "drizzle-kit studio --config=src/drizzle.config.ts",
     "db:check": "drizzle-kit check --config=src/drizzle.config.ts",
     "db:seed": "ts-node ./scripts/seed.ts",
-    "db:reset": "npm run db:drop && npm run db:push && npm run db:seed",
+    "db:reset": "npm run db:drop && npm run db:push",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "NODE_ENV=test jest --config jest.unit.config.ts",
     "test:watch": "jest --watch",

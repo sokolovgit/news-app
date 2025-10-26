@@ -6,6 +6,7 @@ import {
   emailVerificationRelations,
   emailVerifications,
 } from '@/auth/domain/schemas';
+import { sourceRelations, sources } from '@/sources/domain/schemas';
 import { userRelations, users } from '@/users/domain/schemas';
 
 const relations = {
@@ -13,6 +14,7 @@ const relations = {
   oauthAccountRelations,
   refreshTokenRelations,
   emailVerificationRelations,
+  sourceRelations,
 };
 
 const drizzleSchemas = {
@@ -20,6 +22,7 @@ const drizzleSchemas = {
   oauthAccounts,
   refreshTokens,
   emailVerifications,
+  sources,
 };
 
 export const drizzle = {
