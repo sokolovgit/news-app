@@ -1,0 +1,137 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug NestJS Application",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:debug"],
+      "console": "integratedTerminal",
+      "restart": true,
+      "cwd": "${workspaceFolder}/server",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug NestJS Application (Without npm)",
+      "type": "node",
+      "request": "launch",
+      "args": ["${workspaceFolder}/server/src/main.ts"],
+      "runtimeArgs": [
+        "--nolazy",
+        "-r",
+        "ts-node/register",
+        "-r",
+        "tsconfig-paths/register"
+      ],
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}/server",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Attach to NestJS",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Unit Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "-r",
+        "tsconfig-paths/register",
+        "-r",
+        "ts-node/register",
+        "node_modules/.bin/jest",
+        "--runInBand",
+        "--no-cache",
+        "--watchAll=false",
+        "--config",
+        "jest.unit.config.ts"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/server",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Current Unit Test File",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "-r",
+        "tsconfig-paths/register",
+        "-r",
+        "ts-node/register",
+        "node_modules/.bin/jest",
+        "--runInBand",
+        "--no-cache",
+        "--watchAll=false",
+        "--config",
+        "jest.unit.config.ts",
+        "${relativeFile}"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/server",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug E2E Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "-r",
+        "tsconfig-paths/register",
+        "-r",
+        "ts-node/register",
+        "node_modules/.bin/jest",
+        "--runInBand",
+        "--no-cache",
+        "--watchAll=false",
+        "--config",
+        "jest.e2e.config.ts",
+        "--forceExit",
+        "--detectOpenHandles"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/server",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Current E2E Test File",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "-r",
+        "tsconfig-paths/register",
+        "-r",
+        "ts-node/register",
+        "node_modules/.bin/jest",
+        "--runInBand",
+        "--no-cache",
+        "--watchAll=false",
+        "--config",
+        "jest.e2e.config.ts",
+        "--forceExit",
+        "--detectOpenHandles",
+        "${relativeFile}"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/server",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ],
+  "compounds": []
+}
+
