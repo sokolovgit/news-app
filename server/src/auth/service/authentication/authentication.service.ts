@@ -4,7 +4,6 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '../jwt-service';
 import { TokensService } from '../tokens';
 import { LoggerService } from '@/logger';
-import { EmailVerificationsService } from '../email-verifications';
 
 import {
   EmailNotVerifiedError,
@@ -18,7 +17,6 @@ export class AuthenticationService {
     private readonly logger: LoggerService,
     private readonly jwtService: JwtService,
     private readonly tokensService: TokensService,
-    private readonly emailVerificationsService: EmailVerificationsService,
   ) {}
 
   async validateAndGetUserOrThrow(
@@ -32,6 +30,8 @@ export class AuthenticationService {
 
       const user = await this.getUserFromAccessTokenOrThrow(accessToken);
 
+      console.log('--------------------1', user.toString());
+
       this.logger.debug(
         `User found: ${user.getId()}, validating refresh token`,
       );
@@ -42,8 +42,7 @@ export class AuthenticationService {
         `Authentication validated successfully for user: ${user.getId()}`,
       );
 
-      const isEmailVerified =
-        await this.emailVerificationsService.isEmailVerified(user.getId());
+      const isEmailVerified = user.isEmailVerified();
 
       if (!isEmailVerified) {
         this.logger.debug(

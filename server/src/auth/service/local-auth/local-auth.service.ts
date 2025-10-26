@@ -33,7 +33,10 @@ export class LocalAuthService {
   ): Promise<AuthenticationResult> {
     this.logger.debug(`Attempting local login for email: ${email}`);
 
-    const user = await this.usersService.getUserByEmail(email);
+    const user = await this.usersService.getUserByEmail(email, {
+      withEmailVerification: true,
+      withOAuthAccounts: true,
+    });
 
     if (!user) {
       this.logger.debug(`User not found for email: ${email}`);
@@ -51,9 +54,7 @@ export class LocalAuthService {
         `No password hash found for user ID: ${user.getId()}, checking OAuth`,
       );
 
-      const isOAuthUser = await this.oauthAccountsService.isOAuthUserByUserId(
-        user.getId(),
-      );
+      const isOAuthUser = user.hasOAuthAccounts();
 
       if (isOAuthUser) {
         this.logger.debug(`User ${user.getId()} is OAuth-only user`);
@@ -78,8 +79,7 @@ export class LocalAuthService {
       `Password validated successfully for user ID: ${user.getId()}, issuing tokens`,
     );
 
-    const isEmailVerified =
-      await this.emailVerificationsService.isEmailVerified(user.getId());
+    const isEmailVerified = user.isEmailVerified();
 
     if (!isEmailVerified) {
       this.logger.debug(`Email not verified for user ID: ${user.getId()}`);

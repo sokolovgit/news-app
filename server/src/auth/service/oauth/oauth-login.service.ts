@@ -44,9 +44,10 @@ export class OAuthService {
 
     const oauthUser = await strategy.callback(code);
 
-    const oauthAccount = await this.oauthAccountsService.findByProviderWithUser(
+    const oauthAccount = await this.oauthAccountsService.findByProvider(
       provider,
       oauthUser.providerId,
+      { withUser: true },
     );
 
     if (!oauthAccount) {

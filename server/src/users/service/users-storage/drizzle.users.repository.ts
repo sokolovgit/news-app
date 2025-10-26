@@ -21,9 +21,9 @@ export class DrizzleUsersRepository extends UsersRepository {
 
   async getUserById(
     id: UserId,
-    options: UserLoadOptions = {},
+    relations: UserLoadOptions = {},
   ): Promise<User | null> {
-    const withRelations = this.buildWithRelations(options);
+    const withRelations = this.buildRelations(relations);
     console.log(withRelations);
 
     const userData = await this.db.query.users.findFirst({
@@ -32,15 +32,15 @@ export class DrizzleUsersRepository extends UsersRepository {
     });
 
     return userData
-      ? DrizzleUserEntityMapper.toEntity(userData, options)
+      ? DrizzleUserEntityMapper.toEntity(userData, relations)
       : null;
   }
 
   async getUserByEmail(
     email: string,
-    options: UserLoadOptions = {},
+    relations: UserLoadOptions = {},
   ): Promise<User | null> {
-    const withRelations = this.buildWithRelations(options);
+    const withRelations = this.buildRelations(relations);
     console.log(withRelations);
 
     const userData = await this.db.query.users.findFirst({
@@ -49,7 +49,7 @@ export class DrizzleUsersRepository extends UsersRepository {
     });
 
     return userData
-      ? DrizzleUserEntityMapper.toEntity(userData, options)
+      ? DrizzleUserEntityMapper.toEntity(userData, relations)
       : null;
   }
 
@@ -61,14 +61,14 @@ export class DrizzleUsersRepository extends UsersRepository {
       .values(userData)
       .returning();
 
-    return savedUser ? DrizzleUserEntityMapper.toEntity(savedUser, {}) : null;
+    return savedUser ? DrizzleUserEntityMapper.toEntity(savedUser) : null;
   }
 
-  private buildWithRelations(options: UserLoadOptions) {
+  private buildRelations(relations: UserLoadOptions) {
     return {
-      ...(options.withEmailVerification && { emailVerification: true }),
-      ...(options.withOAuthAccounts && { oauthAccounts: true }),
-      ...(options.withRefreshToken && { refreshToken: true }),
+      ...(relations.withEmailVerification && { emailVerification: true }),
+      ...(relations.withOAuthAccounts && { oauthAccounts: true }),
+      ...(relations.withRefreshToken && { refreshToken: true }),
     } as Record<string, boolean | undefined>;
   }
 }

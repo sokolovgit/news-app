@@ -1,5 +1,5 @@
-import { UserRole } from '@/users/domain/enums';
 import { UserId } from '@/users/domain/schemas';
+import { UserRole } from '@/users/domain/enums';
 
 export type CreateUserProps = {
   id?: UserId;

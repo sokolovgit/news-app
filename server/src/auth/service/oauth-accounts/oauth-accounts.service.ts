@@ -6,7 +6,7 @@ import { OAuthAccountsRepository } from '../abstracts/oauth-accounts.repository'
 
 import { UserId } from '@/users/domain/schemas';
 
-import { OAuthAccount } from '@/auth/domain/entities';
+import { OAuthAccount, OAuthAccountLoadOptions } from '@/auth/domain/entities';
 import { OAuthProvider } from '@/auth/domain/enums';
 import { OAuthAccountId } from '@/auth/domain/schemas';
 
@@ -22,14 +22,15 @@ export class OAuthAccountsService {
     return await this.oauthAccountsRepository.existsForUser(userId);
   }
 
-  async findByProviderWithUser(
+  async findByProvider(
     provider: OAuthProvider,
     providerId: string,
+    loadOptions: OAuthAccountLoadOptions = {},
   ): Promise<OAuthAccount | null> {
     return await this.oauthAccountsRepository.findByProvider(
       provider,
       providerId,
-      { withUser: true },
+      loadOptions,
     );
   }
 
