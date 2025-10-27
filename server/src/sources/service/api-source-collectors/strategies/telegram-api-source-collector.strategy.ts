@@ -3,12 +3,17 @@ import { Injectable, NotImplementedException } from '@nestjs/common';
 import { Source } from '@/sources/domain/entities';
 import { AvailableApi } from '@/sources/domain/enums';
 import { AvailableApiSourceCollectorStrategy } from '../interfaces';
+import { TelegramService } from '@/sources/service/telegram-serivce';
+import { LoggerService } from '@/logger';
 
 @Injectable()
 export class TelegramApiSourceCollectorStrategy
   implements AvailableApiSourceCollectorStrategy
 {
-  constructor() {}
+  constructor(
+    private readonly logger: LoggerService,
+    private readonly telegramService: TelegramService,
+  ) {}
 
   async collect(source: Source): Promise<void> {
     console.log('collecting source', source);

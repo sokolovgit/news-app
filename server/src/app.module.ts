@@ -10,6 +10,7 @@ import { MailsModule } from './mails/mails.module';
 import { UsersModule } from './users/users.module';
 import { DrizzleModule } from './database';
 import { CookiesModule } from './cookies';
+import { SourcesModule } from './sources/sources.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CookiesModule } from './cookies';
     UsersModule,
     AuthModule,
     MailsModule,
+    SourcesModule,
   ],
 })
 export class AppModule implements NestModule {

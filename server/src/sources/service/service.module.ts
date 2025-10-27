@@ -3,19 +3,23 @@ import { Module } from '@nestjs/common';
 import { SourcesRepository } from './abstracts';
 import { DrizzleSourcesRepository } from './sources-storage';
 
-import { SourcesCollectorService } from './sources-collector-service';
+import { SourcesCollectorService } from './source-collector-service';
+
+import {
+  CollectorStrategy,
+  SourceCollectorsFactory,
+  RssSourceCollectorStrategy,
+  ScraperSourceCollectorStrategy,
+} from './source-collectors';
 
 import {
   ApiSourceCollectorStrategy,
-  RssSourceCollectorStrategy,
-  ScraperSourceCollectorStrategy,
-} from './sources-collector-service/strategies';
-import { CollectorStrategy } from './sources-collector-service/interfaces';
-import { SourceCollectorsFactory } from './sources-collector-service/factories';
+  AvailableApiSourceCollectorsFactory,
+  TelegramApiSourceCollectorStrategy,
+  AvailableApiSourceCollectorStrategy,
+} from './api-source-collectors';
 
-import { TelegramApiSourceCollectorStrategy } from './sources-collector-service/strategies/api-source-collector/strategies';
-import { AvailableApiSourceCollectorStrategy } from './sources-collector-service/strategies/api-source-collector/interfaces';
-import { AvailableApiSourceCollectorsFactory } from './sources-collector-service/strategies/api-source-collector/factories';
+import { TelegramService } from './telegram-serivce';
 
 const repositories = [
   {
@@ -49,15 +53,16 @@ const factories = [
   },
 ];
 
-const services = [SourcesCollectorService];
+const services = [SourcesCollectorService, TelegramService];
 
 @Module({
   imports: [],
   providers: [
     ...repositories,
-    ...sourceCollectorsStrategies,
-    ...factories,
     ...services,
+    ...sourceCollectorsStrategies,
+    ...availableApiSourceCollectorsStrategies,
+    ...factories,
   ],
   exports: [...services],
 })

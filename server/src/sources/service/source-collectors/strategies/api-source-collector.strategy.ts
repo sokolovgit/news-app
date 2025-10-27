@@ -2,7 +2,7 @@ import { Injectable, NotImplementedException } from '@nestjs/common';
 
 import { Source } from '@/sources/domain/entities';
 import { Collector } from '@/sources/domain/enums';
-import { CollectorStrategy } from '../../interfaces';
+import { CollectorStrategy } from '../interfaces';
 
 @Injectable()
 export class ApiSourceCollectorStrategy implements CollectorStrategy {

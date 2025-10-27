@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
+import { SourcesController } from './ui';
+import { OperationModule } from './operation/operation.module';
 
 @Module({
-  imports: [],
-  controllers: [],
-  providers: [],
+  controllers: [SourcesController],
+  imports: [OperationModule],
+  exports: [OperationModule],
 })
 export class SourcesModule {}
