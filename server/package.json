@@ -25,7 +25,6 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-
     "pretest:e2e": "docker compose -f test/docker-compose.test.yml up -d",
     "test:e2e": "jest --config jest.e2e.config.ts --forceExit --detectOpenHandles",
     "posttest:e2e": "docker compose -f test/docker-compose.test.yml down -v"
@@ -67,6 +66,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1",
+    "telegram": "^2.26.22",
     "uuid": "^13.0.0",
     "yamljs": "^0.3.0",
     "zod": "^4.1.12"
@@ -82,7 +82,7 @@
     "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.18.12",
     "@types/supertest": "^6.0.2",
     "drizzle-kit": "^0.31.5",
     "eslint": "^9.18.0",
