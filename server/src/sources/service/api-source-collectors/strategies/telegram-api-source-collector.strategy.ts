@@ -16,9 +16,16 @@ export class TelegramApiSourceCollectorStrategy
   ) {}
 
   async collect(source: Source): Promise<void> {
-    console.log('collecting source', source);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    throw new NotImplementedException('Not implemented');
+    this.logger.log(
+      `Collecting last messages from source ${source.getUrl()} using Telegram API`,
+    );
+
+    const messages = await this.telegramService.fetchChannelMessages(
+      source.getUrl(),
+      3,
+    );
+
+    console.log(messages);
   }
 
   async validate(url: string): Promise<boolean> {

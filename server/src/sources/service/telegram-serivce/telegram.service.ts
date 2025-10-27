@@ -6,6 +6,7 @@ import { TelegramClient } from 'telegram';
 
 import { ConfigService } from '@/config';
 import { LoggerService } from '@/logger';
+
 import { TelegramClientNotConnectedError } from '@/sources/domain/errors';
 
 @Injectable()
@@ -60,7 +61,10 @@ export class TelegramService implements OnModuleInit {
     channel: string,
     limit: number = 100,
   ): Promise<Api.Message[]> {
+    this.logger.log(`Fetching ${limit} messages from channel ${channel}`);
+
     if (!this.client.connected) {
+      this.logger.error('Telegram client not connected');
       throw new TelegramClientNotConnectedError();
     }
 
@@ -69,6 +73,11 @@ export class TelegramService implements OnModuleInit {
     for await (const message of this.client.iterMessages(channel, { limit })) {
       messages.push(message);
     }
+
+    this.logger.log(
+      `Fetched ${messages.length} messages from channel ${channel}`,
+    );
+
     return messages.reverse();
   }
 }

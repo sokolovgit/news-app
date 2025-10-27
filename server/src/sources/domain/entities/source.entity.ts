@@ -75,4 +75,19 @@ export class Source {
   getUpdatedAt(): Date | undefined {
     return this.props.updatedAt;
   }
+
+  toJSON() {
+    return {
+      id: this.getId(),
+      addedBy: this.getUserAddedById(),
+      source: this.getSource(),
+      collector: this.getCollector(),
+      name: this.getName(),
+      url: this.getUrl(),
+    };
+  }
+
+  toString() {
+    return JSON.stringify(this.toJSON());
+  }
 }

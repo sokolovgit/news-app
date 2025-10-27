@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ServiceModule } from '../service/service.module';
-import { ValidateSourceHandler } from './handlers';
+import { TestHandler, ValidateSourceHandler } from './handlers';
 
-const handlers = [ValidateSourceHandler];
+const handlers = [ValidateSourceHandler, TestHandler];
 
 @Module({
   imports: [ServiceModule],

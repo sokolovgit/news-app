@@ -3,7 +3,10 @@ import { Module } from '@nestjs/common';
 import { SourcesRepository } from './abstracts';
 import { DrizzleSourcesRepository } from './sources-storage';
 
+import { SourcesService } from './sources-service';
 import { SourcesCollectorService } from './source-collector-service';
+
+import { TelegramService } from './telegram-serivce';
 
 import {
   CollectorStrategy,
@@ -18,8 +21,6 @@ import {
   TelegramApiSourceCollectorStrategy,
   AvailableApiSourceCollectorStrategy,
 } from './api-source-collectors';
-
-import { TelegramService } from './telegram-serivce';
 
 const repositories = [
   {
@@ -53,7 +54,7 @@ const factories = [
   },
 ];
 
-const services = [SourcesCollectorService, TelegramService];
+const services = [SourcesService, SourcesCollectorService, TelegramService];
 
 @Module({
   imports: [],
