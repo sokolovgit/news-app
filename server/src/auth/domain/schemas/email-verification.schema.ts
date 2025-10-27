@@ -8,7 +8,6 @@ export const emailVerifications = pgTable('email_verifications', {
   id: brandedUuid<UserId>('id')
     .primaryKey()
     .references(() => users.id, { onDelete: 'cascade' })
-    .unique()
     .notNull(),
 
   ...timestamps,
