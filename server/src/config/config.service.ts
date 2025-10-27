@@ -71,6 +71,13 @@ export class ConfigService extends BaseConfigService<EnvType> {
     },
   };
 
+  telegram = {
+    appId: this.env.TELEGRAM_APP_ID,
+    appHash: this.env.TELEGRAM_APP_HASH,
+    session: this.env.TELEGRAM_SESSION,
+    phone: this.env.TELEGRAM_PHONE,
+  };
+
   isProduction(): boolean {
     return this.server.env === Environments.PRODUCTION;
   }

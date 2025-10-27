@@ -46,6 +46,11 @@ export const envValidationSchema = z.object({
     .default(false),
 
   MAIL_FROM: z.email(),
+
+  TELEGRAM_APP_ID: z.string(),
+  TELEGRAM_APP_HASH: z.string(),
+  TELEGRAM_SESSION: z.string().optional().default(''),
+  TELEGRAM_PHONE: z.string(),
 });
 
 export type EnvType = z.infer<typeof envValidationSchema>;
