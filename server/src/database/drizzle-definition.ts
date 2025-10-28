@@ -1,3 +1,6 @@
+import { userRelations, users } from '@/users/domain/schemas';
+import { sourceRelations, sources } from '@/sources/domain/schemas';
+import { rawPostRelations, rawPosts } from '@/posts/domain/schemas';
 import {
   oauthAccounts,
   oauthAccountRelations,
@@ -6,8 +9,6 @@ import {
   emailVerificationRelations,
   emailVerifications,
 } from '@/auth/domain/schemas';
-import { sourceRelations, sources } from '@/sources/domain/schemas';
-import { userRelations, users } from '@/users/domain/schemas';
 
 const relations = {
   userRelations,
@@ -15,6 +16,7 @@ const relations = {
   refreshTokenRelations,
   emailVerificationRelations,
   sourceRelations,
+  rawPostRelations,
 };
 
 const drizzleSchemas = {
@@ -23,6 +25,7 @@ const drizzleSchemas = {
   refreshTokens,
   emailVerifications,
   sources,
+  rawPosts,
 };
 
 export const drizzle = {
