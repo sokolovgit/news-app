@@ -9,11 +9,27 @@ type HeaderBlock = {
   type: ContentBlockType.HEADER;
   data: { text: string; level: 1 | 2 | 3 };
 };
+
 type ImageBlock = {
   type: ContentBlockType.IMAGE;
   data: { url: string; caption?: string };
 };
 
-export type ContentBlock = ParagraphBlock | HeaderBlock | ImageBlock;
+type AudioBlock = {
+  type: ContentBlockType.AUDIO;
+  data: { url: string; caption?: string };
+};
+
+type VideoBlock = {
+  type: ContentBlockType.VIDEO;
+  data: { url: string; caption?: string };
+};
+
+export type ContentBlock =
+  | ParagraphBlock
+  | HeaderBlock
+  | ImageBlock
+  | AudioBlock
+  | VideoBlock;
 
 export type Content = ContentBlock[];
