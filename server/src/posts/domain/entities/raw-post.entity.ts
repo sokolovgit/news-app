@@ -6,7 +6,7 @@ import { Content } from '../types';
 
 export type RawPostProperties = {
   id: RawPostId;
-  source: SourceId;
+  sourceId: SourceId;
   externalId: string;
   title?: string;
   content: Content;
@@ -38,7 +38,7 @@ export class RawPost {
   }
 
   getSourceId(): SourceId {
-    return this.props.source;
+    return this.props.sourceId;
   }
 
   getSource(): Source | null {

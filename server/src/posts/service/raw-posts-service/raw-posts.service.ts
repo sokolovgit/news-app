@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
 
 import { LoggerService } from '@/logger';
-import { RawPostsRepository } from '../abstracts';
+
 import { RawPostId } from '@/posts/domain/schemas';
 import { RawPost, RawPostLoadOptions } from '@/posts/domain/entities';
+import { RawPostPayload } from '@/posts/domain/types';
+import { RawPostFactory } from '@/posts/domain/factories';
+import { RawPostsRepository } from '../abstracts';
 import {
   RawPostSaveFailedError,
   RawPostSaveManyFailedError,
 } from '@/posts/domain/errors';
+
+import { SourceId } from '@/sources/domain/schemas';
 
 @Injectable()
 export class RawPostsService {
@@ -55,7 +60,7 @@ export class RawPostsService {
   }
 
   async saveManyRawPostsOrThrow(rawPosts: RawPost[]): Promise<RawPost[]> {
-    this.logger.log(`Saving ${rawPosts.length} raw posts`);
+    this.logger.log(`Saving ${rawPosts.length} ${RawPost.name} entities`);
 
     const savedRawPosts = await this.rawPostsRepository.saveMany(rawPosts);
 
@@ -69,5 +74,20 @@ export class RawPostsService {
     this.logger.log(`Saved ${savedRawPosts.length} raw posts`);
 
     return savedRawPosts;
+  }
+
+  async saveManyRawPostsPayloadsOrThrow(
+    rawPostsPayloads: RawPostPayload[],
+    sourceId: SourceId,
+  ): Promise<RawPost[]> {
+    this.logger.log(
+      `Mapping ${rawPostsPayloads.length} raw posts payloads to ${RawPost.name} entities`,
+    );
+
+    const rawPosts = rawPostsPayloads.map((rawPostPayload) =>
+      RawPostFactory.fromPayload(rawPostPayload, sourceId),
+    );
+
+    return this.saveManyRawPostsOrThrow(rawPosts);
   }
 }

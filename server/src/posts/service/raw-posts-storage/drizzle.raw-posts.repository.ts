@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 
@@ -38,6 +38,14 @@ export class DrizzleRawPostsRepository extends RawPostsRepository {
     const [savedRawPost] = await this.db
       .insert(rawPosts)
       .values(rawPostData)
+      .onConflictDoUpdate({
+        target: [rawPosts.sourceId, rawPosts.externalId],
+        set: {
+          title: sql`EXCLUDED.title`,
+          content: sql`EXCLUDED.content`,
+          updatedAt: sql`NOW()`,
+        },
+      })
       .returning();
 
     return savedRawPost
@@ -57,6 +65,14 @@ export class DrizzleRawPostsRepository extends RawPostsRepository {
     const savedRawPosts = await this.db
       .insert(rawPosts)
       .values(rawPostsData)
+      .onConflictDoUpdate({
+        target: [rawPosts.sourceId, rawPosts.externalId],
+        set: {
+          title: sql`EXCLUDED.title`,
+          content: sql`EXCLUDED.content`,
+          updatedAt: sql`NOW()`,
+        },
+      })
       .returning();
 
     return savedRawPosts.map((savedRawPost) =>

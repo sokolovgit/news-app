@@ -6,33 +6,17 @@ import { RawPostInsert, RawPostSelect } from '@/posts/domain/schemas';
 import { SourceId, SourceSelect } from '@/sources/domain/schemas';
 import { DrizzleSourcesEntityMapper } from '@/sources/service/sources-storage/mappers';
 
-type RawPostWithRelations = Omit<RawPostSelect, 'source'> & {
-  source: SourceId | SourceSelect | null;
-};
-
 export class DrizzleRawPostsEntityMapper {
   static toEntity(
-    data: RawPostWithRelations,
+    data: RawPostSelect & { source?: SourceSelect | null },
     loadOptions: RawPostLoadOptions = {},
   ): RawPost {
-    let sourceId: SourceId | undefined;
-
-    if (typeof data.source === 'string') sourceId = data.source;
-    else if (data.source !== null) sourceId = data.source.id;
-
-    if (!sourceId) {
-      throw new Error('Source ID is required');
-    }
-
-    const sourceEntity =
-      typeof data.source === 'object' && data.source !== null
-        ? data.source
-        : undefined;
+    const sourceEntity = data.source;
 
     return new RawPost(
       {
         id: data.id,
-        source: sourceId,
+        sourceId: data.sourceId as SourceId,
         externalId: data.externalId,
         title: data.title ?? undefined,
         content: data.content,
@@ -50,7 +34,7 @@ export class DrizzleRawPostsEntityMapper {
   static toSchema(entity: RawPost): RawPostInsert {
     return {
       id: entity.getId(),
-      source: entity.getSourceId(),
+      sourceId: entity.getSourceId(),
       externalId: entity.getExternalId(),
       title: entity.getTitle(),
       content: entity.getContent(),

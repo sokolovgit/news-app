@@ -5,6 +5,9 @@ import { AvailableApi } from '@/sources/domain/enums';
 import { AvailableApiSourceCollectorStrategy } from '../interfaces';
 import { TelegramService } from '@/sources/service/telegram-serivce';
 import { LoggerService } from '@/logger';
+import { TelegramMessageToRawPostMapper } from '../mappers';
+import { RawPostPayload } from '@/posts/domain/types';
+import { RawPostsService } from '@/posts/service';
 
 @Injectable()
 export class TelegramApiSourceCollectorStrategy
@@ -13,6 +16,7 @@ export class TelegramApiSourceCollectorStrategy
   constructor(
     private readonly logger: LoggerService,
     private readonly telegramService: TelegramService,
+    private readonly rawPostsService: RawPostsService,
   ) {}
 
   async collect(source: Source): Promise<void> {
@@ -25,7 +29,22 @@ export class TelegramApiSourceCollectorStrategy
       3,
     );
 
-    console.log(messages);
+    const rawPostsPayloads: RawPostPayload[] = messages.map((message) =>
+      TelegramMessageToRawPostMapper.toRawPostPayload(message),
+    );
+
+    this.logger.log(
+      `Collected ${rawPostsPayloads.length} raw posts from Telegram`,
+    );
+
+    await this.rawPostsService.saveManyRawPostsPayloadsOrThrow(
+      rawPostsPayloads,
+      source.getId(),
+    );
+
+    this.logger.log(
+      `Successfully saved ${rawPostsPayloads.length} raw posts from source ${source.getId()}`,
+    );
   }
 
   async validate(url: string): Promise<boolean> {

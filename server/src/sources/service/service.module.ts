@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { PostsModule } from '@/posts/posts.module';
 
 import { SourcesRepository } from './abstracts';
 import { DrizzleSourcesRepository } from './sources-storage';
@@ -57,7 +58,7 @@ const factories = [
 const services = [SourcesService, SourcesCollectorService, TelegramService];
 
 @Module({
-  imports: [],
+  imports: [PostsModule],
   providers: [
     ...repositories,
     ...services,
