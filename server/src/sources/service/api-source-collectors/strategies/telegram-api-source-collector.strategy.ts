@@ -1,13 +1,14 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+
+import { LoggerService } from '@/logger';
+import { TelegramService } from '@/sources/service/telegram-serivce';
+import { RawPostsService } from '@/posts/service';
 
 import { Source } from '@/sources/domain/entities';
 import { AvailableApi } from '@/sources/domain/enums';
-import { AvailableApiSourceCollectorStrategy } from '../interfaces';
-import { TelegramService } from '@/sources/service/telegram-serivce';
-import { LoggerService } from '@/logger';
-import { TelegramMessageToRawPostMapper } from '../mappers';
 import { RawPostPayload } from '@/posts/domain/types';
-import { RawPostsService } from '@/posts/service';
+import { TelegramMessageToRawPostMapper } from '../mappers';
+import { AvailableApiSourceCollectorStrategy } from '../interfaces';
 
 @Injectable()
 export class TelegramApiSourceCollectorStrategy
@@ -26,7 +27,7 @@ export class TelegramApiSourceCollectorStrategy
 
     const messages = await this.telegramService.fetchChannelMessages(
       source.getUrl(),
-      3,
+      5,
     );
 
     const rawPostsPayloads: RawPostPayload[] = messages.map((message) =>
@@ -48,9 +49,15 @@ export class TelegramApiSourceCollectorStrategy
   }
 
   async validate(url: string): Promise<boolean> {
-    console.log('validating url', url);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    throw new NotImplementedException('Not implemented');
+    this.logger.log(`Validating source ${url} using Telegram API`);
+
+    try {
+      const message = await this.telegramService.fetchChannelMessages(url, 1);
+      return message.length > 0;
+    } catch (error) {
+      this.logger.error(`Error validating source ${url}: ${error}`);
+      return false;
+    }
   }
 
   supports(api: AvailableApi): boolean {
