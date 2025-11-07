@@ -1,6 +1,7 @@
 <template>
   <div>
-    <h1 class="font-bold text-3xl underline text-red-500">Hello world!</h1>
+    <h1 class="text-3xl underline text-red-500 font-bold">Hello world!</h1>
+    <Button class="bg-red-500 text-white">Click me</Button>
 
     <NuxtRouteAnnouncer />
 
