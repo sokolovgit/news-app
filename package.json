@@ -4,5 +4,8 @@
   "workspaces": [
     "server",
     "web"
-  ]
+  ],
+  "devDependencies": {
+    "patch-package": "^8.0.1"
+  }
 }
