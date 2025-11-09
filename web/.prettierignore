@@ -1,0 +1,25 @@
+# Dependencies
+node_modules
+.nuxt
+.output
+dist
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+
+# Build artifacts
+public/build
+coverage
+

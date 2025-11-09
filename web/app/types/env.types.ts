@@ -1,0 +1,27 @@
+/**
+ * Environment variable types
+ * This ensures type safety for environment variables
+ */
+
+export interface PublicRuntimeConfig {
+  appName: string
+  appUrl: string
+  appEnv: 'development' | 'staging' | 'production'
+  apiBaseUrl: string
+  apiTimeout: number
+  featureAnalytics: boolean
+  featureDebugMode: boolean
+}
+
+export interface PrivateRuntimeConfig {
+  apiSecretKey?: string
+  databaseUrl?: string
+}
+
+declare module 'nuxt/schema' {
+  interface PublicRuntimeConfig extends PublicRuntimeConfig {}
+  interface RuntimeConfig extends PrivateRuntimeConfig {}
+}
+
+export {}
+
