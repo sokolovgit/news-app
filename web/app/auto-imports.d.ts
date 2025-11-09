@@ -74,7 +74,7 @@ export type {
 } from '~/types'
 
 // Auto-imported from ~/lib
-export { ApiClient, ApiError as ApiClientError } from '~/lib/api'
+export * from '~/lib/api'
 
 // Auto-imported from ~/utils
 export {

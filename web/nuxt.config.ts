@@ -24,7 +24,7 @@ export default defineNuxtConfig({
 
   css: ['./app/assets/css/tailwind.css'],
   plugins: ['./app/plugins/ssr-width.ts'],
-  modules: ['@nuxt/eslint', 'shadcn-nuxt', '@vueuse/nuxt', '@nuxt/icon'],
+  modules: ['@nuxt/eslint', 'shadcn-nuxt', '@vueuse/nuxt', '@nuxt/icon', '@pinia/nuxt'],
 
   vite: {
     plugins: [tailwindcss()],

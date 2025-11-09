@@ -24,7 +24,10 @@ export class ApiClient {
    * Build full URL from endpoint
    */
   private buildUrl(endpoint: string, params?: Record<string, string | number | boolean | undefined | null>): string {
-    const url = new URL(endpoint, this.baseURL)
+    const normalizedEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint
+    const normalizedBaseURL = this.baseURL.endsWith('/') ? this.baseURL : `${this.baseURL}/`
+    
+    const url = new URL(normalizedEndpoint, normalizedBaseURL)
     
     if (params) {
       Object.entries(params).forEach(([key, value]) => {

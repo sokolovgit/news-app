@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type */
+ 
 /**
  * Environment variable types
  * This ensures type safety for environment variables
@@ -12,10 +12,6 @@ export interface PublicRuntimeConfig {
   apiTimeout: number
   featureAnalytics: boolean
   featureDebugMode: boolean
-}
-
-declare module 'nuxt/schema' {
-  interface PublicRuntimeConfig extends PublicRuntimeConfig {}
 }
 
 export {}

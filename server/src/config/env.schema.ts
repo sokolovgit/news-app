@@ -51,6 +51,8 @@ export const envValidationSchema = z.object({
   TELEGRAM_APP_HASH: z.string(),
   TELEGRAM_SESSION: z.string().optional().default(''),
   TELEGRAM_PHONE: z.string(),
+
+  CLIENT_URL: z.url().default('http://localhost:3001'),
 });
 
 export type EnvType = z.infer<typeof envValidationSchema>;

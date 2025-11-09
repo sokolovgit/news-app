@@ -18,6 +18,10 @@ export class ConfigService extends BaseConfigService<EnvType> {
     env: this.env.NODE_ENV,
   };
 
+  client = {
+    url: this.env.CLIENT_URL,
+  };
+
   auth = {
     accessTokenSecret: this.env.JWT_SECRET,
     refreshTokenSecret: this.env.REFRESH_TOKEN_SECRET,
