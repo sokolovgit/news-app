@@ -30,7 +30,7 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
   },
 
-  typescript: {
+   typescript: {
     typeCheck: true,
     strict: true,
   },

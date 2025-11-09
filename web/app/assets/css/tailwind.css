@@ -1,235 +1,141 @@
 @import 'tailwindcss';
 
 @theme {
+  /* Core Colors */
+  --color-bg: var(--color-bg-value);
+  --color-surface: var(--color-surface-value);
+  --color-accent: var(--color-accent-value);
+  --color-text: var(--color-text-value);
+
   /* Brand Colors */
-  --color-brand-black: hsl(173 100% 2%);
-  --color-brand-cool-gray: hsl(238 16% 68%);
-  --color-brand-tropical-indigo: hsl(238 42% 70%);
-  --color-brand-periwinkle: hsl(236 63% 82%);
-  --color-brand-ghost-white: hsl(260 100% 99%);
+  --color-primary: var(--color-primary-value);
+  --color-secondary: var(--color-secondary-value);
+  --color-tertiary: var(--color-tertiary-value);
+  --color-bg-tint: var(--color-bg-tint-value);
 
-  /* Semantic Colors */
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
+  /* UI Element Colors */
+  --color-border: var(--color-border-value);
+  --color-muted: var(--color-muted-value);
 
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-
-  --color-success: hsl(var(--success));
-  --color-success-foreground: hsl(var(--success-foreground));
-
-  --color-warning: hsl(var(--warning));
-  --color-warning-foreground: hsl(var(--warning-foreground));
-
-  --color-info: hsl(var(--info));
-  --color-info-foreground: hsl(var(--info-foreground));
-
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
+  /* Status Colors */
+  --color-success: var(--color-success-value);
+  --color-warning: var(--color-warning-value);
+  --color-error: var(--color-error-value);
+  --color-info: var(--color-info-value);
 }
 
 @layer base {
   :root {
-    /* Brand Palette Colors */
-    --brand-black: 173 100% 2%;
-    --brand-cool-gray: 238 16% 68%;
-    --brand-tropical-indigo: 238 42% 70%;
-    --brand-periwinkle: 236 63% 82%;
-    --brand-ghost-white: 260 100% 99%;
+    /* Core Colors - Light Theme */
+    --color-bg-value: #fafafa;
+    --color-surface-value: #ffffff;
+    --color-accent-value: #9b5de0;
+    --color-text-value: #1a1a1a;
 
-    /* Semantic Color Tokens - Light Theme */
-    --background: 260 100% 99%; /* ghost-white */
-    --foreground: 173 100% 2%; /* black */
+    /* Brand Colors - Light Theme */
+    --color-primary-value: #9b5de0;
+    --color-secondary-value: #d78fee;
+    --color-tertiary-value: #fdcffa;
+    --color-bg-tint-value: #f8f5ff;
 
-    --card: 260 100% 99%;
-    --card-foreground: 173 100% 2%;
+    /* UI Element Colors - Light Theme */
+    --color-border-value: #e9e3f5;
+    --color-muted-value: #6b6b7b;
 
-    --popover: 260 100% 99%;
-    --popover-foreground: 173 100% 2%;
-
-    --primary: 238 42% 70%; /* tropical-indigo */
-    --primary-foreground: 260 100% 99%;
-
-    --secondary: 236 63% 82%; /* periwinkle */
-    --secondary-foreground: 173 100% 2%;
-
-    --muted: 238 16% 68%; /* cool-gray */
-    --muted-foreground: 173 100% 2%;
-
-    --accent: 236 63% 82%;
-    --accent-foreground: 173 100% 2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 260 100% 99%;
-
-    --success: 142 76% 36%;
-    --success-foreground: 260 100% 99%;
-
-    --warning: 38 92% 50%;
-    --warning-foreground: 173 100% 2%;
-
-    --info: 199 89% 48%;
-    --info-foreground: 260 100% 99%;
-
-    --border: 238 16% 90%;
-    --input: 238 16% 90%;
-    --ring: 238 42% 70%;
-
-    --radius: 0.5rem;
-
-    /* Chart Colors */
-    --chart-1: 238 42% 70%;
-    --chart-2: 236 63% 82%;
-    --chart-3: 238 16% 68%;
-    --chart-4: 199 89% 48%;
-    --chart-5: 142 76% 36%;
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    /* Status Colors - Light Theme */
+    --color-success-value: #2d6a4f;
+    --color-warning-value: #f59e0b;
+    --color-error-value: #dc2626;
+    --color-info-value: #9b5de0;
   }
 
   .dark {
-    /* Brand colors remain the same */
-    --brand-black: 173 100% 2%;
-    --brand-cool-gray: 238 16% 68%;
-    --brand-tropical-indigo: 238 42% 70%;
-    --brand-periwinkle: 236 63% 82%;
-    --brand-ghost-white: 260 100% 99%;
+    /* Core Colors - Dark Theme */
+    --color-bg-value: #1a1a1a;
+    --color-surface-value: #2a2a35;
+    --color-accent-value: #9b5de0;
+    --color-text-value: #f5f5f5;
 
-    /* Semantic Color Tokens - Dark Theme */
-    --background: 173 100% 2%; /* black */
-    --foreground: 260 100% 99%; /* ghost-white */
+    /* Brand Colors - Dark Theme */
+    --color-primary-value: #9b5de0;
+    --color-secondary-value: #d78fee;
+    --color-tertiary-value: #fdcffa;
+    --color-bg-tint-value: #3a2f4a;
 
-    --card: 238 42% 12%;
-    --card-foreground: 260 100% 99%;
+    /* UI Element Colors - Dark Theme */
+    --color-border-value: #3a3a4a;
+    --color-muted-value: #9c9ca8;
 
-    --popover: 238 42% 12%;
-    --popover-foreground: 260 100% 99%;
-
-    --primary: 238 42% 70%; /* tropical-indigo */
-    --primary-foreground: 173 100% 2%;
-
-    --secondary: 236 63% 82%; /* periwinkle */
-    --secondary-foreground: 173 100% 2%;
-
-    --muted: 238 16% 25%;
-    --muted-foreground: 238 16% 68%;
-
-    --accent: 236 63% 30%;
-    --accent-foreground: 260 100% 99%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 260 100% 99%;
-
-    --success: 142 76% 36%;
-    --success-foreground: 260 100% 99%;
-
-    --warning: 38 92% 50%;
-    --warning-foreground: 173 100% 2%;
-
-    --info: 199 89% 48%;
-    --info-foreground: 260 100% 99%;
-
-    --border: 238 16% 20%;
-    --input: 238 16% 20%;
-    --ring: 236 63% 82%;
-
-    /* Chart Colors for dark mode */
-    --chart-1: 238 42% 70%;
-    --chart-2: 236 63% 82%;
-    --chart-3: 238 16% 68%;
-    --chart-4: 199 89% 68%;
-    --chart-5: 142 76% 56%;
-
-    /* Shadows for dark mode */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+    /* Status Colors - Dark Theme */
+    --color-success-value: #52b788;
+    --color-warning-value: #fbbf24;
+    --color-error-value: #f87171;
+    --color-info-value: #d78fee;
   }
 }
 
-@layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
+/* Base Styles */
+* {
+  border-color: var(--color-border-value);
+}
 
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-feature-settings:
-      'rlig' 1,
-      'calt' 1;
-  }
+body {
+  background-color: var(--color-bg-value);
+  color: var(--color-text-value);
+  font-feature-settings:
+    'rlig' 1,
+    'calt' 1;
+}
 
-  /* Typography defaults */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-weight: 600;
-  }
+/* Typography defaults */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  color: var(--color-text-value);
+}
 
-  h1 {
-    font-size: 2.25rem;
-    line-height: 2.5rem;
-  }
+h1 {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
 
-  h2 {
-    font-size: 1.875rem;
-    line-height: 2.25rem;
-  }
+h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
 
-  h3 {
-    font-size: 1.5rem;
-    line-height: 2rem;
-  }
+h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
 
-  h4 {
-    font-size: 1.25rem;
-    line-height: 1.75rem;
-  }
+h4 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
 
-  h5 {
-    font-size: 1.125rem;
-    line-height: 1.75rem;
-  }
+h5 {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
 
-  h6 {
-    font-size: 1rem;
-    line-height: 1.5rem;
-  }
+h6 {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+/* Links */
+a {
+  color: var(--color-accent-value);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 @layer utilities {
@@ -240,28 +146,21 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
-    background-color: hsl(var(--muted));
+    background-color: var(--color-surface-value);
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--muted-foreground) / 0.3);
+    background-color: color-mix(in srgb, var(--color-text-value) 30%, transparent);
     border-radius: 9999px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: hsl(var(--muted-foreground) / 0.5);
+    background-color: color-mix(in srgb, var(--color-text-value) 50%, transparent);
   }
 
   /* Focus visible styles */
-  .focus-ring {
-    outline: 2px solid transparent;
-    outline-offset: 2px;
-  }
-
   .focus-ring:focus-visible {
-    outline: none;
-    box-shadow:
-      0 0 0 2px hsl(var(--background)),
-      0 0 0 4px hsl(var(--ring));
+    outline: 2px solid var(--color-accent-value);
+    outline-offset: 2px;
   }
 }
