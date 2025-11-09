@@ -14,14 +14,8 @@ export interface PublicRuntimeConfig {
   featureDebugMode: boolean
 }
 
-export interface PrivateRuntimeConfig {
-  apiSecretKey?: string
-  databaseUrl?: string
-}
-
 declare module 'nuxt/schema' {
   interface PublicRuntimeConfig extends PublicRuntimeConfig {}
-  interface RuntimeConfig extends PrivateRuntimeConfig {}
 }
 
 export {}
