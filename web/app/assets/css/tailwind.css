@@ -53,18 +53,18 @@
     /* Core Colors - Dark Theme */
     --color-bg-value: #1a1a1a;
     --color-surface-value: #2a2a35;
-    --color-accent-value: #9b5de0;
+    --color-accent-value: #c49aff;
     --color-text-value: #f5f5f5;
 
     /* Brand Colors - Dark Theme */
-    --color-primary-value: #9b5de0;
+    --color-primary-value: #c49aff;
     --color-secondary-value: #d78fee;
     --color-tertiary-value: #fdcffa;
     --color-bg-tint-value: #3a2f4a;
 
     /* UI Element Colors - Dark Theme */
     --color-border-value: #3a3a4a;
-    --color-muted-value: #9c9ca8;
+    --color-muted-value: #b5b5c3;
 
     /* Status Colors - Dark Theme */
     --color-success-value: #52b788;
@@ -129,12 +129,12 @@ h6 {
 }
 
 /* Links */
-a {
+a:not([class*='bg-']):not([class*='btn']) {
   color: var(--color-accent-value);
   text-decoration: none;
 }
 
-a:hover {
+a:not([class*='bg-']):not([class*='btn']):hover {
   text-decoration: underline;
 }
 

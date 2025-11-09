@@ -23,7 +23,7 @@ export class ApiClient {
   /**
    * Build full URL from endpoint
    */
-  private buildUrl(endpoint: string, params?: Record<string, any>): string {
+  private buildUrl(endpoint: string, params?: Record<string, string | number | boolean | undefined | null>): string {
     const url = new URL(endpoint, this.baseURL)
     
     if (params) {
@@ -72,7 +72,7 @@ export class ApiClient {
   /**
    * Build request body
    */
-  private buildBody(body: any): BodyInit | null {
+  private buildBody(body: unknown): BodyInit | null {
     if (!body) return null
     
     if (body instanceof FormData) {
@@ -82,14 +82,34 @@ export class ApiClient {
     if (typeof body === 'object') {
       return JSON.stringify(body)
     }
-    
-    return body
+
+    // Ensure primitive types are returned as strings and treat {} specially
+    if (
+      (typeof body === 'string') ||
+      (typeof body === 'number') ||
+      (typeof body === 'boolean')
+    ) {
+      return String(body);
+    }
+
+    // If body is an empty object ({}), treat as null (to avoid fetch TypeError)
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      Object.keys(body).length === 0 &&
+      body.constructor === Object
+    ) {
+      return null;
+    }
+
+    // Otherwise, return null for unsupported types (e.g. symbols, undefined)
+    return null;
   }
 
   /**
    * Generic request method
    */
-  async request<T = any>(
+  async request<T = unknown>(
     endpoint: string,
     config?: ApiRequestConfig,
   ): Promise<T> {
@@ -113,7 +133,7 @@ export class ApiClient {
         throw error
       }
       
-      return await this.handleSuccessResponse(response)
+      return await this.handleSuccessResponse(response) as T
     } catch (error) {
       throw this.transformError(error)
     }
@@ -122,7 +142,7 @@ export class ApiClient {
   /**
    * Handle successful response
    */
-  private async handleSuccessResponse(response: Response): Promise<any> {
+  private async handleSuccessResponse(response: Response): Promise<unknown> {
     const contentType = response.headers.get('content-type')
     
     if (contentType?.includes('application/json')) {
@@ -163,7 +183,7 @@ export class ApiClient {
   /**
    * Transform any error to ApiError
    */
-  private transformError(error: any): Error {
+  private transformError(error: unknown): Error {
     if (error instanceof ApiError) {
       return error
     }
@@ -188,23 +208,23 @@ export class ApiClient {
   /**
    * Convenience methods
    */
-  async get<T = any>(endpoint: string, params?: Record<string, any>): Promise<T> {
+  async get<T = unknown>(endpoint: string, params?: Record<string, string | number | boolean | undefined | null>): Promise<T> {
     return this.request<T>(endpoint, { method: 'GET', params })
   }
 
-  async post<T = any>(endpoint: string, body?: any): Promise<T> {
+  async post<T = unknown>(endpoint: string, body?: unknown): Promise<T> {
     return this.request<T>(endpoint, { method: 'POST', body })
   }
 
-  async put<T = any>(endpoint: string, body?: any): Promise<T> {
+  async put<T = unknown>(endpoint: string, body?: unknown): Promise<T> {
     return this.request<T>(endpoint, { method: 'PUT', body })
   }
 
-  async patch<T = any>(endpoint: string, body?: any): Promise<T> {
+  async patch<T = unknown>(endpoint: string, body?: unknown): Promise<T> {
     return this.request<T>(endpoint, { method: 'PATCH', body })
   }
 
-  async delete<T = any>(endpoint: string): Promise<T> {
+  async delete<T = unknown>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: 'DELETE' })
   }
 }
@@ -216,7 +236,7 @@ export class ApiError extends Error {
   public readonly statusCode: number
   public readonly error: string
   public readonly timestamp: string
-  public readonly details?: Record<string, any>
+  public readonly details?: Record<string, unknown>
 
   constructor(data: ApiErrorResponse) {
     super(data.message)

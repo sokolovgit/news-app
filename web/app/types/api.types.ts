@@ -15,8 +15,8 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 export interface ApiRequestConfig {
   method?: HttpMethod
   headers?: Record<string, string>
-  params?: Record<string, any>
-  body?: any
+  params?: Record<string, string | number | boolean | undefined | null>
+  body?: unknown
   timeout?: number
   withCredentials?: boolean
   signal?: AbortSignal
@@ -42,7 +42,7 @@ export interface ApiErrorResponse {
   timestamp: string
   path?: string
   method?: string
-  details?: Record<string, any>
+  details?: Record<string, unknown>
 }
 
 /**
@@ -56,8 +56,8 @@ export interface ApiClientOptions {
   retryAttempts?: number
   retryDelay?: number
   onRequest?: (config: ApiRequestConfig) => ApiRequestConfig | Promise<ApiRequestConfig>
-  onResponse?: (response: any) => any | Promise<any>
-  onError?: (error: any) => void | Promise<void>
+  onResponse?: (response: unknown) => unknown | Promise<unknown>
+  onError?: (error: unknown) => void | Promise<void>
 }
 
 /**
@@ -77,7 +77,7 @@ export type UploadProgressCallback = (event: UploadProgressEvent) => void
 export interface FileUploadRequest {
   file: File
   fieldName?: string
-  additionalData?: Record<string, any>
+  additionalData?: Record<string, unknown>
   onProgress?: UploadProgressCallback
 }
 
@@ -88,10 +88,10 @@ export interface BatchRequest {
   id: string
   endpoint: string
   method: HttpMethod
-  body?: any
+  body?: unknown
 }
 
-export interface BatchResponse<T = any> {
+export interface BatchResponse<T = unknown> {
   id: string
   success: boolean
   data?: T

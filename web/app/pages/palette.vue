@@ -297,8 +297,9 @@
         </div>
       </section>
     </div>
-    <NuxtRouteAnnouncer />
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+// Color system reference page
+</script>
