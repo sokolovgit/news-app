@@ -14,7 +14,7 @@
       </div>
 
       <div class="mt-12">
-        <ThemeSwitcher />
+        <ThemeToggle />
       </div>
     </div>
   </div>

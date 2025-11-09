@@ -4,9 +4,9 @@ import { useTheme } from '@/composables/useTheme'
 const { theme, setTheme } = useTheme()
 
 const themes = [
-  { value: 'light', label: 'Light', icon: '☀️' },
-  { value: 'dark', label: 'Dark', icon: '🌙' },
-  { value: 'system', label: 'System', icon: '💻' },
+  { value: 'light', label: 'Light', icon: 'meteor-icons:sun' },
+  { value: 'dark', label: 'Dark', icon: 'meteor-icons:moon' },
+  { value: 'system', label: 'System', icon: 'meteor-icons:desktop' },
 ] as const
 </script>
 
@@ -25,8 +25,7 @@ const themes = [
       ]"
       @click="setTheme(item.value)"
     >
-      <span>{{ item.icon }}</span>
-      <span>{{ item.label }}</span>
+      <Icon :name="item.icon" size="24" />
     </button>
   </div>
 </template>

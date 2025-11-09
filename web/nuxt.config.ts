@@ -24,10 +24,15 @@ export default defineNuxtConfig({
 
   css: ['./app/assets/css/tailwind.css'],
   plugins: ['./app/plugins/ssr-width.ts'],
-  modules: ['@nuxt/eslint', 'shadcn-nuxt', '@vueuse/nuxt'],
+  modules: ['@nuxt/eslint', 'shadcn-nuxt', '@vueuse/nuxt', '@nuxt/icon'],
 
   vite: {
     plugins: [tailwindcss()],
+  },
+
+  icon: {
+    mode: 'css',
+    cssLayer: 'base'
   },
 
    typescript: {
