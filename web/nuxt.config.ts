@@ -10,6 +10,10 @@ export default defineNuxtConfig({
     port: 3001,
   },
 
+  dir: {
+    public: './app/public',
+  },
+
   shadcn: {
     /**
      * Prefix for all the imported component

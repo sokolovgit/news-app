@@ -21,9 +21,15 @@ export class RegisterDto {
 
   @IsDefined()
   @IsString()
-  @IsStrongPassword({
-    minLength: 8,
-  })
+  @IsStrongPassword(
+    {
+      minLength: 8,
+    },
+    {
+      message:
+        'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+    },
+  )
   @ApiProperty({
     example: 'P@sswo2d',
     description: 'User password',

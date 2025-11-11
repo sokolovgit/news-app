@@ -66,8 +66,41 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     if (exception instanceof HttpException) {
+      const status = exception.getStatus();
+      const exceptionResponse = exception.getResponse();
+
+      // Handle validation errors from class-validator
+      if (
+        typeof exceptionResponse === 'object' &&
+        exceptionResponse !== null &&
+        'message' in exceptionResponse
+      ) {
+        const response = exceptionResponse as Record<string, unknown>;
+
+        // If message is an array, it's validation errors
+        if (Array.isArray(response.message)) {
+          return {
+            statusCode: status,
+            message: response.message.join(', '),
+            metadata: {
+              validationErrors: response.message,
+            },
+          };
+        }
+
+        // If message is a string, use it directly
+        if (typeof response.message === 'string') {
+          return {
+            statusCode: status,
+            message: response.message,
+            metadata: {},
+          };
+        }
+      }
+
+      // Fallback to exception message
       return {
-        statusCode: exception.getStatus(),
+        statusCode: status,
         message: exception.message,
         metadata: {},
       };

@@ -31,17 +31,17 @@ const handleLogout = async () => {
             {{ authStore.isEmailVerified ? 'Yes' : 'No' }}
           </p>
         </div>
-        <Button variant="outline" class-name="w-full" @click="handleLogout"> Logout </Button>
+        <Button variant="outline" class="w-full" @click="handleLogout"> Logout </Button>
       </div>
 
       <div v-else class="mt-8 p-6 bg-card rounded-lg border border-border">
         <p class="text-lg mb-4">Please sign in to continue</p>
         <div class="flex gap-4 justify-center">
           <NuxtLink to="/login">
-            <Button class-name="px-6"> Login </Button>
+            <Button size="lg" class="px-8 bg-accent text-bg hover:bg-accent/90"> Login </Button>
           </NuxtLink>
           <NuxtLink to="/register">
-            <Button variant="outline" class-name="px-6"> Register </Button>
+            <Button variant="outline" size="lg" class="px-8 hover:bg-accent/10"> Register </Button>
           </NuxtLink>
         </div>
       </div>

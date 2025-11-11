@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { GalleryVerticalEnd } from 'lucide-vue-next'
-import RegisterForm from '~/components/RegisterForm.vue'
+import RegisterForm from '~/components/auth/RegisterForm.vue'
 
 const router = useRouter()
 
@@ -18,7 +18,9 @@ const handleSwitchToLogin = () => {
     <div class="flex flex-col gap-4 p-6 md:p-10">
       <div class="flex justify-center gap-2 md:justify-start">
         <a href="/" class="flex items-center gap-2 font-medium">
-          <div class="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <div
+            class="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground"
+          >
             <GalleryVerticalEnd :size="16" />
           </div>
           News App
@@ -35,7 +37,7 @@ const handleSwitchToLogin = () => {
         src="https://images.unsplash.com/photo-1585829365295-ab7cd400c167?q=80&w=2670&auto=format&fit=crop"
         alt="News and Media"
         class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-      >
+      />
     </div>
   </div>
 </template>
