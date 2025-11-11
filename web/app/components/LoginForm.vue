@@ -1,9 +1,16 @@
 <script setup lang="ts">
+import * as z from 'zod'
+
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+
 import type { HTMLAttributes } from 'vue'
+
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+
 import { useAuthStore } from '~/stores/auth.store'
 
 const props = defineProps<{
@@ -18,58 +25,40 @@ const emit = defineEmits<{
 const authStore = useAuthStore()
 const router = useRouter()
 
-// Form state
-const email = ref('')
-const password = ref('')
-const emailError = ref('')
-const passwordError = ref('')
+// Form error state
 const formError = ref('')
 
-// Validation
-const validateEmail = () => {
-  if (!email.value) {
-    emailError.value = 'Email is required'
-    return false
-  }
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email.value)) {
-    emailError.value = 'Please enter a valid email'
-    return false
-  }
-  emailError.value = ''
-  return true
-}
+// Define form schema with Zod
+const loginFormSchema = toTypedSchema(
+  z.object({
+    email: z
+      .string({ required_error: 'Email is required' })
+      .min(1, 'Email is required')
+      .email('Please enter a valid email'),
+    password: z
+      .string({ required_error: 'Password is required' })
+      .min(6, 'Password must be at least 6 characters')
+      .max(100, 'Password must be less than 100 characters'),
+  }),
+)
 
-const validatePassword = () => {
-  if (!password.value) {
-    passwordError.value = 'Password is required'
-    return false
-  }
-  if (password.value.length < 6) {
-    passwordError.value = 'Password must be at least 6 characters'
-    return false
-  }
-  passwordError.value = ''
-  return true
-}
+// Initialize form with vee-validate
+const form = useForm({
+  validationSchema: loginFormSchema,
+  initialValues: {
+    email: '',
+    password: '',
+  },
+})
 
-// Handle submit
-const handleSubmit = async (e: Event) => {
-  e.preventDefault()
+// Handle form submission
+const onSubmit = form.handleSubmit(async (values) => {
   formError.value = ''
-
-  // Validate
-  const isEmailValid = validateEmail()
-  const isPasswordValid = validatePassword()
-
-  if (!isEmailValid || !isPasswordValid) {
-    return
-  }
 
   try {
     await authStore.login({
-      email: email.value,
-      password: password.value,
+      email: values.email,
+      password: values.password,
     })
 
     emit('success')
@@ -81,7 +70,7 @@ const handleSubmit = async (e: Event) => {
       error instanceof Error ? error.message : 'Login failed. Please check your credentials.'
     formError.value = errorMessage
   }
-}
+})
 
 const handleSwitchToRegister = () => {
   emit('switchToRegister')
@@ -89,7 +78,7 @@ const handleSwitchToRegister = () => {
 </script>
 
 <template>
-  <form :class="cn('flex flex-col gap-6', props.class)" @submit="handleSubmit">
+  <form :class="cn('flex flex-col gap-6', props.class)" @submit="onSubmit">
     <div class="flex flex-col items-center gap-2 text-center">
       <h1 class="text-2xl font-bold">Login to your account</h1>
       <p class="text-muted-foreground text-sm text-balance">
@@ -106,37 +95,32 @@ const handleSwitchToRegister = () => {
     </div>
 
     <div class="grid gap-6">
-      <div class="grid gap-3">
-        <Label for="email">Email</Label>
-        <Input
-          id="email"
-          v-model="email"
-          :class="emailError ? 'border-red-500' : ''"
-          type="email"
-          placeholder="m@example.com"
-          required
-          @blur="validateEmail"
-        />
-        <p v-if="emailError" class="text-sm text-red-600">{{ emailError }}</p>
-      </div>
+      <!-- Email Field -->
+      <FormField v-slot="{ componentField }" name="email">
+        <FormItem>
+          <FormLabel>Email</FormLabel>
+          <FormControl>
+            <Input type="email" placeholder="m@example.com" v-bind="componentField" />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
 
-      <div class="grid gap-3">
-        <div class="flex items-center">
-          <Label for="password">Password</Label>
-          <a href="#" class="ml-auto text-sm underline-offset-4 hover:underline">
-            Forgot your password?
-          </a>
-        </div>
-        <Input
-          id="password"
-          v-model="password"
-          :class="passwordError ? 'border-red-500' : ''"
-          type="password"
-          required
-          @blur="validatePassword"
-        />
-        <p v-if="passwordError" class="text-sm text-red-600">{{ passwordError }}</p>
-      </div>
+      <!-- Password Field -->
+      <FormField v-slot="{ componentField }" name="password">
+        <FormItem>
+          <div class="flex items-center">
+            <FormLabel>Password</FormLabel>
+            <a href="#" class="ml-auto text-sm underline-offset-4 hover:underline">
+              Forgot your password?
+            </a>
+          </div>
+          <FormControl>
+            <Input type="password" v-bind="componentField" />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
 
       <Button type="submit" class-name="w-full" :disabled="authStore.isLoading">
         {{ authStore.isLoading ? 'Logging in...' : 'Login' }}
