@@ -1,4 +1,5 @@
 <template>
+  <Toaster />
   <div>
     <NuxtPage />
     <NuxtRouteAnnouncer />
@@ -6,5 +7,6 @@
 </template>
 
 <script setup lang="ts">
-// Main app layout with Nuxt page routing
+import { Toaster } from '@/components/ui/sonner'
+import 'vue-sonner/style.css' // vue-sonner v2 requires this import
 </script>
