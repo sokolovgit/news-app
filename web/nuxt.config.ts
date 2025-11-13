@@ -27,7 +27,6 @@ export default defineNuxtConfig({
   },
 
   css: ['./app/assets/css/tailwind.css'],
-  plugins: ['./app/plugins/ssr-width.ts'],
   modules: ['@nuxt/eslint', 'shadcn-nuxt', '@vueuse/nuxt', '@nuxt/icon', '@pinia/nuxt'],
 
   vite: {
@@ -79,6 +78,19 @@ export default defineNuxtConfig({
         {
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
+        },
+      ],
+      script: [
+        {
+          innerHTML: `
+            (function() {
+              const theme = localStorage.getItem('news-app-theme') || 'system';
+              const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+              const effectiveTheme = theme === 'system' ? getSystemTheme() : theme;
+              document.documentElement.classList.add(effectiveTheme);
+            })();
+          `,
+          type: 'text/javascript',
         },
       ],
     },

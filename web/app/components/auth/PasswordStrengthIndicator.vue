@@ -1,27 +1,28 @@
 <script setup lang="ts">
 import type { PasswordStrength } from '~/composables/usePasswordValidation'
 
-defineProps<{
+const props = defineProps<{
   strength: PasswordStrength
 }>()
+
+const strengthTextColor = computed(() => {
+  const colorMap: Record<number, string> = {
+    1: 'text-red-600',
+    2: 'text-red-600',
+    3: 'text-orange-600',
+    4: 'text-yellow-600',
+    5: 'text-green-600',
+  }
+
+  return colorMap[props.strength.score] || 'text-muted-foreground'
+})
 </script>
 
 <template>
   <div v-if="strength.label" class="space-y-2">
     <div class="flex items-center justify-between text-xs">
       <span class="text-muted-foreground">Password strength:</span>
-      <span
-        :class="[
-          'font-medium',
-          strength.score <= 2
-            ? 'text-red-600'
-            : strength.score === 3
-              ? 'text-orange-600'
-              : strength.score === 4
-                ? 'text-yellow-600'
-                : 'text-green-600',
-        ]"
-      >
+      <span :class="['font-medium', strengthTextColor]">
         {{ strength.label }}
       </span>
     </div>
@@ -37,4 +38,3 @@ defineProps<{
     </div>
   </div>
 </template>
-

@@ -32,6 +32,7 @@ export function usePasswordValidation(password: Ref<string>) {
     if (score <= 2) return { score, label: 'Weak', color: 'bg-red-500' }
     if (score === 3) return { score, label: 'Fair', color: 'bg-orange-500' }
     if (score === 4) return { score, label: 'Good', color: 'bg-yellow-500' }
+    
     return { score, label: 'Strong', color: 'bg-green-500' }
   })
 

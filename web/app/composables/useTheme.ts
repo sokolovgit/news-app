@@ -1,6 +1,9 @@
 import { computed, onMounted, ref } from 'vue'
+import { APP_CONFIG } from '~/config/app.config'
 
 export type Theme = 'light' | 'dark' | 'system'
+
+const THEME_STORAGE_KEY = APP_CONFIG.theme.storageKey
 
 export function useTheme() {
   const theme = ref<Theme>('system')
@@ -26,7 +29,7 @@ export function useTheme() {
     theme.value = newTheme
 
     if (isBrowser) {
-      localStorage.setItem('theme', newTheme)
+      localStorage.setItem(THEME_STORAGE_KEY, newTheme)
     }
 
     const effectiveTheme = newTheme === 'system' ? getSystemTheme() : newTheme
@@ -45,7 +48,7 @@ export function useTheme() {
   onMounted(() => {
     if (!isBrowser) return
 
-    const savedTheme = localStorage.getItem('theme') as Theme | null
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null
     const initialTheme = savedTheme || 'system'
 
     theme.value = initialTheme

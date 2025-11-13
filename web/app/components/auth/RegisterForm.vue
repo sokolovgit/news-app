@@ -7,11 +7,12 @@ import type { HTMLAttributes } from 'vue'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
+
+import FormError from '~/components/auth/FormError.vue'
 import EmailInput from '~/components/auth/EmailInput.vue'
 import PasswordInput from '~/components/auth/PasswordInput.vue'
 import PasswordStrengthIndicator from '~/components/auth/PasswordStrengthIndicator.vue'
 import PasswordRequirementsList from '~/components/auth/PasswordRequirementsList.vue'
-import FormError from '~/components/auth/FormError.vue'
 
 import { useAuthStore } from '~/stores/auth.store'
 import { usePasswordValidation } from '~/composables/usePasswordValidation'
