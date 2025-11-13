@@ -27,12 +27,6 @@ export const APP_CONFIG = {
     retryDelay: 1000,
   },
   
-  // Theme
-  theme: {
-    defaultMode: 'light' as 'light' | 'dark' | 'system',
-    storageKey: 'news-app-theme',
-  },
-  
   // Validation
   validation: {
     minPasswordLength: 8,

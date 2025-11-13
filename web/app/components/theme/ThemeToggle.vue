@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { useTheme } from '@/composables/useTheme'
-
-const { theme, setTheme } = useTheme()
+const colorMode = useColorMode()
 
 const themes = [
   { value: 'light', label: 'Light', icon: 'meteor-icons:sun' },
@@ -21,9 +19,9 @@ const themes = [
         'hover:bg-accent hover:text-accent-foreground',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         'disabled:pointer-events-none disabled:opacity-50',
-        theme === item.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground',
+        colorMode.preference === item.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground',
       ]"
-      @click="setTheme(item.value)"
+      @click="colorMode.preference = item.value"
     >
       <Icon :name="item.icon" size="24" />
     </button>

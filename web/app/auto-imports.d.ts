@@ -123,7 +123,7 @@ export {
 // - useLocalStorage()
 // - useDebounce()
 // - useDebouncedFn()
-// - useTheme()
+// - useColorMode() (from @nuxtjs/color-mode)
 
 // Vue & Nuxt auto-imports
 // - ref, reactive, computed, watch, onMounted, etc.

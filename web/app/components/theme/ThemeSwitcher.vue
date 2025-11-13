@@ -1,7 +1,28 @@
 <script setup lang="ts">
-import { useTheme } from '@/composables/useTheme'
+const colorMode = useColorMode()
 
-const { resolvedTheme, toggleTheme } = useTheme()
+const toggleTheme = () => {
+  // Cycle through light -> dark -> system
+  if (colorMode.preference === 'light') {
+    colorMode.preference = 'dark'
+  } else if (colorMode.preference === 'dark') {
+    colorMode.preference = 'system'
+  } else {
+    colorMode.preference = 'light'
+  }
+}
+
+const getCurrentIcon = computed(() => {
+  if (colorMode.preference === 'light') return 'meteor-icons:sun'
+  if (colorMode.preference === 'dark') return 'meteor-icons:moon'
+  return 'meteor-icons:desktop'
+})
+
+const getLabel = computed(() => {
+  if (colorMode.preference === 'light') return 'Switch to dark mode'
+  if (colorMode.preference === 'dark') return 'Switch to system mode'
+  return 'Switch to light mode'
+})
 </script>
 
 <template>
@@ -13,10 +34,9 @@ const { resolvedTheme, toggleTheme } = useTheme()
       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
       'transition-colors',
     ]"
-    :aria-label="resolvedTheme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'"
+    :aria-label="getLabel"
     @click="toggleTheme"
   >
-    <Icon v-if="resolvedTheme === 'light'" name="meteor-icons:sun" size="24" />
-    <Icon v-else name="meteor-icons:moon" size="24" />
+    <Icon :name="getCurrentIcon" size="24" />
   </button>
 </template>
