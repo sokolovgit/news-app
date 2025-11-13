@@ -9,4 +9,20 @@ export default withNuxt(
       'vue/require-default-prop': 'off',
     },
   },
+  {
+    rules: {
+      'vue/html-self-closing': [
+        'error',
+        {
+          html: {
+            void: 'any', // Allow both <img> and <img /> for void elements
+            normal: 'always',
+            component: 'always',
+          },
+          svg: 'always',
+          math: 'always',
+        },
+      ],
+    },
+  },
 )
