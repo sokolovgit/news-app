@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { GalleryVerticalEnd } from 'lucide-vue-next'
 import RegisterForm from '~/components/auth/RegisterForm.vue'
-import { Toaster } from '@/components/ui/sonner'
 
 const router = useRouter()
 
@@ -17,7 +16,6 @@ const handleSwitchToLogin = () => {
 <template>
   <div class="grid min-h-svh lg:grid-cols-2">
     <div class="relative flex flex-col gap-4 p-6 md:p-10">
-      <Toaster position="bottom-right" />
       <div class="flex justify-center gap-2 md:justify-start">
         <a href="/" class="flex items-center gap-2 font-medium">
           <div

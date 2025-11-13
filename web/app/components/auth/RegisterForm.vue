@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import * as z from 'zod'
+import 'vue-sonner/style.css'
+import { toast } from 'vue-sonner'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import type { HTMLAttributes } from 'vue'
@@ -8,7 +10,6 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
 
-import FormError from '~/components/auth/FormError.vue'
 import EmailInput from '~/components/auth/EmailInput.vue'
 import PasswordInput from '~/components/auth/PasswordInput.vue'
 import PasswordStrengthIndicator from '~/components/auth/PasswordStrengthIndicator.vue'
@@ -33,9 +34,6 @@ const emit = defineEmits<{
 
 const authStore = useAuthStore()
 const router = useRouter()
-
-// Form error state
-const formError = ref('')
 
 // Define form schema with Zod matching backend validation
 const registerFormSchema = toTypedSchema(
@@ -85,20 +83,29 @@ const passwordsMatch = computed(() => {
 
 // Handle form submission
 const onSubmit = form.handleSubmit(async (values) => {
-  formError.value = ''
-
   try {
     await authStore.register({
       email: values.email,
       password: values.password,
     })
 
+    // Show success toast
+    toast.success('Account Created!', {
+      description: 'Your account has been successfully created. Welcome aboard!',
+      duration: 3000,
+    })
+
     emit('success')
     router.push('/')
   } catch (error: unknown) {
+    // Show error toast for API errors
     const errorMessage =
       error instanceof Error ? error.message : 'Registration failed. Please try again.'
-    formError.value = errorMessage
+
+    toast.error('Registration Failed', {
+      description: errorMessage,
+      duration: 5000,
+    })
   }
 })
 
@@ -119,9 +126,6 @@ const handleSwitchToLogin = () => {
         Enter your details below to create your account
       </p>
     </div>
-
-    <!-- Display form error -->
-    <FormError v-if="formError" :message="formError" />
 
     <div class="grid gap-5">
       <!-- Email Field -->

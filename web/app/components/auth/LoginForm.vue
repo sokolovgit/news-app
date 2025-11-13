@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import * as z from 'zod'
+import 'vue-sonner/style.css'
+import { toast } from 'vue-sonner'
 
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -24,9 +26,6 @@ const emit = defineEmits<{
 
 const authStore = useAuthStore()
 const router = useRouter()
-
-// Form error state
-const formError = ref('')
 
 // Password visibility toggle
 const showPassword = ref(false)
@@ -72,12 +71,16 @@ const form = useForm({
 
 // Handle form submission
 const onSubmit = form.handleSubmit(async (values) => {
-  formError.value = ''
-
   try {
     await authStore.login({
       email: values.email,
       password: values.password,
+    })
+
+    // Show success toast
+    toast.success('Welcome back!', {
+      description: 'You have successfully logged in.',
+      duration: 3000,
     })
 
     emit('success')
@@ -85,9 +88,14 @@ const onSubmit = form.handleSubmit(async (values) => {
     // Redirect to home or dashboard
     router.push('/')
   } catch (error: unknown) {
+    // Show error toast for API errors
     const errorMessage =
       error instanceof Error ? error.message : 'Login failed. Please check your credentials.'
-    formError.value = errorMessage
+
+    toast.error('Login Failed', {
+      description: errorMessage,
+      duration: 5000,
+    })
   }
 })
 
@@ -107,15 +115,6 @@ const handleSwitchToRegister = () => {
       <p class="text-muted-foreground text-sm text-balance">
         Enter your credentials to access your account
       </p>
-    </div>
-
-    <!-- Display form error -->
-    <div
-      v-if="formError"
-      class="flex items-start gap-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-4"
-    >
-      <Icon name="lucide:alert-circle" class="h-5 w-5 shrink-0 mt-0.5" />
-      <span>{{ formError }}</span>
     </div>
 
     <div class="grid gap-5">

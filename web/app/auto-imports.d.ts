@@ -116,17 +116,3 @@ export {
   clamp,
   random,
 } from '~/utils'
-
-// Composables (auto-imported by Nuxt)
-// - useApi()
-// - useNotification()
-// - useLocalStorage()
-// - useDebounce()
-// - useDebouncedFn()
-// - useColorMode() (from @nuxtjs/color-mode)
-
-// Vue & Nuxt auto-imports
-// - ref, reactive, computed, watch, onMounted, etc.
-// - useState, useFetch, useRoute, useRouter, etc.
-// - navigateTo, definePageMeta, etc.
-
