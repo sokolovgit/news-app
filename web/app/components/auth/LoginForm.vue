@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import * as z from 'zod'
-import 'vue-sonner/style.css'
 import { toast } from 'vue-sonner'
 
 import { useForm } from 'vee-validate'

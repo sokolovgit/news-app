@@ -2,17 +2,14 @@
 import type { ToasterProps } from 'vue-sonner'
 import { Toaster as Sonner } from 'vue-sonner'
 
-const props = defineProps<ToasterProps>()
+const props = withDefaults(defineProps<ToasterProps>(), {
+  position: 'bottom-right',
+  expand: false,
+  richColors: false,
+  closeButton: true,
+})
 </script>
 
 <template>
-  <Sonner
-    class="toaster group"
-    v-bind="props"
-    :style="{
-      '--normal-bg': 'var(--popover)',
-      '--normal-text': 'var(--popover-foreground)',
-      '--normal-border': 'var(--border)',
-    }"
-  />
+  <Sonner v-bind="props" :theme="'system'" :toast-options="{ unstyled: false }" />
 </template>
