@@ -138,6 +138,22 @@ a:not([class*='bg-']):not([class*='btn']):hover {
   text-decoration: underline;
 }
 
+/* Autofill Override - prevents browser's default autofill background */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface-value) inset !important;
+  box-shadow: 0 0 0 1000px var(--color-surface-value) inset !important;
+  -webkit-text-fill-color: var(--color-text-value) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+input:-webkit-autofill::first-line {
+  font-family: inherit;
+  font-size: inherit;
+}
+
 @layer utilities {
   /* Custom scrollbar styles */
   .scrollbar-thin::-webkit-scrollbar {

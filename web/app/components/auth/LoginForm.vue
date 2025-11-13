@@ -208,7 +208,12 @@ const handleSwitchToRegister = () => {
       </FormField>
 
       <!-- Submit Button -->
-      <Button type="submit" size="lg" class="w-full mt-2" :disabled="authStore.isLoading">
+      <Button
+        type="submit"
+        size="lg"
+        class="w-full mt-2 bg-accent text-bg hover:bg-accent/90"
+        :disabled="authStore.isLoading"
+      >
         <Icon v-if="authStore.isLoading" name="lucide:loader-2" class="mr-2 h-4 w-4 animate-spin" />
         {{ authStore.isLoading ? 'Logging in...' : 'Login' }}
       </Button>
