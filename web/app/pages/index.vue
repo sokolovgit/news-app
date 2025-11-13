@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '~/stores/auth.store'
+import EmailVerificationBanner from '~/components/auth/EmailVerificationBanner.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -12,7 +13,11 @@ const handleLogout = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg text-text flex items-center justify-center p-8">
+  <div class="min-h-screen bg-bg text-text flex flex-col">
+    <!-- Email Verification Banner -->
+    <EmailVerificationBanner />
+    
+    <div class="flex-1 flex items-center justify-center p-8">
     <div class="text-center space-y-6 max-w-2xl">
       <h1 class="text-5xl font-bold">News App</h1>
       <p class="text-xl text-muted">Welcome to the News Application</p>
@@ -57,6 +62,7 @@ const handleLogout = async () => {
 
       <div class="mt-12">
         <ThemeToggle />
+        </div>
       </div>
     </div>
   </div>

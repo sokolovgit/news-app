@@ -23,7 +23,6 @@ export const useAuthStore = defineStore('auth', () => {
   // Get auth service instance
   const authService = computed(() => {
     const api = useApi()
-    console.log(api)
     return new AuthService(api)
   })
 
@@ -182,6 +181,61 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Verify email with token and automatically log in
+   */
+  async function verifyEmail(token: string) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const response = await authService.value.verifyEmail(token)
+
+      console.log(response)
+      
+      // Set auth state with returned tokens (automatic login)
+      accessToken.value = response.accessToken
+      user.value = {
+        id: response.user.id,
+        email: response.user.email,
+        roles: response.user.roles,
+        emailVerified: true, // Email is now verified
+      }
+
+      // Persist token
+      localStorage.setItem('accessToken', response.accessToken)
+
+      // Fetch full user data to ensure everything is up to date
+      await fetchUser()
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Email verification failed'
+      console.error('Email verification failed:', err)
+      error.value = errorMessage
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
+   * Resend verification email
+   */
+  async function resendVerificationEmail() {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      await authService.value.resendVerificationEmail()
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to resend verification email'
+      console.error('Failed to resend verification email:', err)
+      error.value = errorMessage
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     // State
     user: readonly(user),
@@ -203,5 +257,7 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     clearAuth,
     refreshToken,
+    verifyEmail,
+    resendVerificationEmail,
   }
 })

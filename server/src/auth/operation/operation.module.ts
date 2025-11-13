@@ -11,6 +11,7 @@ import {
   OAuthCallbackHandler,
   OAuthAuthorizationUrlHandler,
   VerifyEmailHandler,
+  ResendVerificationEmailHandler,
 } from './handlers';
 
 const handlers = [
@@ -19,9 +20,10 @@ const handlers = [
   LogoutHandler,
   RegisterHandler,
   RefreshTokenHandler,
-  VerifyEmailHandler,
   OAuthCallbackHandler,
   OAuthAuthorizationUrlHandler,
+  VerifyEmailHandler,
+  ResendVerificationEmailHandler,
 ];
 
 @Module({

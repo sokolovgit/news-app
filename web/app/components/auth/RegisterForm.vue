@@ -88,11 +88,19 @@ const onSubmit = form.handleSubmit(async (values) => {
       password: values.password,
     })
 
-    // Show success toast
-    toast.success('Account Created!', {
-      description: 'Your account has been successfully created. Welcome aboard!',
-      duration: 3000,
+    // Show success toast with email verification notice
+    toast.success('Account Created Successfully! 🎉', {
+      description: 'Please check your email to verify your account. A verification link has been sent to your inbox.',
+      duration: 7000,
     })
+
+    // Show additional info toast after a short delay
+    setTimeout(() => {
+      toast.info('Email Verification Required', {
+        description: 'You can use the app now, but some features may be limited until you verify your email.',
+        duration: 6000,
+    })
+    }, 1000)
 
     emit('success')
     router.push('/')

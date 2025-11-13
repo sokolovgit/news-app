@@ -49,5 +49,19 @@ export class AuthService {
   async refresh(): Promise<AuthenticationResponse> {
     return this.apiClient.post<AuthenticationResponse>('/auth/refresh')
   }
+
+  /**
+   * Verify email with token and return authentication tokens
+   */
+  async verifyEmail(token: string): Promise<AuthenticationResponse> {
+    return this.apiClient.post<AuthenticationResponse>(`/auth/verify-email?token=${encodeURIComponent(token)}`)
+  }
+
+  /**
+   * Resend verification email
+   */
+  async resendVerificationEmail(): Promise<ApiResponse<void>> {
+    return this.apiClient.post<ApiResponse<void>>('/auth/resend-verification-email')
+  }
 }
 

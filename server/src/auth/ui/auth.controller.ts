@@ -23,6 +23,7 @@ import {
   RegisterHandler,
   VerifyEmailHandler,
   RefreshTokenHandler,
+  ResendVerificationEmailHandler,
 } from '../operation/handlers';
 
 import {
@@ -38,6 +39,7 @@ import { CurrentUser } from '@/users/decorators';
 
 import { Auth } from '../decorators/auth.decorator';
 import { Cookies } from '@/cookies/decorators';
+import { CookiesService } from '@/cookies';
 
 import { ValidateRefreshTokenPipe } from '../pipes';
 
@@ -50,6 +52,8 @@ export class AuthController {
     private readonly logoutHandler: LogoutHandler,
     private readonly refreshTokenHandler: RefreshTokenHandler,
     private readonly verifyEmailHandler: VerifyEmailHandler,
+    private readonly resendVerificationEmailHandler: ResendVerificationEmailHandler,
+    private readonly cookiesService: CookiesService,
   ) {}
 
   @Get('me')
@@ -141,12 +145,14 @@ export class AuthController {
     refreshToken: string,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const authTokens = await this.refreshTokenHandler.handle(
+    const authenticationResult = await this.refreshTokenHandler.handle(
       { refreshToken },
       response,
     );
 
-    return AuthenticationResultDto.fromAuthenticationResult(authTokens);
+    return AuthenticationResultDto.fromAuthenticationResult(
+      authenticationResult,
+    );
   }
 
   @Post('logout')
@@ -167,15 +173,41 @@ export class AuthController {
   }
 
   @Post('verify-email')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Verify email',
-    description: 'Verify an email by sending a verification email',
+    description:
+      'Verify an email and automatically log the user in with new tokens',
   })
   @ApiOkResponse({
-    description: 'Email verified successfully',
+    description: 'Email verified successfully and user logged in',
+    type: AuthenticationResultDto,
   })
-  public async verifyEmail(@Query() verifyEmailQuery: VerifyEmailDto) {
-    await this.verifyEmailHandler.handle(verifyEmailQuery.token);
+  public async verifyEmail(
+    @Query() verifyEmailQuery: VerifyEmailDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const authenticationResult = await this.verifyEmailHandler.handle(
+      verifyEmailQuery.token,
+      response,
+    );
+
+    return AuthenticationResultDto.fromAuthenticationResult(
+      authenticationResult,
+    );
+  }
+
+  @Post('resend-verification-email')
+  @Auth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Resend verification email',
+    description: 'Resend verification email to the current user',
+  })
+  @ApiOkResponse({
+    description: 'Verification email sent successfully',
+  })
+  public async resendVerificationEmail(@CurrentUser() user: User) {
+    await this.resendVerificationEmailHandler.handle(user.getId());
   }
 }
