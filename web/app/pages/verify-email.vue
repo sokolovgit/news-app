@@ -154,7 +154,7 @@ onUnmounted(() => {
             <div class="space-y-2">
               <h1 class="text-2xl font-bold text-text">Email Verified!</h1>
               <p class="text-muted text-sm">
-                Your email has been successfully verified and you're now logged in. Welcome!
+                Your email has been successfully verified. You can now access all features.
               </p>
             </div>
 

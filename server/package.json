@@ -49,6 +49,7 @@
     "@types/pg": "^8.15.5",
     "@types/swagger-ui-express": "^4.1.8",
     "@types/yamljs": "^0.2.34",
+    "amqp-connection-manager": "^5.0.0",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.61.0",
     "class-transformer": "^0.5.1",

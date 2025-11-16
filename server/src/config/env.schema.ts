@@ -32,6 +32,8 @@ export const envValidationSchema = z.object({
 
   REDIS_URL: z.url(),
 
+  RABBITMQ_URL: z.url(),
+
   JWT_SECRET: z.string(),
   REFRESH_TOKEN_SECRET: z.string(),
 

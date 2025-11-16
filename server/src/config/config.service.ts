@@ -49,6 +49,15 @@ export class ConfigService extends BaseConfigService<EnvType> {
     url: this.env.REDIS_URL,
   };
 
+  rabbitmq = {
+    url: this.env.RABBITMQ_URL,
+    timeConfig: {
+      reconnectTimeInSeconds: 10,
+      heartbeatIntervalInSeconds: 60,
+      waitForChannelReadyTimeoutMs: 10000,
+    },
+  };
+
   smtp = {
     host: this.env.SMTP_HOST,
     port: this.env.SMTP_PORT,
