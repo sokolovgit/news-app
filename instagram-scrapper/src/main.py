@@ -8,10 +8,12 @@ from src.config import get_settings
 
 def setup_logging() -> None:
     """Configure logging for the application."""
+
     settings = get_settings()
+    print(settings)
 
     logging.basicConfig(
-        level=getattr(logging, settings.log_level),
+        level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         handlers=[logging.StreamHandler(sys.stdout)],
     )
