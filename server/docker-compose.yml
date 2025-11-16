@@ -1,6 +1,4 @@
-
 services:
-
   db:
     container_name: news_app_db
     image: postgres:16
@@ -34,7 +32,7 @@ services:
       - '6380:6379'
     volumes:
       - redis_data:/data
-  
+
   mailhog:
     image: mailhog/mailhog
     platform: linux/amd64
@@ -43,7 +41,21 @@ services:
     ports:
       - '1026:1025'
       - '8026:8025'
-      
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: news_app_rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=password
+    ports:
+      - '5672:5672' # AMQP protocol
+      - '15672:15672' # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
 volumes:
   postgres_data:
   redis_data:
+  rabbitmq_data:
