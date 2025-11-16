@@ -1,0 +1,7 @@
+# Core dependencies for production
+instaloader>=4.15
+bullmq>=1.6.0
+redis>=4.6.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+python-dotenv>=1.0.0
