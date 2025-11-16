@@ -1,7 +1,8 @@
 import { BullModule } from '@nestjs/bullmq';
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
 import { ConfigModule } from './commons/config';
+import { RedisModule } from './commons/redis';
 // import { RabbitmqModule } from './commons/rabbitmq';
 import { ConfigService, envValidationSchema } from './config';
 import { LoggerModule, RequestLoggerMiddleware } from './logger';
@@ -20,6 +21,7 @@ import { SourcesModule } from './sources/sources.module';
       validationSchema: envValidationSchema,
     }),
     LoggerModule.forRootAsync(),
+    RedisModule.forRoot(),
     // RabbitmqModule.forRoot(),
     BullModule.forRootAsync({
       inject: [ConfigService],
