@@ -2,7 +2,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 
 import { ConfigModule } from './commons/config';
-import { RabbitmqModule } from './commons/rabbitmq';
+// import { RabbitmqModule } from './commons/rabbitmq';
 import { ConfigService, envValidationSchema } from './config';
 import { LoggerModule, RequestLoggerMiddleware } from './logger';
 
@@ -20,7 +20,7 @@ import { SourcesModule } from './sources/sources.module';
       validationSchema: envValidationSchema,
     }),
     LoggerModule.forRootAsync(),
-    RabbitmqModule.forRoot(),
+    // RabbitmqModule.forRoot(),
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

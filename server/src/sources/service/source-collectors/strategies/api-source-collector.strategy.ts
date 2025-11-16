@@ -1,4 +1,4 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { LoggerService } from '@/logger';
 
@@ -10,7 +10,9 @@ import { AvailableApiSourceCollectorsFactory } from '../../api-source-collectors
 import {
   AvailableApiNotFoundError,
   AvailableApiSourceCollectorStrategyNotFoundError,
+  InvalidSourceUrlError,
 } from '@/sources/domain/errors';
+import { ValidatedSourceUrl } from '@/sources/domain/types';
 
 @Injectable()
 export class ApiSourceCollectorStrategy implements CollectorStrategy {
@@ -23,7 +25,7 @@ export class ApiSourceCollectorStrategy implements CollectorStrategy {
     this.logger.log(
       `Collecting source ${source.getId()} of type ${source.getCollector()}`,
     );
-    const availableApi = SourceToAvailableApiMatcher.match(source);
+    const availableApi = SourceToAvailableApiMatcher.match(source.getSource());
 
     if (!availableApi) {
       this.logger.error(`Available API not found for source ${source.getId()}`);
@@ -54,10 +56,48 @@ export class ApiSourceCollectorStrategy implements CollectorStrategy {
     await apiStrategy.collect(source);
   }
 
-  async validate(url: string): Promise<boolean> {
-    console.log('validating url', url);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    throw new NotImplementedException('Not implemented');
+  async validate(validatedSourceUrl: ValidatedSourceUrl): Promise<boolean> {
+    this.logger.log(
+      `Validating API source ${validatedSourceUrl.url} with collector ${validatedSourceUrl.collector}`,
+    );
+
+    const availableApi = SourceToAvailableApiMatcher.match(
+      validatedSourceUrl.source,
+    );
+
+    if (!availableApi) {
+      this.logger.error(
+        `Available API not found for source ${validatedSourceUrl.source}`,
+      );
+      throw new InvalidSourceUrlError(
+        validatedSourceUrl.url,
+        `Available API not found for source type ${validatedSourceUrl.source}`,
+      );
+    }
+
+    const apiStrategy =
+      this.availableApiSourceCollectorFactory.getStrategy(availableApi);
+
+    if (!apiStrategy) {
+      this.logger.error(
+        `API strategy not found for source ${validatedSourceUrl.source} and API ${availableApi}`,
+      );
+      throw new InvalidSourceUrlError(
+        validatedSourceUrl.url,
+        `API strategy not found for source type ${validatedSourceUrl.source} and API ${availableApi}`,
+      );
+    }
+
+    const isValid = await apiStrategy.validate(validatedSourceUrl.url);
+
+    if (!isValid) {
+      throw new InvalidSourceUrlError(
+        validatedSourceUrl.url,
+        `Invalid source URL for source type ${validatedSourceUrl.source} and API ${availableApi}`,
+      );
+    }
+
+    return true;
   }
 
   supports(collector: Collector): boolean {

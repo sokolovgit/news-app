@@ -7,7 +7,7 @@ import { RabbitSetupConfig } from './types';
 
 type AmqpConnection = ReturnType<typeof connect>;
 
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 @Injectable()
 export class RabbitmqService implements OnModuleDestroy {
   private readonly logger = new Logger(RabbitmqService.name);

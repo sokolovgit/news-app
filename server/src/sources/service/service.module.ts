@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 import { PostsModule } from '@/posts/posts.module';
 
-import { SourcesRepository } from './abstracts';
+import { SourcesRepository, UserSourcesRepository } from './abstracts';
 import { DrizzleSourcesRepository } from './sources-storage';
+import { DrizzleUserSourcesRepository } from './user-sources-storage';
 
 import { SourcesService } from './sources-service';
+import { UserSourcesService } from './user-sources-service';
+import { SourceValidationService } from './source-validation';
 import { SourcesCollectorService } from './source-collector-service';
 
 import { TelegramService } from './telegram-serivce';
@@ -27,6 +30,10 @@ const repositories = [
   {
     provide: SourcesRepository,
     useClass: DrizzleSourcesRepository,
+  },
+  {
+    provide: UserSourcesRepository,
+    useClass: DrizzleUserSourcesRepository,
   },
 ];
 
@@ -55,7 +62,13 @@ const factories = [
   },
 ];
 
-const services = [SourcesService, SourcesCollectorService, TelegramService];
+const services = [
+  SourcesService,
+  SourcesCollectorService,
+  TelegramService,
+  SourceValidationService,
+  UserSourcesService,
+];
 
 @Module({
   imports: [PostsModule],

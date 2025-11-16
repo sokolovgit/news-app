@@ -6,7 +6,7 @@ import { AppError } from '@/errors';
 export class AvailableApiNotFoundError extends AppError {
   constructor(source: Source, context?: string) {
     super(
-      'Available API not found',
+      'Available API not found for existing source',
       HttpStatus.INTERNAL_SERVER_ERROR,
       context,
       {

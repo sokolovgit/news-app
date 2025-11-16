@@ -6,12 +6,9 @@ import { AppError } from '@/errors';
  */
 export class UserCreationFailedError extends AppError {
   constructor(email: string, reason?: string, context?: string) {
-    super(
-      'Failed to create user',
-      HttpStatus.INTERNAL_SERVER_ERROR,
-      context,
-      { email, reason },
-    );
+    super('Failed to create user', HttpStatus.INTERNAL_SERVER_ERROR, context, {
+      email,
+      reason,
+    });
   }
 }
-

@@ -68,11 +68,9 @@ export class TelegramService implements OnModuleInit {
       throw new TelegramClientNotConnectedError();
     }
 
-    const messages: Api.Message[] = [];
-
-    for await (const message of this.client.iterMessages(channel, { limit })) {
-      messages.push(message);
-    }
+    const messages: Api.Message[] = await this.client.getMessages(channel, {
+      limit,
+    });
 
     this.logger.log(
       `Fetched ${messages.length} messages from channel ${channel}`,

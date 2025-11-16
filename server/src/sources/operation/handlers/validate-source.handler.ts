@@ -1,13 +1,18 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ValidateSourceRequest } from '../requests';
+
+import { SourceValidationService } from '@/sources/service/source-validation';
+import { ValidateSourceResponse } from '../responses';
 
 @Injectable()
 export class ValidateSourceHandler {
-  constructor() {}
+  constructor(
+    private readonly sourceValidationService: SourceValidationService,
+  ) {}
 
-  async handle(request: ValidateSourceRequest): Promise<void> {
-    console.log('validating source', request);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    throw new NotImplementedException('Not implemented');
+  async handle(
+    request: ValidateSourceRequest,
+  ): Promise<ValidateSourceResponse> {
+    return await this.sourceValidationService.validateOrThrow(request.url);
   }
 }

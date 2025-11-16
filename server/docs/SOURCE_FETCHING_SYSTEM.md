@@ -35,7 +35,7 @@ graph TB
         CALC --> |10-99 users| P2[Medium Priority<br/>Fetch every 15 minutes]
         CALC --> |1-9 users| P3[Low Priority<br/>Fetch every 2 hours]
         CALC --> |0 users| P4[Paused<br/>Don't fetch]
-        
+
         P1 & P2 & P3 --> QUEUE[Job Queue]
     end
 
@@ -43,7 +43,7 @@ graph TB
         QUEUE --> W1[Worker 1<br/>Processes Instagram]
         QUEUE --> W2[Worker 2<br/>Processes Twitter]
         QUEUE --> W3[Worker 3<br/>Processes RSS]
-        
+
         W1 --> PY1[Python Script<br/>Instagram Scraper]
         W2 --> PY2[Python Script<br/>Twitter Scraper]
     end
@@ -81,7 +81,7 @@ Every 5 minutes, the system analyzes all sources and determines which ones need 
 flowchart TD
     START([Priority Calculator Runs]) --> COUNT[Count Active Users<br/>per Source]
     COUNT --> CHECK{How many<br/>active users?}
-    
+
     CHECK -->|100+ users| SET1[Priority: HIGHEST<br/>Frequency: Every 3 min<br/>Example: NASA, BBC]
     CHECK -->|50-99 users| SET2[Priority: HIGH<br/>Frequency: Every 5 min<br/>Example: TechCrunch]
     CHECK -->|20-49 users| SET3[Priority: MEDIUM<br/>Frequency: Every 10 min<br/>Example: Local News]
@@ -90,10 +90,10 @@ flowchart TD
     CHECK -->|2-4 users| SET6[Priority: VERY LOW<br/>Frequency: Every 1 hour<br/>Example: Personal Accounts]
     CHECK -->|1 user| SET7[Priority: MINIMAL<br/>Frequency: Every 2 hours]
     CHECK -->|0 users| SET8[Status: PAUSED<br/>No fetching]
-    
+
     SET1 & SET2 & SET3 & SET4 & SET5 & SET6 & SET7 --> SCHEDULE[Schedule in Job Queue]
     SET8 --> REMOVE[Remove from Queue]
-    
+
     SCHEDULE --> END([Repeat in 5 minutes])
     REMOVE --> END
 
@@ -130,27 +130,28 @@ sequenceDiagram
     Note over Clock,Queue: Every 3-120 minutes<br/>(depending on priority)
     Clock->>Queue: Time to fetch NASA's Instagram
     Queue->>Worker: Execute fetch job
-    
+
     Worker->>DB: Get last cursor position<br/>(where we left off)
     DB-->>Worker: Cursor: "post_12345"
-    
+
     Worker->>External: Fetch new posts since cursor
     Note over External: Takes 5-30 seconds
     External-->>Worker: 50 new posts
-    
+
     Worker->>Worker: Filter: Keep only new posts<br/>(skip already stored)
-    
+
     Worker->>DB: Store 23 new posts<br/>(27 were duplicates)
     Worker->>Cache: Update cached feed<br/>(expires in 5 min)
     Worker->>DB: Update cursor: "post_67890"
-    
+
     User->>Cache: Request feed
     Cache-->>User: Fresh posts (instant!)
-    
+
     Note over Queue,Worker: Job complete.<br/>Schedule next fetch based on priority.
 ```
 
 **Deduplication Logic:**
+
 - Each post has a unique external ID (e.g., Instagram post ID)
 - Before storing, check if post already exists
 - Only store new posts to avoid duplicates
@@ -167,10 +168,10 @@ Recently fetched posts are stored in a fast cache to provide instant access to u
 graph LR
     subgraph "User Request Flow"
         U[User opens feed] --> CHECK{Is data<br/>in cache?}
-        
+
         CHECK -->|Yes, < 5 min old| C1[Return from Cache<br/>⚡ Instant response]
         CHECK -->|No or expired| C2[Read from Database<br/>🔄 Slightly slower]
-        
+
         C2 --> TRIGGER{Should we<br/>fetch now?}
         TRIGGER -->|Last fetch > 10 min| URGENT[Trigger urgent fetch<br/>High priority job]
         TRIGGER -->|Last fetch < 10 min| WAIT[Wait for scheduled fetch]
@@ -189,6 +190,7 @@ graph LR
 ```
 
 **Cache Benefits:**
+
 - **Speed**: Cache responses are 10-100x faster than database queries
 - **Reduced Load**: Popular sources read from cache by many users
 - **Fresh Data**: 5-minute TTL ensures data doesn't get too stale
@@ -203,30 +205,30 @@ graph LR
 ```mermaid
 flowchart TD
     START([Fetch Job Starts]) --> ATTEMPT1[Attempt 1:<br/>Try to fetch posts]
-    
+
     ATTEMPT1 --> CHECK1{Success?}
     CHECK1 -->|Yes ✓| STORE[Store posts<br/>Update cache]
     CHECK1 -->|No ✗| ERROR1[Error occurred]
-    
+
     ERROR1 --> CLASSIFY{Error Type?}
-    
+
     CLASSIFY -->|Network timeout<br/>Rate limit<br/>Temporary issue| RETRY1[Wait 5 seconds]
     CLASSIFY -->|Invalid credentials<br/>Account suspended<br/>Permanent issue| ALERT[Alert administrators]
-    
+
     RETRY1 --> ATTEMPT2[Attempt 2:<br/>Try again]
     ATTEMPT2 --> CHECK2{Success?}
     CHECK2 -->|Yes ✓| STORE
     CHECK2 -->|No ✗| WAIT2[Wait 15 seconds]
-    
+
     WAIT2 --> ATTEMPT3[Attempt 3:<br/>Final attempt]
     ATTEMPT3 --> CHECK3{Success?}
     CHECK3 -->|Yes ✓| STORE
     CHECK3 -->|No ✗| FAIL[Mark as failed<br/>Send to Dead Letter Queue]
-    
+
     STORE --> SCHEDULE[Schedule next fetch]
     ALERT --> MANUAL[Manual investigation required]
     FAIL --> MANUAL
-    
+
     SCHEDULE --> END([Complete])
     MANUAL --> END
 
@@ -239,14 +241,14 @@ flowchart TD
 
 **Error Categories:**
 
-| Error Type | Retryable? | Action |
-|------------|------------|--------|
-| Network timeout | ✅ Yes | Retry with exponential backoff |
-| Rate limit exceeded | ✅ Yes | Wait and retry after specified time |
-| Authentication failed | ❌ No | Alert admin, pause source |
-| Account not found | ❌ No | Mark source as invalid |
-| Private account | ❌ No | Notify user, pause fetching |
-| Server error (5xx) | ✅ Yes | Retry up to 3 times |
+| Error Type            | Retryable? | Action                              |
+| --------------------- | ---------- | ----------------------------------- |
+| Network timeout       | ✅ Yes     | Retry with exponential backoff      |
+| Rate limit exceeded   | ✅ Yes     | Wait and retry after specified time |
+| Authentication failed | ❌ No      | Alert admin, pause source           |
+| Account not found     | ❌ No      | Mark source as invalid              |
+| Private account       | ❌ No      | Notify user, pause fetching         |
+| Server error (5xx)    | ✅ Yes     | Retry up to 3 times                 |
 
 ---
 
@@ -265,22 +267,23 @@ sequenceDiagram
     System->>System: Add to user's sources
     Note over System: NASA already being fetched<br/>every 3 minutes
     System-->>User: Followed successfully
-    
+
     User->>System: View feed
     System->>System: Check cache
     Note over System: Cache hit!<br/>NASA fetched 2 min ago
     System-->>User: Show NASA posts (instant)
-    
+
     Note over Queue,NASA: 1 minute later<br/>(3 min since last fetch)
     Queue->>NASA: Fetch new posts
     NASA-->>Queue: 5 new posts
     Queue->>System: Update cache & database
-    
+
     User->>System: Refresh feed
     System-->>User: Show 5 new NASA posts
 ```
 
 **Key Points:**
+
 - User sees existing posts immediately (from cache)
 - No additional fetch triggered (NASA already on schedule)
 - New posts appear within 3 minutes
@@ -301,24 +304,25 @@ sequenceDiagram
     User->>System: Follow "TechBlog123"
     System->>System: Add to user's sources
     System-->>User: Followed successfully
-    
+
     Note over Priority: 3 minutes later<br/>(next calculation cycle)
     Priority->>System: Analyze sources
     Priority->>Priority: TechBlog123: 1 active follower
     Priority->>Queue: Schedule job<br/>Priority: LOW<br/>Frequency: Every 2 hours
-    
+
     Queue->>Niche: Fetch posts (first time)
     Niche-->>Queue: 20 posts
     Queue->>System: Store posts & cache
-    
+
     User->>System: View feed
     System-->>User: Show TechBlog123 posts
-    
+
     Note over Queue,Niche: 2 hours later
     Queue->>Niche: Fetch new posts
 ```
 
 **Key Points:**
+
 - First fetch happens within 5 minutes of following
 - Subsequent fetches every 2 hours (low priority)
 - If user stops viewing feed, priority drops further
@@ -332,16 +336,16 @@ sequenceDiagram
 graph TD
     START[TechBlog123<br/>1 follower] --> F1[User 2 follows]
     F1 --> STATE1[2 followers<br/>Fetch every 1 hour]
-    
+
     STATE1 --> F2[3 more users follow]
     F2 --> STATE2[5 followers<br/>Fetch every 30 minutes]
-    
+
     STATE2 --> F3[5 more users follow]
     F3 --> STATE3[10 followers<br/>Fetch every 15 minutes]
-    
+
     STATE3 --> F4[10 more users follow]
     F4 --> STATE4[20 followers<br/>Fetch every 10 minutes]
-    
+
     STATE4 --> F5[80 more users follow]
     F5 --> STATE5[100+ followers<br/>Fetch every 3 minutes]
 
@@ -363,6 +367,7 @@ The system automatically adjusts fetch frequency as popularity changes, without 
 ### 1. Cost Efficiency
 
 **Traditional Approach:**
+
 ```
 100 users follow NASA
 Each user requests feed every 5 minutes
@@ -370,6 +375,7 @@ Each user requests feed every 5 minutes
 ```
 
 **Our Approach:**
+
 ```
 100 users follow NASA
 System fetches NASA once every 3 minutes
@@ -390,18 +396,19 @@ pie title Computing Resources Distribution
 ```
 
 **Smart Resource Allocation:**
+
 - 70% of resources go to sources that serve the most users
 - 0% wasted on sources nobody follows
 - Automatic rebalancing as user behavior changes
 
 ### 3. User Experience
 
-| Metric | Value | Notes |
-|--------|-------|-------|
-| **Average Feed Load Time** | < 100ms | Thanks to caching |
-| **Content Freshness** | 3-120 min | Based on source popularity |
-| **Feed Availability** | 99.9% | Multiple retry mechanisms |
-| **New Post Delay** | 3-120 min | Popular sources update fastest |
+| Metric                     | Value     | Notes                          |
+| -------------------------- | --------- | ------------------------------ |
+| **Average Feed Load Time** | < 100ms   | Thanks to caching              |
+| **Content Freshness**      | 3-120 min | Based on source popularity     |
+| **Feed Availability**      | 99.9%     | Multiple retry mechanisms      |
+| **New Post Delay**         | 3-120 min | Popular sources update fastest |
 
 ### 4. Scalability
 
@@ -412,19 +419,19 @@ graph LR
         S1[500 sources]
         F1[~1,000 fetches/hour]
     end
-    
+
     subgraph "10x Growth"
         U2[10,000 users]
         S2[2,000 sources]
         F2[~3,000 fetches/hour<br/>Only 3x increase!]
     end
-    
+
     subgraph "100x Growth"
         U3[100,000 users]
         S3[10,000 sources]
         F3[~15,000 fetches/hour<br/>Only 15x increase!]
     end
-    
+
     U1 --> U2 --> U3
     S1 --> S2 --> S3
     F1 --> F2 --> F3
@@ -435,6 +442,7 @@ graph LR
 ```
 
 **Why Sub-Linear Scaling?**
+
 - Multiple users share the same sources
 - Popular sources (most users) are fetched once
 - Only unique niche sources add fetch cost
@@ -452,13 +460,13 @@ graph TB
         M2[Cache Hit Rate:<br/>% of requests served from cache]
         M3[Resource Utilization:<br/>Computing power used vs. available]
     end
-    
+
     subgraph "Quality Metrics"
         M4[Fetch Success Rate:<br/>% of successful fetches]
         M5[Average Post Freshness:<br/>Time from post creation to delivery]
         M6[Error Recovery Time:<br/>Time to recover from failures]
     end
-    
+
     subgraph "Business Metrics"
         M7[API Cost per User:<br/>External API charges / active users]
         M8[Feed Load Performance:<br/>Average time to load user feed]
@@ -477,6 +485,7 @@ graph TB
 ```
 
 **Target Values:**
+
 - Fetch Deduplication Rate: > 80%
 - Cache Hit Rate: > 90%
 - Fetch Success Rate: > 98%
@@ -495,24 +504,25 @@ gantt
     title NASA Instagram - Daily Fetch Frequency
     dateFormat HH:mm
     axisFormat %H:%M
-    
+
     section Night (Low Activity)
     Low Priority (Every 2h) :00:00, 06:00
-    
+
     section Morning (Rising)
     Medium Priority (Every 30m) :06:00, 09:00
-    
+
     section Peak Hours
     High Priority (Every 5m) :09:00, 18:00
-    
+
     section Evening (Declining)
     Medium Priority (Every 30m) :18:00, 22:00
-    
+
     section Night (Low Activity)
     Low Priority (Every 2h) :22:00, 24:00
 ```
 
 **Adaptive Behavior:**
+
 - System detects user activity patterns
 - Adjusts fetch frequency throughout the day
 - Saves resources during low-activity periods
@@ -535,15 +545,15 @@ sequenceDiagram
     Queue->>Worker: Fetch popular_account
     Worker->>Insta: Request posts
     Insta-->>Worker: Error 429: Rate Limit Exceeded<br/>Retry after 15 minutes
-    
+
     Worker->>Worker: Mark as retriable error
     Worker->>Queue: Requeue with 15-min delay
     Worker->>Monitor: Log rate limit event
-    
+
     Note over Worker,Monitor: If rate limits persist...
     Monitor->>Monitor: Detect pattern:<br/>5+ rate limits in 1 hour
     Monitor->>Admin: Alert: Instagram rate limiting
-    
+
     Note over Queue,Worker: 15 minutes later
     Queue->>Worker: Retry fetch
     Worker->>Insta: Request posts
@@ -553,6 +563,7 @@ sequenceDiagram
 ```
 
 **Self-Healing:**
+
 - Automatic retry with appropriate delays
 - No user impact (cache serves stale data)
 - Administrator alerted only if issue persists
@@ -570,17 +581,17 @@ The Source Fetching System is designed to:
 ✅ **Guarantee Reliability**: Automatic error recovery  
 ✅ **Scale Effortlessly**: Sub-linear growth with user base  
 ✅ **Minimize Costs**: Reduced external API calls  
-✅ **Deliver Speed**: Cache-first architecture  
+✅ **Deliver Speed**: Cache-first architecture
 
 ### Business Value Proposition
 
-| Traditional Approach | Our System | Improvement |
-|---------------------|------------|-------------|
-| Fetch on every user request | Shared, scheduled fetching | **98% fewer API calls** |
-| Fixed update frequency | Dynamic prioritization | **Better resource usage** |
-| User waits for fetch | Instant from cache | **10-100x faster** |
-| Manual scaling needed | Auto-adjusts to demand | **Zero-touch scaling** |
-| No deduplication | Smart deduplication | **Sub-linear cost growth** |
+| Traditional Approach        | Our System                 | Improvement                |
+| --------------------------- | -------------------------- | -------------------------- |
+| Fetch on every user request | Shared, scheduled fetching | **98% fewer API calls**    |
+| Fixed update frequency      | Dynamic prioritization     | **Better resource usage**  |
+| User waits for fetch        | Instant from cache         | **10-100x faster**         |
+| Manual scaling needed       | Auto-adjusts to demand     | **Zero-touch scaling**     |
+| No deduplication            | Smart deduplication        | **Sub-linear cost growth** |
 
 ---
 
@@ -591,4 +602,3 @@ The Source Fetching System is designed to:
 3. **User Settings**: Let users boost priority for favorite sources
 4. **Analytics**: Track which sources drive most engagement
 5. **Cost Optimization**: Identify expensive sources and optimize fetch strategy
-

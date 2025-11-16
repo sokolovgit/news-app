@@ -32,6 +32,20 @@ export class DrizzleSourcesRepository extends SourcesRepository {
       : null;
   }
 
+  async getSourceByUrl(
+    url: string,
+    relations: SourceLoadOptions = {},
+  ): Promise<Source | null> {
+    const source = await this.db.query.sources.findFirst({
+      where: eq(sources.url, url),
+      with: this.buildRelations(relations),
+    });
+
+    return source
+      ? DrizzleSourcesEntityMapper.toEntity(source, relations)
+      : null;
+  }
+
   async save(source: Source): Promise<Source | null> {
     const sourceData = DrizzleSourcesEntityMapper.toSchema(source);
 

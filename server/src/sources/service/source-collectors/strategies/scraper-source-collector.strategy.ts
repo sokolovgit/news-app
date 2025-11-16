@@ -5,6 +5,7 @@ import { LoggerService } from '@/logger';
 import { Source } from '@/sources/domain/entities';
 import { Collector } from '@/sources/domain/enums';
 import { CollectorStrategy } from '../interfaces';
+import { ValidatedSourceUrl } from '@/sources/domain/types';
 
 @Injectable()
 export class ScraperSourceCollectorStrategy implements CollectorStrategy {
@@ -17,8 +18,8 @@ export class ScraperSourceCollectorStrategy implements CollectorStrategy {
     throw new NotImplementedException('Not implemented');
   }
 
-  async validate(url: string): Promise<boolean> {
-    console.log('validating url', url);
+  async validate(validatedSourceUrl: ValidatedSourceUrl): Promise<boolean> {
+    console.log('validating url', validatedSourceUrl.url);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     throw new NotImplementedException('Not implemented');
   }

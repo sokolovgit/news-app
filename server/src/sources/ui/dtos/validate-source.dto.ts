@@ -14,7 +14,7 @@ export class ValidateSourceDto {
 
   toRequest(): ValidateSourceRequest {
     return {
-      url: this.url,
+      url: this.url.trim(),
     };
   }
 }

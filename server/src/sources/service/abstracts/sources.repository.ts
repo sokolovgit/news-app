@@ -7,5 +7,10 @@ export abstract class SourcesRepository {
     relations?: SourceLoadOptions,
   ): Promise<Source | null>;
 
+  abstract getSourceByUrl(
+    url: string,
+    relations?: SourceLoadOptions,
+  ): Promise<Source | null>;
+
   abstract save(source: Source): Promise<Source | null>;
 }
