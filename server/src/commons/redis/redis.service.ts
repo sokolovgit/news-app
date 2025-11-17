@@ -83,4 +83,24 @@ export class RedisService implements OnModuleDestroy {
 
     return keys;
   }
+
+  async zadd(key: string, score: number, member: string): Promise<number> {
+    return this.client.zadd(key, score, member);
+  }
+
+  async zcount(
+    key: string,
+    min: number | string,
+    max: number | string,
+  ): Promise<number> {
+    return this.client.zcount(key, min, max);
+  }
+
+  async zremrangebyscore(
+    key: string,
+    min: number | string,
+    max: number | string,
+  ): Promise<number> {
+    return this.client.zremrangebyscore(key, min, max);
+  }
 }
