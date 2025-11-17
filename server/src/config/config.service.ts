@@ -1,7 +1,6 @@
 import * as dayjs from 'dayjs';
 
 import { Injectable } from '@nestjs/common';
-import { JobsOptions } from 'bullmq';
 
 import { Environments } from '@/commons/enums';
 
@@ -9,7 +8,12 @@ import { EnvType } from './env.schema';
 import { BaseConfigService } from '../commons/config/base-config.service';
 
 import { EmailQueue } from '@/mails/domain/queues';
-import { SourceQueue } from '@/sources/domain/queues';
+import { SourceQueue, SourceJobScheduler } from '@/sources/domain/queues';
+
+import type {
+  JobsOptions,
+  UpsertJobSchedulerConfig,
+} from '@/commons/bullmq/types';
 
 @Injectable()
 export class ConfigService extends BaseConfigService<EnvType> {
@@ -84,10 +88,20 @@ export class ConfigService extends BaseConfigService<EnvType> {
       removeOnFail: 20,
     },
 
-    [SourceQueue.CALCULATE_SOURCE_PRIORITY]: <JobsOptions>{
-      repeat: { pattern: '*/5 * * * *' },
-      removeOnComplete: 5,
-      removeOnFail: 20,
+    [SourceQueue.CALCULATE_SOURCE_PRIORITY]: <
+      UpsertJobSchedulerConfig<string, null>
+    >{
+      jobSchedulerId: SourceJobScheduler.CALCULATE_SOURCE_PRIORITY,
+      // Every 5 minutes
+      repeatOptions: { pattern: '*/5 * * * *' },
+      template: {
+        name: SourceQueue.CALCULATE_SOURCE_PRIORITY,
+        data: null,
+        opts: {
+          removeOnComplete: 5,
+          removeOnFail: 20,
+        },
+      },
     },
   };
 
