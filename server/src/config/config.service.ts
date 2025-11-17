@@ -9,6 +9,7 @@ import { EnvType } from './env.schema';
 import { BaseConfigService } from '../commons/config/base-config.service';
 
 import { EmailQueue } from '@/mails/domain/enums';
+import { SourceQueue } from '@/sources/domain/queues';
 
 @Injectable()
 export class ConfigService extends BaseConfigService<EnvType> {
@@ -79,6 +80,12 @@ export class ConfigService extends BaseConfigService<EnvType> {
         type: 'exponential',
         delay: 1000,
       },
+      removeOnComplete: 5,
+      removeOnFail: 20,
+    },
+
+    [SourceQueue.CALCULATE_SOURCE_PRIORITY]: <JobsOptions>{
+      repeat: { pattern: '*/5 * * * *' },
       removeOnComplete: 5,
       removeOnFail: 20,
     },

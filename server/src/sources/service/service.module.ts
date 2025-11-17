@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
+
 import { PostsModule } from '@/posts/posts.module';
 
 import { SourcesRepository, UserSourcesRepository } from './abstracts';
@@ -25,6 +27,9 @@ import {
   TelegramApiSourceCollectorStrategy,
   AvailableApiSourceCollectorStrategy,
 } from './api-source-collectors';
+
+import { SourceQueue } from '../domain/queues';
+import { SourcePriorityJobScheduler } from './schedulers';
 
 const repositories = [
   {
@@ -70,10 +75,19 @@ const services = [
   UserSourcesService,
 ];
 
+const schedulers = [SourcePriorityJobScheduler];
+
+const queues = [
+  {
+    name: SourceQueue.CALCULATE_SOURCE_PRIORITY,
+  },
+];
+
 @Module({
-  imports: [PostsModule],
+  imports: [PostsModule, BullModule.registerQueue(...queues)],
   providers: [
     ...repositories,
+    ...schedulers,
     ...services,
     ...sourceCollectorsStrategies,
     ...availableApiSourceCollectorsStrategies,

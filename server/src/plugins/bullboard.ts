@@ -7,6 +7,7 @@ import { ExpressAdapter } from '@bull-board/express';
 import { Queue } from 'bullmq';
 import { ConfigService } from '@/config';
 import { EmailQueue } from '@/mails/domain/enums';
+import { SourceQueue } from '@/sources/domain/queues';
 
 export const setupBullBoard = (app: INestApplication): void => {
   const configService = app.get(ConfigService);
@@ -27,7 +28,7 @@ export const setupBullBoard = (app: INestApplication): void => {
 };
 
 const buildBullBoardQueues = (redisUrl: string): BullMQAdapter[] => {
-  const queues = [...Object.values(EmailQueue)];
+  const queues = [...Object.values(EmailQueue), ...Object.values(SourceQueue)];
 
   return queues.map((queueName) => {
     return new BullMQAdapter(

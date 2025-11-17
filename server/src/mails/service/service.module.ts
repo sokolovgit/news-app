@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 
 import { NodemailerTransporterModule } from '@/commons/emails/nodemailer-transporter.module';
 
@@ -12,10 +13,9 @@ import {
 } from './mail-service/strategies';
 import { MailSendingFactory } from './mail-service';
 import { MailSendingStrategy } from './mail-service/interfaces';
-import { BullMailQueueService } from './mail-queue/bull.mail-queue.service';
-import { BullModule } from '@nestjs/bullmq';
+
 import { EmailQueue } from '../domain/enums';
-import { LoggerModule } from '@/logger';
+import { BullMailQueueService } from './mail-queue/bull.mail-queue.service';
 
 const mailProviderServices = [
   {
@@ -51,7 +51,6 @@ const queues = [
   imports: [
     NodemailerTransporterModule.forRootAsync(),
     BullModule.registerQueue(...queues),
-    LoggerModule,
   ],
   providers: [
     ...mailProviderServices,
