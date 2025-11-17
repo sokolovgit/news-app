@@ -3,13 +3,13 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 
 import { ConfigService } from '@/config';
-import { EmailQueue } from '@/mails/domain/enums';
+import { EmailQueue } from '@/mails/domain/queues';
 import { SendEmailQueueJobType } from './types';
 import { SendEmailOptions } from '../mail-service/types';
 import { LoggerService } from '@/logger';
 
 @Injectable()
-export class BullMailQueueService {
+export class BullMQMailQueueService {
   constructor(
     @InjectQueue(EmailQueue.SEND_EMAIL)
     private readonly sendEmailQueue: Queue<SendEmailQueueJobType>,

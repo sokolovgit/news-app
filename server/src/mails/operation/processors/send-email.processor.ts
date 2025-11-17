@@ -1,7 +1,7 @@
 import { Job } from 'bullmq';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 
-import { EmailQueue } from '@/mails/domain/enums';
+import { EmailQueue } from '@/mails/domain/queues';
 import { MailService } from '@/mails/service/mail-service';
 import { SendEmailQueueJobType } from '@/mails/service/mail-queue/types';
 import { LoggerService } from '@/logger';

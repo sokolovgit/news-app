@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { SendEmailOptions } from './types';
 import { MailSendingFactory } from './mail-sending.factory';
-import { BullMailQueueService } from '../mail-queue/bull.mail-queue.service';
+import { BullMQMailQueueService } from '../mail-queue/bull.mail-queue.service';
 
 import { EmailContentTypeNotSupportedError } from '@/mails/domain/errors';
 import { LoggerService } from '@/logger';
@@ -11,7 +11,7 @@ import { LoggerService } from '@/logger';
 export class MailService {
   constructor(
     private readonly mailSendingFactory: MailSendingFactory,
-    private readonly bullMailQueueService: BullMailQueueService,
+    private readonly bullMailQueueService: BullMQMailQueueService,
     private readonly logger: LoggerService,
   ) {}
 

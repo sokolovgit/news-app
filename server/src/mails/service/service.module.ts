@@ -14,8 +14,8 @@ import {
 import { MailSendingFactory } from './mail-service';
 import { MailSendingStrategy } from './mail-service/interfaces';
 
-import { EmailQueue } from '../domain/enums';
-import { BullMailQueueService } from './mail-queue/bull.mail-queue.service';
+import { EmailQueue } from '../domain/queues';
+import { BullMQMailQueueService } from './mail-queue/bull.mail-queue.service';
 
 const mailProviderServices = [
   {
@@ -39,7 +39,7 @@ const factories = [
 ];
 
 const services = [MailService];
-const queueServices = [BullMailQueueService];
+const queueServices = [BullMQMailQueueService];
 
 const queues = [
   {

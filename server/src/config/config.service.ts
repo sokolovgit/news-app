@@ -8,7 +8,7 @@ import { Environments } from '@/commons/enums';
 import { EnvType } from './env.schema';
 import { BaseConfigService } from '../commons/config/base-config.service';
 
-import { EmailQueue } from '@/mails/domain/enums';
+import { EmailQueue } from '@/mails/domain/queues';
 import { SourceQueue } from '@/sources/domain/queues';
 
 @Injectable()
