@@ -1,4 +1,5 @@
-import { Source, UserSource } from '@/sources/domain/entities';
+import { Source } from '@/sources/domain/entities';
+import { UserSource } from '@/user-sources/domain/entities';
 
 export type AddSourceResponse = {
   source: Source;

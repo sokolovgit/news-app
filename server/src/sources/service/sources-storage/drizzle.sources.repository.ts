@@ -1,8 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_CONNECTION, drizzle } from '@/database';
+
+import {
+  PaginatedResult,
+  PaginationParams,
+  createPaginatedResult,
+} from '@/commons/types';
 
 import { SourcesRepository } from '../abstracts';
 import { DrizzleSourcesEntityMapper } from './mappers';
@@ -57,6 +63,38 @@ export class DrizzleSourcesRepository extends SourcesRepository {
     return savedSource
       ? DrizzleSourcesEntityMapper.toEntity(savedSource)
       : null;
+  }
+
+  async findAll(loadOptions: SourceLoadOptions = {}): Promise<Source[]> {
+    const allSources = await this.db.query.sources.findMany({
+      with: this.buildRelations(loadOptions),
+    });
+
+    return allSources.map((source) =>
+      DrizzleSourcesEntityMapper.toEntity(source, loadOptions),
+    );
+  }
+
+  async findAllPaginated(
+    params: PaginationParams,
+    loadOptions: SourceLoadOptions = {},
+  ): Promise<PaginatedResult<Source>> {
+    const result = await this.db.query.sources.findMany({
+      offset: params.offset,
+      limit: params.limit,
+      with: this.buildRelations(loadOptions),
+      extras: {
+        total: sql<number>`count(*) over()`.as('total'),
+      },
+    });
+
+    const total = result[0]?.total ?? 0;
+
+    const data = result.map((source) =>
+      DrizzleSourcesEntityMapper.toEntity(source, loadOptions),
+    );
+
+    return createPaginatedResult(data, total, params);
   }
 
   private buildRelations(relations?: SourceLoadOptions) {

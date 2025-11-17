@@ -1,5 +1,6 @@
 import { SourceId } from '@/sources/domain/schemas';
 import { Source, SourceLoadOptions } from '@/sources/domain/entities';
+import { PaginatedResult, PaginationParams } from '@/commons/types';
 
 export abstract class SourcesRepository {
   abstract getSourceById(
@@ -13,4 +14,11 @@ export abstract class SourcesRepository {
   ): Promise<Source | null>;
 
   abstract save(source: Source): Promise<Source | null>;
+
+  abstract findAll(loadOptions?: SourceLoadOptions): Promise<Source[]>;
+
+  abstract findAllPaginated(
+    params: PaginationParams,
+    loadOptions?: SourceLoadOptions,
+  ): Promise<PaginatedResult<Source>>;
 }

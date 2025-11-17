@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { LoadState } from '@/commons/types';
+import { LoadState, PaginatedResult, PaginationParams } from '@/commons/types';
 import { uuid } from '@/commons/utils';
 
 import { LoggerService } from '@/logger';
@@ -93,5 +93,20 @@ export class SourcesService {
     );
 
     return savedSource;
+  }
+
+  async findAll(loadOptions: SourceLoadOptions = {}): Promise<Source[]> {
+    this.logger.debug('Getting all sources');
+    return this.sourcesRepository.findAll(loadOptions);
+  }
+
+  async findAllPaginated(
+    params: PaginationParams,
+    loadOptions: SourceLoadOptions = {},
+  ): Promise<PaginatedResult<Source>> {
+    this.logger.debug(
+      `Getting sources paginated: offset=${params.offset}, limit=${params.limit}`,
+    );
+    return this.sourcesRepository.findAllPaginated(params, loadOptions);
   }
 }

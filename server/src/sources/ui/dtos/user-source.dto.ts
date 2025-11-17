@@ -1,9 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { UserSource } from '@/sources/domain/entities';
-import { SourceDto } from './source.dto';
-import { SourceId, UserSourceId } from '@/sources/domain/schemas';
 import { UserId } from '@/users/domain/schemas';
+import { UserSource } from '@/user-sources/domain/entities';
+import { UserSourceId } from '@/user-sources/domain/schemas';
+
+import { SourceId } from '@/sources/domain/schemas';
+import { SourceDto } from './source.dto';
 
 export class UserSourceDto {
   @ApiProperty({ description: 'Relation identifier' })

@@ -1,16 +1,21 @@
 import { Module } from '@nestjs/common';
-import { ServiceModule } from '../service/service.module';
+import { ServiceModule as SourcesServiceModule } from '../service/service.module';
+import { UserSourcesModule } from '@/user-sources';
+
 import {
-  AddSourceHandler,
   TestHandler,
+  AddSourceHandler,
   ValidateSourceHandler,
 } from './handlers';
 
+import { CalculateSourcePriorityProcessor } from './processors';
+
 const handlers = [ValidateSourceHandler, TestHandler, AddSourceHandler];
 
+const processors = [CalculateSourcePriorityProcessor];
 @Module({
-  imports: [ServiceModule],
-  providers: [...handlers],
-  exports: [...handlers, ServiceModule],
+  imports: [SourcesServiceModule, UserSourcesModule],
+  providers: [...handlers, ...processors],
+  exports: [...handlers, SourcesServiceModule],
 })
 export class OperationModule {}

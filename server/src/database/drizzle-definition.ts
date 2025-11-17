@@ -1,10 +1,9 @@
 import { userRelations, users } from '@/users/domain/schemas';
+import { sourceRelations, sources } from '@/sources/domain/schemas';
 import {
-  sourceRelations,
-  sources,
   userSources,
   userSourceRelations,
-} from '@/sources/domain/schemas';
+} from '@/user-sources/domain/schemas';
 import { rawPostRelations, rawPosts } from '@/posts/domain/schemas';
 import {
   oauthAccounts,

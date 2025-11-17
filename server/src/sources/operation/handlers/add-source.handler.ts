@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { LoggerService } from '@/logger';
 import { SourcesService } from '@/sources/service/sources-service';
 import { SourceValidationService } from '@/sources/service/source-validation';
-import { UserSourcesService } from '@/sources/service/user-sources-service';
+import { UserSourcesService } from '@/user-sources';
 
 import { AddSourceRequest } from '../requests';
 import { AddSourceResponse } from '../responses';
