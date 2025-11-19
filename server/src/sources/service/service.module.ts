@@ -9,9 +9,10 @@ import { SourcesRepository } from './abstracts';
 
 import { SourcesService } from './sources-service';
 import { UserSourcesModule } from '@/user-sources';
-import { SourceValidationService } from './source-validation';
-import { SourcesCollectorService } from './source-collector-service';
-import { SourcePriorityCalculatorService } from './source-priority-calculator';
+import { SourcesValidationService } from './sources-validation';
+import { SourcesCollectorService } from './sources-collector-service';
+import { SourcesFetchQueueService } from './sources-fetch-queue';
+import { SourcesPriorityCalculatorService } from './sources-priority-calculator';
 
 import { TelegramService } from './telegram-serivce';
 
@@ -30,7 +31,7 @@ import {
 } from './api-source-collectors';
 
 import { SourceQueue } from '../domain/queues';
-import { SourcePriorityJobScheduler } from './schedulers';
+import { SourcePriorityJobScheduler } from './init-job-schedulers';
 
 const repositories = [
   {
@@ -65,18 +66,24 @@ const factories = [
 ];
 
 const services = [
+  TelegramService,
+
   SourcesService,
   SourcesCollectorService,
-  TelegramService,
-  SourceValidationService,
-  SourcePriorityCalculatorService,
+  SourcesValidationService,
+  SourcesPriorityCalculatorService,
 ];
+
+const queueServices = [SourcesFetchQueueService];
 
 const schedulers = [SourcePriorityJobScheduler];
 
 const queues = [
   {
     name: SourceQueue.CALCULATE_SOURCE_PRIORITY,
+  },
+  {
+    name: SourceQueue.FETCH_SOURCE,
   },
 ];
 
@@ -91,6 +98,7 @@ const queues = [
     ...repositories,
     ...schedulers,
     ...services,
+    ...queueServices,
     ...sourceCollectorsStrategies,
     ...availableApiSourceCollectorsStrategies,
     ...factories,

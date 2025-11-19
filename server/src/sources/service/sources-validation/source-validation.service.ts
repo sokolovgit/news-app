@@ -23,7 +23,7 @@ const INSTAGRAM_HOSTS = new Set([
 ]);
 
 @Injectable()
-export class SourceValidationService {
+export class SourcesValidationService {
   constructor(
     private readonly logger: LoggerService,
     private readonly sourceCollectorsFactory: SourceCollectorsFactory,

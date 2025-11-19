@@ -40,7 +40,7 @@ export class SourcePriorityJobScheduler implements OnModuleInit {
     await this.calculateSourcePriorityQueue.setGlobalConcurrency(1);
 
     this.logger.log(
-      `Source priority scheduler is ready. pattern: ${this.jobSchedulerConfig.repeatOptions.pattern}`,
+      `Source priority scheduler is ready. Repeat interval: ${this.jobSchedulerConfig.repeatOptions.every}ms`,
     );
   }
 

@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { ValidateSourceRequest } from '../requests';
 
-import { SourceValidationService } from '@/sources/service/source-validation';
+import { SourcesValidationService } from '@/sources/service/sources-validation';
 import { ValidateSourceResponse } from '../responses';
 
 @Injectable()
 export class ValidateSourceHandler {
   constructor(
-    private readonly sourceValidationService: SourceValidationService,
+    private readonly sourcesValidationService: SourcesValidationService,
   ) {}
 
   async handle(
     request: ValidateSourceRequest,
   ): Promise<ValidateSourceResponse> {
-    return await this.sourceValidationService.validateOrThrow(request.url);
+    return await this.sourcesValidationService.validateOrThrow(request.url);
   }
 }

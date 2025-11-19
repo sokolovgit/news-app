@@ -1,7 +1,8 @@
+import { SourceId } from '@/sources/domain/schemas';
 import { Collector, PublicSource } from '@/sources/domain/enums';
 
 export type SourcePriority = {
-  sourceId: string;
+  sourceId: SourceId;
   sourceType: PublicSource;
   collector: Collector;
   url: string;

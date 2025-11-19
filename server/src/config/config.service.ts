@@ -88,12 +88,22 @@ export class ConfigService extends BaseConfigService<EnvType> {
       removeOnFail: 20,
     },
 
+    [SourceQueue.FETCH_SOURCE]: <JobsOptions>{
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 5000,
+      },
+      removeOnComplete: 100,
+      removeOnFail: 1000,
+    },
+
     [SourceQueue.CALCULATE_SOURCE_PRIORITY]: <
       UpsertJobSchedulerConfig<string, null>
     >{
       jobSchedulerId: SourceJobScheduler.CALCULATE_SOURCE_PRIORITY,
       // Every 5 minutes
-      repeatOptions: { pattern: '*/5 * * * *' },
+      repeatOptions: { every: dayjs().add(5, 'minutes').diff(dayjs(), 'ms') },
       template: {
         name: SourceQueue.CALCULATE_SOURCE_PRIORITY,
         data: null,
@@ -103,6 +113,12 @@ export class ConfigService extends BaseConfigService<EnvType> {
         },
       },
     },
+  };
+
+  sources = {
+    activeWindowTimeInSeconds: dayjs()
+      .add(24, 'hours')
+      .diff(dayjs(), 'seconds'),
   };
 
   telegram = {

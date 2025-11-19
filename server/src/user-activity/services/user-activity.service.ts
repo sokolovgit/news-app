@@ -21,6 +21,7 @@ export class UserActivityService {
    * Get user's followed source IDs using proxy pattern
    */
   async getUserFollowedSourceIds(userId: UserId): Promise<SourceId[]> {
+    this.logger.debug(`Getting user ${userId} followed source IDs`);
     return this.userFollowedSourcesProxy.getUserFollowedSourceIds(userId);
   }
 
@@ -89,7 +90,7 @@ export class UserActivityService {
   /**
    * Count active users for a source in the last N seconds
    */
-  async countActiveUsersInTimeWindow(
+  async countActiveUsersInTimeWindowBySourceId(
     sourceId: SourceId,
     windowSeconds: number,
   ): Promise<number> {

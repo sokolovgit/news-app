@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { LoggerService } from '@/logger';
 import { SourcesService } from '@/sources/service/sources-service';
-import { SourcesCollectorService } from '@/sources/service/source-collector-service';
+import { SourcesCollectorService } from '@/sources/service/sources-collector-service';
 import { SourceId } from '@/sources/domain/schemas';
 import { SourceNotFoundError } from '@/sources/domain/errors';
 

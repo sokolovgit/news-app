@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { LoggerService } from '@/logger';
 import { SourcesService } from '@/sources/service/sources-service';
-import { SourceValidationService } from '@/sources/service/source-validation';
+import { SourcesValidationService } from '@/sources/service/sources-validation';
 import { UserSourcesService } from '@/user-sources';
 
 import { AddSourceRequest } from '../requests';
@@ -14,7 +14,7 @@ export class AddSourceHandler {
     private readonly logger: LoggerService,
     private readonly sourcesService: SourcesService,
     private readonly userSourcesService: UserSourcesService,
-    private readonly sourceValidationService: SourceValidationService,
+    private readonly sourcesValidationService: SourcesValidationService,
   ) {}
 
   async handle(request: AddSourceRequest): Promise<AddSourceResponse> {
@@ -22,7 +22,7 @@ export class AddSourceHandler {
       `Handling add source request for user ${request.userId} and URL ${request.url}`,
     );
 
-    const normalizedUrl = this.sourceValidationService.normalizeUrl(
+    const normalizedUrl = this.sourcesValidationService.normalizeUrl(
       request.url,
     );
 
@@ -35,7 +35,7 @@ export class AddSourceHandler {
         `Source for URL ${normalizedUrl} not found, validating and creating`,
       );
 
-      const validation = await this.sourceValidationService.validateOrThrow(
+      const validation = await this.sourcesValidationService.validateOrThrow(
         request.url,
       );
 
