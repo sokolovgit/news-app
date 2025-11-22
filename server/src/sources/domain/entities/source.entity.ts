@@ -5,6 +5,8 @@ import { User } from '@/users/domain/entities';
 import { UserId } from '@/users/domain/schemas';
 import { SourceId } from '../schemas';
 
+export type SourceStatus = 'active' | 'paused' | 'error';
+
 export type SourceProperties = {
   id: SourceId;
   addedBy?: UserId;
@@ -13,6 +15,10 @@ export type SourceProperties = {
   name: string;
   url: string;
   lastFetchedAt?: Date;
+  cursor?: string;
+  lastError?: string;
+  status?: SourceStatus;
+  fetchMetadata?: Record<string, unknown>;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -74,6 +80,34 @@ export class Source {
 
   getUpdatedAt(): Date | undefined {
     return this.props.updatedAt;
+  }
+
+  getCursor(): string | undefined {
+    return this.props.cursor;
+  }
+
+  getLastError(): string | undefined {
+    return this.props.lastError;
+  }
+
+  getStatus(): SourceStatus {
+    return this.props.status ?? 'active';
+  }
+
+  getFetchMetadata(): Record<string, unknown> | undefined {
+    return this.props.fetchMetadata;
+  }
+
+  isActive(): boolean {
+    return this.getStatus() === 'active';
+  }
+
+  isPaused(): boolean {
+    return this.getStatus() === 'paused';
+  }
+
+  hasError(): boolean {
+    return this.getStatus() === 'error';
   }
 
   toJSON() {

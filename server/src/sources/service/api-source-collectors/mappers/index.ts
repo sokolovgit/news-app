@@ -1,1 +1,1 @@
-export * from './telegram-message-to-raw-post.mapper';
+export * from './telegram-message-to-fetched-post.mapper';

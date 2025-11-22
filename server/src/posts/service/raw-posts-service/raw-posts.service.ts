@@ -90,4 +90,11 @@ export class RawPostsService {
 
     return this.saveManyRawPostsOrThrow(rawPosts);
   }
+
+  async existsByExternalIds(
+    sourceId: SourceId,
+    externalIds: string[],
+  ): Promise<Set<string>> {
+    return this.rawPostsRepository.existsByExternalIds(sourceId, externalIds);
+  }
 }

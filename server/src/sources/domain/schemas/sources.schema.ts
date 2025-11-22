@@ -1,4 +1,10 @@
-import { pgEnum, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core';
+import {
+  pgEnum,
+  pgTable,
+  timestamp,
+  varchar,
+  jsonb,
+} from 'drizzle-orm/pg-core';
 
 import {
   primaryUuid,
@@ -7,7 +13,7 @@ import {
   timestampConfig,
 } from '@/commons/database';
 import { Uuid } from '@/commons/utils';
-import { Collector, PublicSource } from '../enums';
+import { Collector, PublicSource, SourceStatus } from '../enums';
 
 import { UserId, users } from '@/users/domain/schemas';
 import { relations } from 'drizzle-orm';
@@ -24,6 +30,11 @@ export const pgCollectors = pgEnum(
   Object.values(Collector) as [string, ...string[]],
 );
 
+export const pgSourceStatus = pgEnum(
+  'source_status_enum',
+  Object.values(SourceStatus) as [string, ...string[]],
+);
+
 export const sources = pgTable('sources', {
   id: primaryUuid<SourceId>(),
 
@@ -38,6 +49,12 @@ export const sources = pgTable('sources', {
   url: varchar('url').notNull(),
 
   lastFetchedAt: timestamp('last_fetched_at', timestampConfig),
+
+  // Metadata fields
+  cursor: varchar('cursor'),
+  lastError: varchar('last_error'),
+  status: pgSourceStatus('status').default(SourceStatus.ACTIVE),
+  fetchMetadata: jsonb('fetch_metadata'),
 
   ...timestamps,
 });

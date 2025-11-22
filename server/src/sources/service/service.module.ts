@@ -11,7 +11,6 @@ import { SourcesService } from './sources-service';
 import { UserSourcesModule } from '@/user-sources';
 import { SourcesValidationService } from './sources-validation';
 import { SourcesCollectorService } from './sources-collector-service';
-import { SourcesFetchQueueService } from './sources-fetch-queue';
 import { SourcesPriorityCalculatorService } from './sources-priority-calculator';
 
 import { TelegramService } from './telegram-serivce';
@@ -32,6 +31,10 @@ import {
 
 import { SourceQueue } from '../domain/queues';
 import { SourcePriorityJobScheduler } from './init-job-schedulers';
+import { SourcesOrchestratorQueueService } from './sources-orchestrator-queue';
+import { SourcesOrchestratorService } from './sources-orchestrator';
+import { SourcesResultService } from './sources-result';
+import { SourcesCollectorQueueService } from './sources-collector-queue';
 
 const repositories = [
   {
@@ -67,23 +70,39 @@ const factories = [
 
 const services = [
   TelegramService,
-
   SourcesService,
+  SourcesResultService,
   SourcesCollectorService,
+  SourcesCollectorQueueService,
   SourcesValidationService,
+  SourcesOrchestratorService,
   SourcesPriorityCalculatorService,
 ];
 
-const queueServices = [SourcesFetchQueueService];
-
 const schedulers = [SourcePriorityJobScheduler];
+const queueServices = [SourcesOrchestratorQueueService];
 
 const queues = [
   {
     name: SourceQueue.CALCULATE_SOURCE_PRIORITY,
   },
   {
-    name: SourceQueue.FETCH_SOURCE,
+    name: SourceQueue.ORCHESTRATOR,
+  },
+  {
+    name: SourceQueue.INSTAGRAM_FETCHER,
+  },
+  {
+    name: SourceQueue.TWITTER_FETCHER,
+  },
+  {
+    name: SourceQueue.TELEGRAM_FETCHER,
+  },
+  {
+    name: SourceQueue.RSS_FETCHER,
+  },
+  {
+    name: SourceQueue.FETCH_RESULTS,
   },
 ];
 

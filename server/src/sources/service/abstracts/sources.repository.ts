@@ -21,4 +21,15 @@ export abstract class SourcesRepository {
     params: PaginationParams,
     loadOptions?: SourceLoadOptions,
   ): Promise<PaginatedResult<Source>>;
+
+  abstract updateMetadata(
+    sourceId: SourceId,
+    metadata: {
+      lastFetchedAt?: Date;
+      cursor?: string | null;
+      lastError?: string | null;
+      status?: 'active' | 'paused' | 'error';
+      fetchMetadata?: Record<string, unknown>;
+    },
+  ): Promise<void>;
 }

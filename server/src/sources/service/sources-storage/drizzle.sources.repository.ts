@@ -97,6 +97,46 @@ export class DrizzleSourcesRepository extends SourcesRepository {
     return createPaginatedResult(data, total, params);
   }
 
+  async updateMetadata(
+    sourceId: SourceId,
+    metadata: {
+      lastFetchedAt?: Date;
+      cursor?: string | null;
+      lastError?: string | null;
+      status?: 'active' | 'paused' | 'error';
+      fetchMetadata?: Record<string, unknown>;
+    },
+  ): Promise<void> {
+    const updateData: Record<string, unknown> = {
+      updatedAt: new Date(),
+    };
+
+    if (metadata.lastFetchedAt !== undefined) {
+      updateData.lastFetchedAt = metadata.lastFetchedAt;
+    }
+
+    if (metadata.cursor !== undefined) {
+      updateData.cursor = metadata.cursor;
+    }
+
+    if (metadata.lastError !== undefined) {
+      updateData.lastError = metadata.lastError;
+    }
+
+    if (metadata.status !== undefined) {
+      updateData.status = metadata.status;
+    }
+
+    if (metadata.fetchMetadata !== undefined) {
+      updateData.fetchMetadata = metadata.fetchMetadata;
+    }
+
+    await this.db
+      .update(sources)
+      .set(updateData)
+      .where(eq(sources.id, sourceId));
+  }
+
   private buildRelations(relations?: SourceLoadOptions) {
     return {
       ...(relations?.withAddedBy && { addedBy: true }),

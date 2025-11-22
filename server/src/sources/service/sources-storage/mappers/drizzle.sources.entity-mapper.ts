@@ -1,7 +1,11 @@
 import { loadRelation } from '@/commons/database';
 
 import { Collector, PublicSource } from '@/sources/domain/enums';
-import { Source, SourceLoadOptions } from '@/sources/domain/entities';
+import {
+  Source,
+  SourceLoadOptions,
+  SourceProperties,
+} from '@/sources/domain/entities';
 import { SourceInsert, SourceSelect } from '@/sources/domain/schemas';
 
 import { UserSelect } from '@/users/domain/schemas';
@@ -23,6 +27,11 @@ export class DrizzleSourcesEntityMapper {
         name: data.name,
         url: data.url,
         lastFetchedAt: data.lastFetchedAt ?? undefined,
+        cursor: data.cursor ?? undefined,
+        lastError: data.lastError ?? undefined,
+        status: (data.status as SourceProperties['status']) ?? 'active',
+        fetchMetadata:
+          (data.fetchMetadata as Record<string, unknown>) ?? undefined,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
       },
@@ -43,6 +52,10 @@ export class DrizzleSourcesEntityMapper {
       name: entity.getName(),
       url: entity.getUrl(),
       lastFetchedAt: entity.getLastFetchedAt(),
+      cursor: entity.getCursor(),
+      lastError: entity.getLastError(),
+      status: entity.getStatus(),
+      fetchMetadata: entity.getFetchMetadata(),
       createdAt: entity.getCreatedAt(),
       updatedAt: entity.getUpdatedAt(),
     };

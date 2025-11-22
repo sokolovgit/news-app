@@ -5,6 +5,7 @@ import { SourceCollectorsFactory } from '../source-collectors';
 
 import { Source } from '@/sources/domain/entities';
 import { SourceCollectorStrategyNotFoundError } from '@/sources/domain/errors';
+import { CollectorResult } from './types';
 
 @Injectable()
 export class SourcesCollectorService {
@@ -13,7 +14,7 @@ export class SourcesCollectorService {
     private readonly sourceCollectorsFactory: SourceCollectorsFactory,
   ) {}
 
-  async collect(source: Source): Promise<void> {
+  async collect(source: Source): Promise<CollectorResult> {
     this.logger.log(`Collecting source ${source.toString()}`);
 
     const collector = source.getCollector();
@@ -31,6 +32,6 @@ export class SourcesCollectorService {
       `Strategy found for source ${source.getId()}: ${strategy.getCollectorType()}`,
     );
 
-    await strategy.collect(source);
+    return await strategy.collect(source);
   }
 }

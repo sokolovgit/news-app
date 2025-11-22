@@ -6,12 +6,13 @@ import { Source } from '@/sources/domain/entities';
 import { Collector } from '@/sources/domain/enums';
 import { CollectorStrategy } from '../interfaces';
 import { ValidatedSourceUrl } from '@/sources/domain/types';
+import { CollectorResult } from '../../sources-collector-service/types';
 
 @Injectable()
 export class ScraperSourceCollectorStrategy implements CollectorStrategy {
   constructor(private readonly logger: LoggerService) {}
 
-  async collect(source: Source): Promise<void> {
+  async collect(source: Source): Promise<CollectorResult> {
     this.logger.log(`Collecting scraper source ${source.getId()}`);
 
     await new Promise((resolve) => setTimeout(resolve, 1000));

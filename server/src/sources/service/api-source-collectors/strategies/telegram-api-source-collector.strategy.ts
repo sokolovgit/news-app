@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 
 import { LoggerService } from '@/logger';
 import { TelegramService } from '@/sources/service/telegram-serivce';
-import { RawPostsService } from '@/posts/service';
 
 import { Source } from '@/sources/domain/entities';
 import { AvailableApi } from '@/sources/domain/enums';
-import { RawPostPayload } from '@/posts/domain/types';
-import { TelegramMessageToRawPostMapper } from '../mappers';
+import { CollectorResult } from '../../sources-collector-service/types';
+
+import { TelegramMessageToFetchedPostMapper } from '../mappers/telegram-message-to-fetched-post.mapper';
 import { AvailableApiSourceCollectorStrategy } from '../interfaces';
 
 @Injectable()
@@ -17,10 +17,9 @@ export class TelegramApiSourceCollectorStrategy
   constructor(
     private readonly logger: LoggerService,
     private readonly telegramService: TelegramService,
-    private readonly rawPostsService: RawPostsService,
   ) {}
 
-  async collect(source: Source): Promise<void> {
+  async collect(source: Source): Promise<CollectorResult> {
     this.logger.log(
       `Collecting last messages from source ${source.getUrl()} using Telegram API`,
     );
@@ -30,22 +29,19 @@ export class TelegramApiSourceCollectorStrategy
       5,
     );
 
-    const rawPostsPayloads: RawPostPayload[] = messages.map((message) =>
-      TelegramMessageToRawPostMapper.toRawPostPayload(message),
+    const posts = messages.map((message) =>
+      TelegramMessageToFetchedPostMapper.toFetchedPost(message),
     );
 
     this.logger.log(
-      `Collected ${rawPostsPayloads.length} raw posts from Telegram`,
+      `Collected ${posts.length} posts from Telegram for source ${source.getId()}`,
     );
 
-    await this.rawPostsService.saveManyRawPostsPayloadsOrThrow(
-      rawPostsPayloads,
-      source.getId(),
-    );
-
-    this.logger.log(
-      `Successfully saved ${rawPostsPayloads.length} raw posts from source ${source.getId()}`,
-    );
+    // Telegram doesn't provide cursor-based pagination, so we return empty cursor
+    return {
+      posts,
+      nextCursor: undefined,
+    };
   }
 
   async validate(url: string): Promise<boolean> {

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ServiceModule as SourcesServiceModule } from '../service/service.module';
 import { UserSourcesModule } from '@/user-sources';
+import { ServiceModule as SourcesServiceModule } from '../service/service.module';
 
 import {
   TestHandler,
@@ -8,11 +8,27 @@ import {
   ValidateSourceHandler,
 } from './handlers';
 
-import { CalculateSourcePriorityProcessor } from './processors';
+import {
+  ResultProcessor,
+  OrchestratorProcessor,
+  RssCollectorProcessor,
+  TwitterCollectorProcessor,
+  TelegramCollectorProcessor,
+  InstagramCollectorProcessor,
+  CalculateSourcePriorityProcessor,
+} from './processors';
 
 const handlers = [ValidateSourceHandler, TestHandler, AddSourceHandler];
 
-const processors = [CalculateSourcePriorityProcessor];
+const processors = [
+  ResultProcessor,
+  OrchestratorProcessor,
+  RssCollectorProcessor,
+  TwitterCollectorProcessor,
+  TelegramCollectorProcessor,
+  InstagramCollectorProcessor,
+  CalculateSourcePriorityProcessor,
+];
 @Module({
   imports: [SourcesServiceModule, UserSourcesModule],
   providers: [...handlers, ...processors],

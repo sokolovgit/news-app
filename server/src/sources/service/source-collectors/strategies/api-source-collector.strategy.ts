@@ -13,6 +13,7 @@ import {
   InvalidSourceUrlError,
 } from '@/sources/domain/errors';
 import { ValidatedSourceUrl } from '@/sources/domain/types';
+import { CollectorResult } from '../../sources-collector-service/types';
 
 @Injectable()
 export class ApiSourceCollectorStrategy implements CollectorStrategy {
@@ -21,7 +22,7 @@ export class ApiSourceCollectorStrategy implements CollectorStrategy {
     private readonly availableApiSourceCollectorFactory: AvailableApiSourceCollectorsFactory,
   ) {}
 
-  async collect(source: Source): Promise<void> {
+  async collect(source: Source): Promise<CollectorResult> {
     this.logger.log(
       `Collecting source ${source.getId()} of type ${source.getCollector()}`,
     );
@@ -53,7 +54,7 @@ export class ApiSourceCollectorStrategy implements CollectorStrategy {
       `API strategy found for source ${source.getId()}: ${apiStrategy.getApi()}`,
     );
 
-    await apiStrategy.collect(source);
+    return await apiStrategy.collect(source);
   }
 
   async validate(validatedSourceUrl: ValidatedSourceUrl): Promise<boolean> {

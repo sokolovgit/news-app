@@ -109,4 +109,23 @@ export class SourcesService {
     );
     return this.sourcesRepository.findAllPaginated(params, loadOptions);
   }
+
+  async updateMetadata(
+    sourceId: SourceId,
+    metadata: {
+      lastFetchedAt?: Date;
+      cursor?: string | null;
+      lastError?: string | null;
+      status?: 'active' | 'paused' | 'error';
+      fetchMetadata?: Record<string, unknown>;
+    },
+  ): Promise<void> {
+    this.logger.debug(
+      `Updating metadata for source ${sourceId}: status=${metadata.status}, cursor=${metadata.cursor}`,
+    );
+
+    await this.sourcesRepository.updateMetadata(sourceId, metadata);
+
+    this.logger.debug(`Successfully updated metadata for source ${sourceId}`);
+  }
 }

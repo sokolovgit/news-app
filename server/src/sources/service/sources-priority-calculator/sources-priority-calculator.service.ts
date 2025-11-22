@@ -4,10 +4,9 @@ import { ConfigService } from '@/config';
 import { LoggerService } from '@/logger';
 import { SourcesService } from '../sources-service';
 import { UserActivityService } from '@/user-activity/services';
-import { SourcesFetchQueueService } from '../sources-fetch-queue';
+import { SourcesOrchestratorQueueService } from '../sources-orchestrator-queue';
 
 import { Source } from '@/sources/domain/entities';
-import { SourcePriority } from './types/source-priority.type';
 import { createPaginationParams } from '@/commons/types';
 
 const MINUTE_IN_MILLIS = 60 * 1000;
@@ -22,7 +21,7 @@ export class SourcesPriorityCalculatorService {
     private readonly configService: ConfigService,
     private readonly sourcesService: SourcesService,
     private readonly userActivityService: UserActivityService,
-    private readonly sourcesFetchQueueService: SourcesFetchQueueService,
+    private readonly orchestratorQueueService: SourcesOrchestratorQueueService,
   ) {}
 
   /**
@@ -104,21 +103,15 @@ export class SourcesPriorityCalculatorService {
       const priority = this.calculatePriority(activeUsers);
       const repeatInterval = this.calculateInterval(activeUsers);
 
-      const sourcePriority: SourcePriority = {
-        sourceId,
-        sourceType: source.getSource(),
-        collector: source.getCollector(),
-        url: source.getUrl(),
-        activeFollowers: activeUsers,
-        priority,
-        repeatInterval,
-      };
-
       this.logger.debug(
         `Source ${sourceId}: ${activeUsers} active users, priority ${priority}, interval ${repeatInterval}ms`,
       );
 
-      await this.sourcesFetchQueueService.scheduleSourceFetch(sourcePriority);
+      await this.orchestratorQueueService.scheduleSourceFetch(
+        sourceId,
+        priority,
+        repeatInterval,
+      );
     });
 
     await Promise.all(promises);

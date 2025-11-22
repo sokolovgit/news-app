@@ -1,12 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, inArray } from 'drizzle-orm';
+
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 
 import { RawPostsRepository } from '../abstracts';
 import { DrizzleRawPostsEntityMapper } from './mappers';
 
+import { SourceId } from '@/sources/domain/schemas';
 import { RawPostId, rawPosts } from '@/posts/domain/schemas';
 import { RawPost, RawPostLoadOptions } from '@/posts/domain/entities';
 
@@ -78,6 +80,28 @@ export class DrizzleRawPostsRepository extends RawPostsRepository {
     return savedRawPosts.map((savedRawPost) =>
       DrizzleRawPostsEntityMapper.toEntity(savedRawPost),
     );
+  }
+
+  async existsByExternalIds(
+    sourceId: SourceId,
+    externalIds: string[],
+  ): Promise<Set<string>> {
+    if (externalIds.length === 0) {
+      return new Set();
+    }
+
+    const existingPosts = await this.db.query.rawPosts.findMany({
+      where: (rawPosts, { eq, and }) =>
+        and(
+          eq(rawPosts.sourceId, sourceId),
+          inArray(rawPosts.externalId, externalIds),
+        ),
+      columns: {
+        externalId: true,
+      },
+    });
+
+    return new Set(existingPosts.map((post) => post.externalId));
   }
 
   private buildRelations(relations?: RawPostLoadOptions) {
