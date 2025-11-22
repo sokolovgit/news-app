@@ -9,6 +9,7 @@ import { ContentBlockType } from '@/posts/domain/enums';
 import { Content } from '@/posts/domain/types';
 
 import { SourceId } from '@/sources/domain/schemas';
+import { SourceStatus } from '@/sources/domain/enums';
 import { ResultJobData, FetchedPost } from './types';
 
 @Injectable()
@@ -165,11 +166,12 @@ export class SourcesResultService {
       cursor?: string;
       lastFetchSuccess: boolean;
       lastError?: string;
-      status?: 'active' | 'paused' | 'error';
+      status?: SourceStatus;
     },
   ): Promise<void> {
     const status =
-      metadata.status ?? (metadata.lastFetchSuccess ? 'active' : 'error');
+      metadata.status ??
+      (metadata.lastFetchSuccess ? SourceStatus.ACTIVE : SourceStatus.ERROR);
 
     await this.sourcesService.updateMetadata(sourceId, {
       lastFetchedAt: metadata.lastFetchedAt,
@@ -201,7 +203,7 @@ export class SourcesResultService {
       lastFetchedAt: new Date(),
       lastFetchSuccess: false,
       lastError: error.message,
-      status: isPermanentError ? 'paused' : 'error',
+      status: isPermanentError ? SourceStatus.PAUSED : SourceStatus.ERROR,
     });
 
     if (isPermanentError) {

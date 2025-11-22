@@ -99,7 +99,7 @@ export class ConfigService extends BaseConfigService<EnvType> {
       removeOnFail: 1000,
     },
 
-    // Instagram collector queue
+    // Instagram collector queue (external Python script consumes this)
     [SourceQueue.INSTAGRAM_FETCHER]: <JobsOptions>{
       attempts: 3,
       backoff: {
@@ -110,34 +110,12 @@ export class ConfigService extends BaseConfigService<EnvType> {
       removeOnFail: 1000,
     },
 
-    // Twitter collector queue
-    [SourceQueue.TWITTER_FETCHER]: <JobsOptions>{
-      attempts: 3,
-      backoff: {
-        type: 'exponential',
-        delay: 5000,
-      },
-      removeOnComplete: 100,
-      removeOnFail: 1000,
-    },
-
-    // Telegram collector queue
+    // Telegram collector queue (NestJS processor)
     [SourceQueue.TELEGRAM_FETCHER]: <JobsOptions>{
       attempts: 3,
       backoff: {
         type: 'exponential',
         delay: 5000,
-      },
-      removeOnComplete: 100,
-      removeOnFail: 1000,
-    },
-
-    // RSS collector queue
-    [SourceQueue.RSS_FETCHER]: <JobsOptions>{
-      attempts: 2,
-      backoff: {
-        type: 'linear',
-        delay: 3000,
       },
       removeOnComplete: 100,
       removeOnFail: 1000,

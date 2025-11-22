@@ -19,12 +19,8 @@ export class SourcesOrchestratorService {
     private readonly sourcesRepository: SourcesRepository,
     @InjectQueue(SourceQueue.INSTAGRAM_FETCHER)
     private readonly instagramQueue: Queue<CollectorJobData>,
-    @InjectQueue(SourceQueue.TWITTER_FETCHER)
-    private readonly twitterQueue: Queue<CollectorJobData>,
     @InjectQueue(SourceQueue.TELEGRAM_FETCHER)
     private readonly telegramQueue: Queue<CollectorJobData>,
-    @InjectQueue(SourceQueue.RSS_FETCHER)
-    private readonly rssQueue: Queue<CollectorJobData>,
   ) {}
 
   /**
@@ -48,10 +44,19 @@ export class SourcesOrchestratorService {
       return;
     }
 
-    // 2. Check if source should be skipped (paused, error state, etc.)
+    // 2. Check if source should be skipped (paused, pending validation, error state, etc.)
     const isPaused = source.isPaused();
     if (isPaused) {
       this.logger.debug(`Source ${sourceId} is paused, skipping orchestration`);
+      return;
+    }
+
+    // Skip sources that are pending validation - they need to be validated first
+    const isPendingValidation = source.isPendingValidation();
+    if (isPendingValidation) {
+      this.logger.debug(
+        `Source ${sourceId} is pending validation, skipping orchestration`,
+      );
       return;
     }
 
@@ -75,7 +80,6 @@ export class SourcesOrchestratorService {
     const enrichedJobData: CollectorJobData = {
       sourceId,
       sourceType,
-      collector: source.getCollector(),
       externalId,
       cursor: cursor ?? undefined, // Load cursor from source metadata
       limit: 50, // Default limit
@@ -122,10 +126,6 @@ export class SourcesOrchestratorService {
         await this.telegramQueue.add('fetch-telegram', jobData, jobOptions);
         break;
 
-      case PublicSource.WEBSITE:
-        await this.rssQueue.add('fetch-rss', jobData, jobOptions);
-        break;
-
       default: {
         this.logger.error(`Unknown source type ${String(sourceType)}`);
         throw new Error(`Unknown source type ${String(sourceType)}`);
@@ -136,8 +136,7 @@ export class SourcesOrchestratorService {
   /**
    * Extract externalId from URL based on source type
    * For Instagram: extract username from URL
-   * For Twitter: extract handle from URL
-   * For RSS: use URL as-is
+   * For Telegram: extract channel/username from URL
    */
   private extractExternalId(url: string, sourceType: PublicSource): string {
     switch (sourceType) {
@@ -155,10 +154,6 @@ export class SourcesOrchestratorService {
         return telegramMatch ? telegramMatch[1] : url;
       }
 
-      case PublicSource.WEBSITE:
-        // For RSS feeds, use URL as-is
-        return url;
-
       default:
         this.logger.error(`Unknown source type ${String(sourceType)}`);
         throw new Error(`Unknown source type ${String(sourceType)}`);
@@ -174,11 +169,7 @@ export class SourcesOrchestratorService {
         return this.configService.bullmq[SourceQueue.INSTAGRAM_FETCHER];
 
       case PublicSource.TELEGRAM:
-        // Telegram uses API collector, use RSS config for now
-        return this.configService.bullmq[SourceQueue.RSS_FETCHER];
-
-      case PublicSource.WEBSITE:
-        return this.configService.bullmq[SourceQueue.RSS_FETCHER];
+        return this.configService.bullmq[SourceQueue.TELEGRAM_FETCHER];
 
       default:
         this.logger.error(`Unknown source type ${String(sourceType)}`);

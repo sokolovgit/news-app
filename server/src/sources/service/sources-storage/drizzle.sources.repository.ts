@@ -15,6 +15,7 @@ import { DrizzleSourcesEntityMapper } from './mappers';
 
 import { SourceId, sources } from '@/sources/domain/schemas';
 import { Source, SourceLoadOptions } from '@/sources/domain/entities';
+import { SourceStatus } from '@/sources/domain/enums';
 
 @Injectable()
 export class DrizzleSourcesRepository extends SourcesRepository {
@@ -103,7 +104,7 @@ export class DrizzleSourcesRepository extends SourcesRepository {
       lastFetchedAt?: Date;
       cursor?: string | null;
       lastError?: string | null;
-      status?: 'active' | 'paused' | 'error';
+      status?: SourceStatus;
       fetchMetadata?: Record<string, unknown>;
     },
   ): Promise<void> {

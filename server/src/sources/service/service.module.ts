@@ -2,39 +2,26 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 
 import { PostsModule } from '@/posts/posts.module';
+import { UserSourcesModule } from '@/user-sources';
 import { UserActivityModule } from '@/user-activity/user-activity.module';
 
-import { DrizzleSourcesRepository } from './sources-storage';
 import { SourcesRepository } from './abstracts';
+import { DrizzleSourcesRepository } from './sources-storage';
 
 import { SourcesService } from './sources-service';
-import { UserSourcesModule } from '@/user-sources';
 import { SourcesValidationService } from './sources-validation';
-import { SourcesCollectorService } from './sources-collector-service';
 import { SourcesPriorityCalculatorService } from './sources-priority-calculator';
 
 import { TelegramService } from './telegram-serivce';
-
-import {
-  CollectorStrategy,
-  SourceCollectorsFactory,
-  RssSourceCollectorStrategy,
-  ScraperSourceCollectorStrategy,
-} from './source-collectors';
-
-import {
-  ApiSourceCollectorStrategy,
-  AvailableApiSourceCollectorsFactory,
-  TelegramApiSourceCollectorStrategy,
-  AvailableApiSourceCollectorStrategy,
-} from './api-source-collectors';
+import { TelegramCollectorService } from './collectors';
 
 import { SourceQueue } from '../domain/queues';
-import { SourcePriorityJobScheduler } from './init-job-schedulers';
-import { SourcesOrchestratorQueueService } from './sources-orchestrator-queue';
-import { SourcesOrchestratorService } from './sources-orchestrator';
 import { SourcesResultService } from './sources-result';
-import { SourcesCollectorQueueService } from './sources-collector-queue';
+import { SourcesResultQueueService } from './sources-result-queue';
+import { SourcesOrchestratorService } from './sources-orchestrator';
+import { SourcesOrchestratorQueueService } from './sources-orchestrator-queue';
+
+import { SourcePriorityJobScheduler } from './init-job-schedulers';
 
 const repositories = [
   {
@@ -43,44 +30,21 @@ const repositories = [
   },
 ];
 
-const sourceCollectorsStrategies = [
-  ApiSourceCollectorStrategy,
-  RssSourceCollectorStrategy,
-  ScraperSourceCollectorStrategy,
-];
-
-const availableApiSourceCollectorsStrategies = [
-  TelegramApiSourceCollectorStrategy,
-];
-
-const factories = [
-  {
-    provide: SourceCollectorsFactory,
-    inject: [...sourceCollectorsStrategies],
-    useFactory: (...strategies: CollectorStrategy[]) =>
-      new SourceCollectorsFactory(strategies),
-  },
-  {
-    provide: AvailableApiSourceCollectorsFactory,
-    inject: [...availableApiSourceCollectorsStrategies],
-    useFactory: (...strategies: AvailableApiSourceCollectorStrategy[]) =>
-      new AvailableApiSourceCollectorsFactory(strategies),
-  },
-];
-
 const services = [
   TelegramService,
+  TelegramCollectorService,
   SourcesService,
   SourcesResultService,
-  SourcesCollectorService,
-  SourcesCollectorQueueService,
   SourcesValidationService,
   SourcesOrchestratorService,
   SourcesPriorityCalculatorService,
 ];
 
 const schedulers = [SourcePriorityJobScheduler];
-const queueServices = [SourcesOrchestratorQueueService];
+const queueServices = [
+  SourcesResultQueueService,
+  SourcesOrchestratorQueueService,
+];
 
 const queues = [
   {
@@ -93,13 +57,7 @@ const queues = [
     name: SourceQueue.INSTAGRAM_FETCHER,
   },
   {
-    name: SourceQueue.TWITTER_FETCHER,
-  },
-  {
     name: SourceQueue.TELEGRAM_FETCHER,
-  },
-  {
-    name: SourceQueue.RSS_FETCHER,
   },
   {
     name: SourceQueue.FETCH_RESULTS,
@@ -113,15 +71,7 @@ const queues = [
     UserActivityModule,
     BullModule.registerQueue(...queues),
   ],
-  providers: [
-    ...repositories,
-    ...schedulers,
-    ...services,
-    ...queueServices,
-    ...sourceCollectorsStrategies,
-    ...availableApiSourceCollectorsStrategies,
-    ...factories,
-  ],
+  providers: [...repositories, ...schedulers, ...services, ...queueServices],
   exports: [...services],
 })
 export class ServiceModule {}

@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { LoggerService } from '@/logger';
 import { SourcesService } from '@/sources/service/sources-service';
 import { SourcesValidationService } from '@/sources/service/sources-validation';
+import { SourceStatus } from '@/sources/domain/enums';
 import { UserSourcesService } from '@/user-sources';
 
 import { AddSourceRequest } from '../requests';
@@ -35,17 +36,27 @@ export class AddSourceHandler {
         `Source for URL ${normalizedUrl} not found, validating and creating`,
       );
 
-      const validation = await this.sourcesValidationService.validateOrThrow(
+      // Fast validation: cache, URL format, DB check
+      const validation = await this.sourcesValidationService.validateUrl(
         request.url,
       );
 
+      // Create source with pending_validation status
       source = await this.sourcesService.createSource({
         url: validation.url,
         name: validation.name,
-        collector: validation.collector,
         source: validation.source,
         addedBy: request.userId,
+        status: SourceStatus.PENDING_VALIDATION,
       });
+
+      // Validate source directly (async, non-blocking)
+
+      await this.sourcesValidationService.validateUrl(request.url);
+
+      this.logger.log(
+        `Created source ${source.getId()} with pending_validation status, validation started`,
+      );
 
       isNewSource = true;
     }

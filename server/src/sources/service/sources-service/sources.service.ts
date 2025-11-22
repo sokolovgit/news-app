@@ -7,6 +7,7 @@ import { LoggerService } from '@/logger';
 import { SourcesRepository } from '../abstracts';
 import { SourceId } from '@/sources/domain/schemas';
 import { Source, SourceLoadOptions } from '@/sources/domain/entities';
+import { SourceStatus } from '@/sources/domain/enums';
 import { CreateSourceProps } from './types';
 import { SourceCreationFailedError } from '@/sources/domain/errors';
 
@@ -70,9 +71,9 @@ export class SourcesService {
         id: props.id ?? uuid<SourceId>(),
         addedBy: props.addedBy,
         source: props.source,
-        collector: props.collector,
         name: props.name,
         url: props.url,
+        status: props.status ?? SourceStatus.ACTIVE,
       },
       {
         addedBy: LoadState.notLoaded(),
@@ -116,7 +117,7 @@ export class SourcesService {
       lastFetchedAt?: Date;
       cursor?: string | null;
       lastError?: string | null;
-      status?: 'active' | 'paused' | 'error';
+      status?: SourceStatus;
       fetchMetadata?: Record<string, unknown>;
     },
   ): Promise<void> {

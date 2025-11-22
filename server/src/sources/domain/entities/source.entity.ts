@@ -1,17 +1,14 @@
 import { LoadState } from '@/commons/types';
-import { Collector, PublicSource } from '../enums';
+import { PublicSource, SourceStatus } from '../enums';
 
 import { User } from '@/users/domain/entities';
 import { UserId } from '@/users/domain/schemas';
 import { SourceId } from '../schemas';
 
-export type SourceStatus = 'active' | 'paused' | 'error';
-
 export type SourceProperties = {
   id: SourceId;
   addedBy?: UserId;
   source: PublicSource;
-  collector: Collector;
   name: string;
   url: string;
   lastFetchedAt?: Date;
@@ -58,10 +55,6 @@ export class Source {
     return this.props.source;
   }
 
-  getCollector(): Collector {
-    return this.props.collector;
-  }
-
   getName(): string {
     return this.props.name;
   }
@@ -91,7 +84,7 @@ export class Source {
   }
 
   getStatus(): SourceStatus {
-    return this.props.status ?? 'active';
+    return this.props.status ?? SourceStatus.ACTIVE;
   }
 
   getFetchMetadata(): Record<string, unknown> | undefined {
@@ -99,15 +92,19 @@ export class Source {
   }
 
   isActive(): boolean {
-    return this.getStatus() === 'active';
+    return this.getStatus() === SourceStatus.ACTIVE;
   }
 
   isPaused(): boolean {
-    return this.getStatus() === 'paused';
+    return this.getStatus() === SourceStatus.PAUSED;
   }
 
   hasError(): boolean {
-    return this.getStatus() === 'error';
+    return this.getStatus() === SourceStatus.ERROR;
+  }
+
+  isPendingValidation(): boolean {
+    return this.getStatus() === SourceStatus.PENDING_VALIDATION;
   }
 
   toJSON() {
@@ -115,7 +112,6 @@ export class Source {
       id: this.getId(),
       addedBy: this.getUserAddedById(),
       source: this.getSource(),
-      collector: this.getCollector(),
       name: this.getName(),
       url: this.getUrl(),
     };

@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
+import { CacheService } from '@/commons/cache';
 import { LoggerService } from '@/logger';
+import { SourcesService } from '../sources-service';
 
+import { PublicSource } from '@/sources/domain/enums';
 import { ValidatedSourceUrl } from '@/sources/domain/types';
-import { Collector, PublicSource } from '@/sources/domain/enums';
-import { SourceCollectorsFactory } from '../source-collectors';
-import {
-  InvalidSourceUrlError,
-  CollectorStrategyNotFoundError,
-} from '@/sources/domain/errors';
+import { InvalidSourceUrlError } from '@/sources/domain/errors';
 
 const TELEGRAM_HOSTS = new Set([
   't.me',
@@ -26,51 +24,89 @@ const INSTAGRAM_HOSTS = new Set([
 export class SourcesValidationService {
   constructor(
     private readonly logger: LoggerService,
-    private readonly sourceCollectorsFactory: SourceCollectorsFactory,
+    private readonly cacheService: CacheService,
+    private readonly sourcesService: SourcesService,
   ) {}
 
-  async validateOrThrow(url: string): Promise<ValidatedSourceUrl> {
+  /**
+   * Fast validation: checks cache, URL format, and DB
+   * Does NOT perform fetch validation - that happens asynchronously
+   */
+  async validateUrl(url: string): Promise<ValidatedSourceUrl> {
     this.logger.debug(`Validating URL ${url}`);
 
     const normalizedUrl = this.buildUrl(url);
+    const serializedUrl = this.serializeUrl(normalizedUrl);
+
+    // Step 1: Check cache
+    const cachedResult = await this.checkCache(serializedUrl);
+    if (cachedResult) {
+      this.logger.debug(
+        `Found cached validation result for URL ${serializedUrl}`,
+      );
+      return cachedResult;
+    }
+
+    // Step 2: Validate URL format and classify
     const classification = this.classifyUrl(normalizedUrl);
 
     this.logger.debug(
-      `Classified URL ${normalizedUrl.toString()} as ${classification.source} with collector ${classification.collector}`,
+      `Classified URL ${serializedUrl} as ${classification.source}`,
     );
 
-    const collectorStrategy = this.sourceCollectorsFactory.getStrategy(
-      classification.collector,
-    );
-
-    this.logger.debug(
-      `Collector found for ${classification.source} with collector ${classification.collector}: ${collectorStrategy?.getCollectorType()}`,
-    );
-
-    if (!collectorStrategy) {
-      throw new CollectorStrategyNotFoundError(classification.collector);
+    // Step 3: Check DB for existing source
+    const existingSource =
+      await this.sourcesService.getSourceByUrl(serializedUrl);
+    if (existingSource) {
+      this.logger.debug(`Found existing source in DB for URL ${serializedUrl}`);
+      const result: ValidatedSourceUrl = {
+        url: serializedUrl,
+        ...classification,
+      };
+      // Cache the result
+      await this.cacheValidationResult(serializedUrl, result);
+      return result;
     }
 
-    this.logger.debug(
-      `Validating URL ${normalizedUrl.toString()} with collector ${collectorStrategy.getCollectorType()}`,
-    );
-
-    const isValid = await collectorStrategy.validate({
-      url: normalizedUrl.toString(),
-      ...classification,
-    });
-
-    if (!isValid) {
-      throw new InvalidSourceUrlError(
-        normalizedUrl.toString(),
-        'Invalid source URL',
-      );
-    }
-
-    return {
-      url: this.serializeUrl(normalizedUrl),
+    // All fast checks passed, return classification
+    const result: ValidatedSourceUrl = {
+      url: serializedUrl,
       ...classification,
     };
+
+    // Cache the result (with shorter TTL since it's pending validation)
+    await this.cacheValidationResult(serializedUrl, result, 300); // 5 minutes
+
+    return result;
+  }
+
+  /**
+   * Check cache for validation result
+   */
+  private async checkCache(url: string): Promise<ValidatedSourceUrl | null> {
+    const cacheKey = this.getCacheKey(url);
+    const cached =
+      await this.cacheService.getJson<ValidatedSourceUrl>(cacheKey);
+    return cached;
+  }
+
+  /**
+   * Cache validation result
+   */
+  private async cacheValidationResult(
+    url: string,
+    result: ValidatedSourceUrl,
+    ttlSeconds: number = 3600, // Default 1 hour
+  ): Promise<void> {
+    const cacheKey = this.getCacheKey(url);
+    await this.cacheService.setJson(cacheKey, result, ttlSeconds);
+  }
+
+  /**
+   * Get cache key for validation result
+   */
+  private getCacheKey(url: string): string {
+    return `validation:${url}`;
   }
 
   normalizeUrl(url: string): string {
@@ -131,7 +167,6 @@ export class SourcesValidationService {
       return {
         name: handle,
         source: PublicSource.TELEGRAM,
-        collector: Collector.API,
       };
     }
 
@@ -148,17 +183,13 @@ export class SourcesValidationService {
       return {
         name: username,
         source: PublicSource.INSTAGRAM,
-        collector: Collector.SCRAPER,
       };
     }
 
-    const name = segments[0] ?? host.replace(/^www\./, '');
-
-    return {
-      name,
-      source: PublicSource.WEBSITE,
-      collector: Collector.RSS,
-    };
+    throw new InvalidSourceUrlError(
+      url.toString(),
+      'Unsupported source type. Only Telegram and Instagram are supported.',
+    );
   }
 
   private getPathSegments(pathname: string): string[] {

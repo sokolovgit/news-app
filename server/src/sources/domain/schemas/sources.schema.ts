@@ -13,7 +13,7 @@ import {
   timestampConfig,
 } from '@/commons/database';
 import { Uuid } from '@/commons/utils';
-import { Collector, PublicSource, SourceStatus } from '../enums';
+import { PublicSource, SourceStatus } from '../enums';
 
 import { UserId, users } from '@/users/domain/schemas';
 import { relations } from 'drizzle-orm';
@@ -23,11 +23,6 @@ export type SourceId = Uuid<'sources'>;
 export const pgSources = pgEnum(
   'sources_enum',
   Object.values(PublicSource) as [string, ...string[]],
-);
-
-export const pgCollectors = pgEnum(
-  'collectors_enum',
-  Object.values(Collector) as [string, ...string[]],
 );
 
 export const pgSourceStatus = pgEnum(
@@ -43,7 +38,6 @@ export const sources = pgTable('sources', {
   }),
 
   source: pgSources('source').notNull(),
-  collector: pgCollectors('collector').notNull(),
 
   name: varchar('name').notNull(),
   url: varchar('url').notNull(),

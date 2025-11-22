@@ -1,5 +1,5 @@
 import { ApiOperation } from '@nestjs/swagger';
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 
 import { Auth } from '@/auth/decorators/auth.decorator';
 import { CurrentUser } from '@/users/decorators';
@@ -11,18 +11,13 @@ import {
   UserSourceDto,
   ValidateSourceDto,
 } from './dtos';
-import {
-  AddSourceHandler,
-  TestHandler,
-  ValidateSourceHandler,
-} from '../operation/handlers';
+import { AddSourceHandler, ValidateSourceHandler } from '../operation/handlers';
 
 @Controller('sources')
 export class SourcesController {
   constructor(
     private readonly addSourceHandler: AddSourceHandler,
     private readonly validateSourceHandler: ValidateSourceHandler,
-    private readonly testSourceHandler: TestHandler,
   ) {}
 
   @Post()
@@ -58,14 +53,5 @@ export class SourcesController {
   })
   public validateSource(@Body() validateSourceDto: ValidateSourceDto) {
     return this.validateSourceHandler.handle(validateSourceDto.toRequest());
-  }
-
-  @Get('test')
-  @ApiOperation({
-    summary: 'Test a source',
-    description: 'Test a source',
-  })
-  public async testSource() {
-    return this.testSourceHandler.handle();
   }
 }

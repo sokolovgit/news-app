@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { Source } from '@/sources/domain/entities';
-import { Collector, PublicSource } from '@/sources/domain/enums';
+import { PublicSource } from '@/sources/domain/enums';
 import { SourceId } from '@/sources/domain/schemas';
 import { UserId } from '@/users/domain/schemas';
 
@@ -17,9 +17,6 @@ export class SourceDto {
 
   @ApiProperty({ enum: PublicSource })
   source: PublicSource;
-
-  @ApiProperty({ enum: Collector })
-  collector: Collector;
 
   @ApiProperty({
     description: 'User that initially added the source',
@@ -39,7 +36,6 @@ export class SourceDto {
     dto.url = source.getUrl();
     dto.name = source.getName();
     dto.source = source.getSource();
-    dto.collector = source.getCollector();
     dto.addedBy = source.getUserAddedById();
     dto.createdAt = source.getCreatedAt();
     dto.updatedAt = source.getUpdatedAt();

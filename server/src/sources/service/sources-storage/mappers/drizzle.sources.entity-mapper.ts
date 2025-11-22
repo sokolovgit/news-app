@@ -1,6 +1,6 @@
 import { loadRelation } from '@/commons/database';
 
-import { Collector, PublicSource } from '@/sources/domain/enums';
+import { PublicSource, SourceStatus } from '@/sources/domain/enums';
 import {
   Source,
   SourceLoadOptions,
@@ -23,13 +23,13 @@ export class DrizzleSourcesEntityMapper {
         id: data.id,
         addedBy: data.addedBy ?? undefined,
         source: data.source as PublicSource,
-        collector: data.collector as Collector,
         name: data.name,
         url: data.url,
         lastFetchedAt: data.lastFetchedAt ?? undefined,
         cursor: data.cursor ?? undefined,
         lastError: data.lastError ?? undefined,
-        status: (data.status as SourceProperties['status']) ?? 'active',
+        status:
+          (data.status as SourceProperties['status']) ?? SourceStatus.ACTIVE,
         fetchMetadata:
           (data.fetchMetadata as Record<string, unknown>) ?? undefined,
         createdAt: data.createdAt,
@@ -48,7 +48,6 @@ export class DrizzleSourcesEntityMapper {
       id: entity.getId(),
       addedBy: entity.getUserAddedById(),
       source: entity.getSource(),
-      collector: entity.getCollector(),
       name: entity.getName(),
       url: entity.getUrl(),
       lastFetchedAt: entity.getLastFetchedAt(),

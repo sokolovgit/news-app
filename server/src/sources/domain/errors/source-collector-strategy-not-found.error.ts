@@ -11,7 +11,7 @@ export class SourceCollectorStrategyNotFoundError extends AppError {
       context,
       {
         sourceId: source.getId(),
-        collector: source.getCollector(),
+        sourceType: source.getSource(),
       },
     );
   }

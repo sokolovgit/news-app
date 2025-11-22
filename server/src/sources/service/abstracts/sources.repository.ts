@@ -1,5 +1,6 @@
 import { SourceId } from '@/sources/domain/schemas';
 import { Source, SourceLoadOptions } from '@/sources/domain/entities';
+import { SourceStatus } from '@/sources/domain/enums';
 import { PaginatedResult, PaginationParams } from '@/commons/types';
 
 export abstract class SourcesRepository {
@@ -28,7 +29,7 @@ export abstract class SourcesRepository {
       lastFetchedAt?: Date;
       cursor?: string | null;
       lastError?: string | null;
-      status?: 'active' | 'paused' | 'error';
+      status?: SourceStatus;
       fetchMetadata?: Record<string, unknown>;
     },
   ): Promise<void>;

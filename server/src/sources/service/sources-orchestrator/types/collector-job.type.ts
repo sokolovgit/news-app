@@ -1,14 +1,13 @@
 import { SourceId } from '@/sources/domain/schemas';
-import { PublicSource, Collector } from '@/sources/domain/enums';
+import { PublicSource } from '@/sources/domain/enums';
 
 /**
- * Job data for collector queues (Instagram, Twitter, RSS)
+ * Job data for collector queues (Instagram, Telegram)
  * Created by Orchestrator Processor after enrichment
  */
 export type CollectorJobData = {
   sourceId: SourceId;
   sourceType: PublicSource;
-  collector: Collector;
   externalId: string; // Username, handle, or URL
   cursor?: string;
   limit?: number;

@@ -13,6 +13,6 @@ export class ValidateSourceHandler {
   async handle(
     request: ValidateSourceRequest,
   ): Promise<ValidateSourceResponse> {
-    return await this.sourcesValidationService.validateOrThrow(request.url);
+    return await this.sourcesValidationService.validateUrl(request.url);
   }
 }
