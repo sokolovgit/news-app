@@ -138,15 +138,56 @@ pytest -m integration   # Run only integration tests
 
 ## Configuration
 
-See `.env.example` for available configuration options.
+### Environment Variables
 
-### Key Configuration Items:
+See the [Environment Variables](#environment-variables) section below for all available options.
 
-- **REDIS_HOST**: Redis server host (default: localhost)
-- **REDIS_PORT**: Redis server port (default: 6379)
-- **QUEUE_NAME**: BullMQ queue name
-- **CONCURRENCY**: Number of concurrent workers
-- **LOG_LEVEL**: Logging level (DEBUG, INFO, WARNING, ERROR)
+### Instagram Session File (Optional but Recommended)
+
+The session file allows the scraper to make authenticated requests to Instagram, which:
+- ✅ Reduces rate limiting issues
+- ✅ Allows access to more profiles
+- ✅ Improves reliability
+
+**Without a session file:** The scraper works but may hit rate limits more frequently and has limited access.
+
+**Creating a Session File:**
+
+1. **Using the helper script** (recommended):
+   ```bash
+   python scripts/create_session.py
+   ```
+   This will prompt you for your Instagram username and password, then create a session file.
+
+2. **Using instaloader CLI directly**:
+   ```bash
+   instaloader --login YOUR_USERNAME
+   ```
+   This will create a `YOUR_USERNAME.session` file in the current directory.
+
+3. **Set the session path in `.env`**:
+   ```bash
+   INSTAGRAM_SESSION_PATH=/path/to/your-username.session
+   ```
+
+**Important Notes:**
+- ⚠️ Session files are already in `.gitignore` - they won't be committed
+- ⚠️ Your password is NOT stored - only the session token
+- ⚠️ Session files expire after some time - recreate if authentication fails
+- ⚠️ If you have 2FA enabled, temporarily disable it or use a different account
+- ⚠️ Keep session files secure and private
+
+### Environment Variables
+
+**Required:**
+- `REDIS_URL` - Redis connection URL (must match NestJS app)
+
+**Optional:**
+- `INSTAGRAM_SESSION_PATH` - Path to Instagram session file
+- `INSTAGRAM_RATE_LIMIT_DELAY` - Delay between requests in seconds (default: 1.0)
+- `INSTAGRAM_DOWNLOAD_VIDEOS` - Download videos (default: false)
+- `INSTAGRAM_DOWNLOAD_PICTURES` - Download pictures (default: false)
+- `WORKER_CONCURRENCY` - Number of concurrent jobs (default: 1)
 
 ## License
 

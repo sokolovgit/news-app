@@ -74,7 +74,7 @@ export class SourcesValidationService {
       ...classification,
     };
 
-    // Cache the result (with shorter TTL since it's pending validation)
+    // Cache the result
     await this.cacheValidationResult(serializedUrl, result, 300); // 5 minutes
 
     return result;

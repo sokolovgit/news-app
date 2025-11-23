@@ -44,19 +44,10 @@ export class SourcesOrchestratorService {
       return;
     }
 
-    // 2. Check if source should be skipped (paused, pending validation, error state, etc.)
+    // 2. Check if source should be skipped (paused, error state, etc.)
     const isPaused = source.isPaused();
     if (isPaused) {
       this.logger.debug(`Source ${sourceId} is paused, skipping orchestration`);
-      return;
-    }
-
-    // Skip sources that are pending validation - they need to be validated first
-    const isPendingValidation = source.isPendingValidation();
-    if (isPendingValidation) {
-      this.logger.debug(
-        `Source ${sourceId} is pending validation, skipping orchestration`,
-      );
       return;
     }
 

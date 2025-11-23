@@ -50,6 +50,10 @@ dmypy.json
 
 # Instagram session files
 session*
+# Ignore all files in sessions/ except README.md
+sessions/*
+!sessions/
+!sessions/README.md
 
 # Logs
 *.log

@@ -103,10 +103,6 @@ export class Source {
     return this.getStatus() === SourceStatus.ERROR;
   }
 
-  isPendingValidation(): boolean {
-    return this.getStatus() === SourceStatus.PENDING_VALIDATION;
-  }
-
   toJSON() {
     return {
       id: this.getId(),

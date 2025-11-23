@@ -41,22 +41,16 @@ export class AddSourceHandler {
         request.url,
       );
 
-      // Create source with pending_validation status
+      // Create source with active status
       source = await this.sourcesService.createSource({
         url: validation.url,
         name: validation.name,
         source: validation.source,
         addedBy: request.userId,
-        status: SourceStatus.PENDING_VALIDATION,
+        status: SourceStatus.ACTIVE,
       });
 
-      // Validate source directly (async, non-blocking)
-
-      await this.sourcesValidationService.validateUrl(request.url);
-
-      this.logger.log(
-        `Created source ${source.getId()} with pending_validation status, validation started`,
-      );
+      this.logger.log(`Created source ${source.getId()} with active status`);
 
       isNewSource = true;
     }
