@@ -1,12 +1,24 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { eq, sql, inArray } from 'drizzle-orm';
+import {
+  eq,
+  sql,
+  inArray,
+  and,
+  or,
+  gte,
+  lte,
+  ilike,
+  desc,
+  asc,
+} from 'drizzle-orm';
 
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 
-import { RawPostsRepository } from '../abstracts';
+import { RawPostsRepository, GetFeedPostsParams } from '../abstracts';
 import { DrizzleRawPostsEntityMapper } from './mappers';
+import { createPaginatedResult, PaginatedResult } from '@/commons/types';
 
 import { SourceId } from '@/sources/domain/schemas';
 import { RawPostId, rawPosts } from '@/posts/domain/schemas';
@@ -102,6 +114,75 @@ export class DrizzleRawPostsRepository extends RawPostsRepository {
     });
 
     return new Set(existingPosts.map((post) => post.externalId));
+  }
+
+  async getFeedPosts(
+    params: GetFeedPostsParams,
+    loadOptions: RawPostLoadOptions = {},
+  ): Promise<PaginatedResult<RawPost>> {
+    const conditions = [];
+
+    // Filter by source IDs
+    if (params.sourceIds.length > 0) {
+      conditions.push(inArray(rawPosts.sourceId, params.sourceIds));
+    }
+
+    // Search in title and content
+    if (params.search) {
+      const searchPattern = `%${params.search}%`;
+      conditions.push(
+        or(
+          params.search ? ilike(rawPosts.title, searchPattern) : undefined,
+          // Search in JSONB content - using PostgreSQL JSONB operators
+          sql`${rawPosts.content}::text ILIKE ${searchPattern}`,
+        )!,
+      );
+    }
+
+    // Date range filters
+    if (params.dateFrom) {
+      conditions.push(gte(rawPosts.createdAt, params.dateFrom));
+    }
+
+    if (params.dateTo) {
+      conditions.push(lte(rawPosts.createdAt, params.dateTo));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // Build sort order
+    const sortField =
+      params.sort?.field === 'updatedAt'
+        ? rawPosts.updatedAt
+        : rawPosts.createdAt;
+    const orderBy =
+      params.sort?.order === 'asc' ? asc(sortField) : desc(sortField);
+
+    // Get total count
+    const totalResult = await this.db
+      .select({ count: sql<number>`count(*)` })
+      .from(rawPosts)
+      .where(whereClause);
+
+    const total = Number(totalResult[0]?.count ?? 0);
+
+    // Get paginated data
+    const postsData = await this.db.query.rawPosts.findMany({
+      where: whereClause,
+      with: this.buildRelations(loadOptions),
+      orderBy: [orderBy],
+      limit: params.limit,
+      offset: params.offset,
+    });
+
+    const posts = postsData.map((post) =>
+      DrizzleRawPostsEntityMapper.toEntity(post, loadOptions),
+    );
+
+    return createPaginatedResult(posts, total, {
+      offset: params.offset,
+      limit: params.limit,
+    });
   }
 
   private buildRelations(relations?: RawPostLoadOptions) {

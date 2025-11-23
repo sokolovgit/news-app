@@ -18,6 +18,7 @@ import { DrizzleModule } from './database';
 import { CookiesModule } from './cookies';
 import { SourcesModule } from './sources/sources.module';
 import { UserActivityModule } from './user-activity/user-activity.module';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { UserActivityModule } from './user-activity/user-activity.module';
     MailsModule,
     SourcesModule,
     UserActivityModule,
+    PostsModule,
   ],
   providers: [
     {

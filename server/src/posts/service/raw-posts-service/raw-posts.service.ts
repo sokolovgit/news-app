@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 
 import { LoggerService } from '@/logger';
+import { PaginatedResult } from '@/commons/types';
 
 import { RawPostId } from '@/posts/domain/schemas';
 import { RawPost, RawPostLoadOptions } from '@/posts/domain/entities';
 import { RawPostPayload } from '@/posts/domain/types';
 import { RawPostFactory } from '@/posts/domain/factories';
-import { RawPostsRepository } from '../abstracts';
+import { RawPostsRepository, GetFeedPostsParams } from '../abstracts';
 import {
   RawPostSaveFailedError,
   RawPostSaveManyFailedError,
@@ -96,5 +97,24 @@ export class RawPostsService {
     externalIds: string[],
   ): Promise<Set<string>> {
     return this.rawPostsRepository.existsByExternalIds(sourceId, externalIds);
+  }
+
+  async getFeedPosts(
+    params: GetFeedPostsParams,
+    loadOptions: RawPostLoadOptions = {},
+  ): Promise<PaginatedResult<RawPost>> {
+    const logParams = {
+      sourceIds: params.sourceIds.length,
+      search: params.search,
+      sort: params.sort,
+      offset: params.offset,
+      limit: params.limit,
+    };
+
+    this.logger.log(
+      `Getting feed posts with params: ${JSON.stringify(logParams)}`,
+    );
+
+    return await this.rawPostsRepository.getFeedPosts(params, loadOptions);
   }
 }
