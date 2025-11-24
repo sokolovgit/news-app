@@ -105,17 +105,6 @@ const handleSwitchToRegister = () => {
 
 <template>
   <form :class="cn('flex flex-col gap-6', props.class)" @submit="onSubmit">
-    <!-- Header -->
-    <div class="flex flex-col items-center gap-2 text-center">
-      <div class="rounded-full bg-primary/10 p-3 mb-2">
-        <Icon name="lucide:lock-keyhole" class="h-6 w-6 text-primary-foreground" />
-      </div>
-      <h1 class="text-2xl font-bold">Welcome back</h1>
-      <p class="text-muted-foreground text-sm text-balance">
-        Enter your credentials to access your account
-      </p>
-    </div>
-
     <div class="grid gap-5">
       <!-- Email Field -->
       <FormField v-slot="{ componentField }" name="email">
@@ -209,24 +198,12 @@ const handleSwitchToRegister = () => {
       <Button
         type="submit"
         size="lg"
-        class="w-full mt-2 bg-accent text-bg hover:bg-accent/90"
+        class="w-full mt-2"
         :disabled="authStore.isLoading"
       >
         <Icon v-if="authStore.isLoading" name="lucide:loader-2" class="mr-2 h-4 w-4 animate-spin" />
         {{ authStore.isLoading ? 'Logging in...' : 'Login' }}
       </Button>
-    </div>
-
-    <!-- Footer -->
-    <div class="text-center text-sm">
-      <span class="text-muted-foreground">Don't have an account?</span>
-      <a
-        href="#"
-        class="ml-1 font-medium text-primary-foreground underline-offset-4 hover:underline"
-        @click.prevent="handleSwitchToRegister"
-      >
-        Sign up
-      </a>
     </div>
   </form>
 </template>
