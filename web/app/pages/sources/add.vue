@@ -109,15 +109,7 @@
       </CardContent>
       <CardFooter class="flex justify-end gap-2">
         <Button variant="outline" @click="navigateTo('/sources')"> Cancel </Button>
-        <Button variant="outline" :disabled="!formData.url || isValidating" @click="handleValidate">
-          <Icon
-            name="lucide:check-circle"
-            class="mr-2 h-4 w-4"
-            :class="{ 'animate-spin': isValidating }"
-          />
-          Validate
-        </Button>
-        <Button :disabled="!isValid || isSubmitting" @click="handleSubmit">
+        <Button :disabled="!formData.url || isSubmitting" @click="handleSubmit">
           <Icon
             name="lucide:plus-circle"
             class="mr-2 h-4 w-4"
@@ -144,10 +136,17 @@ import {
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { useApi } from '~/composables/useApi'
+import { SourcesService } from '~/lib/api'
+import { buildSourceUrl } from '~/utils/source-url'
+import { toast } from 'vue-sonner'
 
 definePageMeta({
   layout: 'default',
 })
+
+const api = useApi()
+const sourcesService = new SourcesService(api)
 
 const selectedType = ref<'telegram' | 'instagram'>('telegram')
 const formData = ref({
@@ -155,9 +154,8 @@ const formData = ref({
   name: '',
 })
 const urlError = ref('')
-const isValid = ref(false)
-const isValidating = ref(false)
 const isSubmitting = ref(false)
+
 interface SourcePreview {
   name: string
   url: string
@@ -181,89 +179,82 @@ const validateUrl = () => {
     return
   }
 
+  // Basic validation - allow both @handle and full URLs
+  const trimmed = formData.value.url.trim()
+
   if (selectedType.value === 'instagram') {
-    // Instagram username validation
+    // Instagram username validation - allow @username or full URL
     const instagramPattern = /^@?[a-zA-Z0-9._]+$/
-    if (!instagramPattern.test(formData.value.url.replace('@', ''))) {
-      urlError.value = 'Please enter a valid Instagram username'
+    const urlPattern = /^https?:\/\/(www\.)?(instagram\.com|instagr\.am)\/[a-zA-Z0-9._]+/
+
+    if (!instagramPattern.test(trimmed.replace('@', '')) && !urlPattern.test(trimmed)) {
+      urlError.value = 'Please enter a valid Instagram username (e.g., @username) or URL'
     }
   } else {
-    // Telegram channel validation
+    // Telegram channel validation - allow @channelname or full URL
     const telegramPattern = /^@?[a-zA-Z0-9_]+$/
-    if (!telegramPattern.test(formData.value.url.replace('@', ''))) {
-      urlError.value = 'Please enter a valid Telegram channel username'
+    const urlPattern = /^https?:\/\/(t\.me|telegram\.me)\/[a-zA-Z0-9_]+/
+
+    if (!telegramPattern.test(trimmed.replace('@', '')) && !urlPattern.test(trimmed)) {
+      urlError.value = 'Please enter a valid Telegram channel username (e.g., @channelname) or URL'
     }
-  }
-}
-
-const handleValidate = async () => {
-  if (!formData.value.url || urlError.value) {
-    return
-  }
-
-  isValidating.value = true
-  validationStatus.value = null
-
-  try {
-    // TODO: Call validation API
-    // const response = await validateSource({
-    //   url: formData.value.url,
-    //   source: selectedType.value,
-    // })
-
-    // Mock validation
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    sourcePreview.value = {
-      name: formData.value.name || 'Example Source',
-      url: formData.value.url,
-    }
-
-    validationStatus.value = {
-      type: 'success',
-      icon: 'lucide:check-circle',
-      title: 'Source Valid',
-      message: 'This source looks good! You can add it now.',
-    }
-
-    isValid.value = true
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : 'Could not validate this source. Please check the URL and try again.'
-    validationStatus.value = {
-      type: 'destructive',
-      icon: 'lucide:alert-circle',
-      title: 'Validation Failed',
-      message: errorMessage,
-    }
-    isValid.value = false
-  } finally {
-    isValidating.value = false
   }
 }
 
 const handleSubmit = async () => {
-  if (!isValid.value) {
-    await handleValidate()
+  if (!formData.value.url || urlError.value) {
     return
   }
 
   isSubmitting.value = true
+  validationStatus.value = null
 
   try {
-    // TODO: Call add source API
-    // await addSource({
-    //   url: formData.value.url,
-    //   name: formData.value.name || sourcePreview.value?.name,
-    //   source: selectedType.value,
-    // })
+    // Build the full URL from input (@handle or full URL)
+    const fullUrl = buildSourceUrl(formData.value.url, selectedType.value)
 
-    // Mock submission
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    // Step 1: Validate the source first
+    let validationResponse
+    try {
+      validationResponse = await sourcesService.validateSource(fullUrl)
 
-    // Show success and redirect
+      // Show preview
+      sourcePreview.value = {
+        name: formData.value.name || validationResponse.name,
+        url: validationResponse.url,
+      }
+
+      validationStatus.value = {
+        type: 'success',
+        icon: 'lucide:check-circle',
+        title: 'Source Valid',
+        message: 'Adding source to your feed...',
+      }
+    } catch (validationError: unknown) {
+      const errorMessage =
+        validationError instanceof Error
+          ? validationError.message
+          : 'Could not validate this source. Please check the URL and try again.'
+      validationStatus.value = {
+        type: 'destructive',
+        icon: 'lucide:alert-circle',
+        title: 'Validation Failed',
+        message: errorMessage,
+      }
+      toast.error('Validation Failed', {
+        description: errorMessage,
+      })
+      return
+    }
+
+    // Step 2: Add the source
+    await sourcesService.addSource(fullUrl)
+
+    toast.success('Source Added', {
+      description: 'The source has been successfully added to your feed.',
+    })
+
+    // Redirect to sources page
     navigateTo('/sources')
   } catch (error: unknown) {
     const errorMessage =
@@ -274,6 +265,9 @@ const handleSubmit = async () => {
       title: 'Failed to Add Source',
       message: errorMessage,
     }
+    toast.error('Failed to Add Source', {
+      description: errorMessage,
+    })
   } finally {
     isSubmitting.value = false
   }
