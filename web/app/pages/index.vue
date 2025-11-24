@@ -1,69 +1,175 @@
-<script setup lang="ts">
-import { Button } from '@/components/ui/button'
-import { useAuthStore } from '~/stores/auth.store'
-import EmailVerificationBanner from '~/components/auth/EmailVerificationBanner.vue'
-
-const authStore = useAuthStore()
-const router = useRouter()
-
-const handleLogout = async () => {
-  await authStore.logout()
-  router.push('/login')
-}
-</script>
-
 <template>
-  <div class="min-h-screen bg-bg text-text flex flex-col">
-    <!-- Email Verification Banner -->
-    <EmailVerificationBanner />
-    
-    <div class="flex-1 flex items-center justify-center p-8">
-    <div class="text-center space-y-6 max-w-2xl">
-      <h1 class="text-5xl font-bold">News App</h1>
-      <p class="text-xl text-muted">Welcome to the News Application</p>
-
-      <!-- Auth Status -->
-      <div
-        v-if="authStore.isAuthenticated"
-        class="mt-8 p-6 bg-card rounded-lg border border-border"
-      >
-        <h2 class="text-2xl font-semibold mb-4">Welcome back!</h2>
-        <div class="space-y-2 text-left mb-4">
-          <p><span class="font-medium">Email:</span> {{ authStore.userEmail }}</p>
-          <p><span class="font-medium">Roles:</span> {{ authStore.userRoles.join(', ') }}</p>
-          <p>
-            <span class="font-medium">Email Verified:</span>
-            {{ authStore.isEmailVerified ? 'Yes' : 'No' }}
-          </p>
-        </div>
-        <Button variant="outline" class="w-full" @click="handleLogout"> Logout </Button>
-      </div>
-
-      <div v-else class="mt-8 p-6 bg-card rounded-lg border border-border">
-        <p class="text-lg mb-4">Please sign in to continue</p>
-        <div class="flex gap-4 justify-center">
-          <NuxtLink to="/login">
-            <Button size="lg" class="px-8 bg-accent text-bg hover:bg-accent/90"> Login </Button>
-          </NuxtLink>
-          <NuxtLink to="/register">
-            <Button variant="outline" size="lg" class="px-8 hover:bg-accent/10"> Register </Button>
-          </NuxtLink>
+  <div class="space-y-8">
+    <!-- Hero Section -->
+    <section
+      class="relative overflow-hidden rounded-2xl bg-linear-to-r from-primary via-secondary to-tertiary p-8 md:p-12"
+    >
+      <div class="relative z-10">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+          Welcome back, {{ userInitials }}!
+        </h1>
+        <p class="text-lg md:text-xl text-white/90 mb-6 max-w-2xl">
+          Stay updated with your personalized news feed from all your favorite sources.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <Button
+            size="lg"
+            class="bg-white text-primary hover:bg-white/90"
+            @click="navigateTo('/sources/add')"
+          >
+            <Icon name="lucide:plus-circle" class="mr-2 h-5 w-5" />
+            Add New Source
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            class="border-white text-white hover:bg-white/10"
+            @click="navigateTo('/feed')"
+          >
+            <Icon name="lucide:rss" class="mr-2 h-5 w-5" />
+            View Feed
+          </Button>
         </div>
       </div>
+    </section>
 
-      <div class="flex gap-4 justify-center mt-8">
-        <NuxtLink
-          to="/palette"
-          class="px-6 py-3 bg-accent text-bg rounded-lg hover:opacity-90 hover:no-underline transition-opacity font-medium"
-        >
-          View Color Palette
-        </NuxtLink>
+    <!-- Stats Cards -->
+    <section>
+      <h2 class="text-2xl font-bold text-text mb-4">Overview</h2>
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatsCard
+          title="Total Sources"
+          :value="stats.totalSources"
+          icon="lucide:book-open"
+          description="Sources you're following"
+        />
+        <StatsCard
+          title="Posts Today"
+          :value="stats.postsToday"
+          icon="lucide:newspaper"
+          description="New posts in last 24h"
+        />
+        <StatsCard
+          title="Unread Items"
+          :value="stats.unreadItems"
+          icon="lucide:mail"
+          description="Posts you haven't read"
+        />
+        <StatsCard
+          title="Last Updated"
+          :value="stats.lastUpdated"
+          icon="lucide:clock"
+          description="Feed refresh time"
+        />
       </div>
+    </section>
 
-      <div class="mt-12">
-        <ThemeToggle />
-        </div>
+    <!-- Quick Actions -->
+    <section>
+      <h2 class="text-2xl font-bold text-text mb-4">Quick Actions</h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        <QuickActionCard
+          title="Add Source"
+          description="Add a new RSS feed or Instagram account"
+          icon="lucide:plus-circle"
+          @click="navigateTo('/sources/add')"
+        />
+        <QuickActionCard
+          title="Manage Sources"
+          description="View and manage all your sources"
+          icon="lucide:settings"
+          @click="navigateTo('/sources')"
+        />
       </div>
-    </div>
+    </section>
+
+    <!-- Recent Sources Preview -->
+    <section v-if="recentSources.length > 0">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-bold text-text">Recent Sources</h2>
+        <NuxtLink to="/sources" class="text-sm text-primary hover:underline"> View all </NuxtLink>
+      </div>
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <SourceCard
+          v-for="source in recentSources"
+          :key="source.id"
+          :source="source"
+          :preview="true"
+        />
+      </div>
+    </section>
+
+    <!-- Feed Preview -->
+    <section v-if="recentPosts.length > 0">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-bold text-text">Latest Posts</h2>
+        <NuxtLink to="/feed" class="text-sm text-primary hover:underline"> View all </NuxtLink>
+      </div>
+      <div class="space-y-4">
+        <PostCard v-for="post in recentPosts" :key="post.id" :post="post" :preview="true" />
+      </div>
+    </section>
+
+    <!-- Empty State -->
+    <section
+      v-if="recentSources.length === 0 && recentPosts.length === 0"
+      class="text-center py-12"
+    >
+      <div class="max-w-md mx-auto">
+        <Icon name="lucide:inbox" class="h-16 w-16 text-muted mx-auto mb-4" />
+        <h3 class="text-xl font-semibold text-text mb-2">Get Started</h3>
+        <p class="text-muted mb-6">
+          Add your first source to start seeing personalized news in your feed.
+        </p>
+        <Button @click="navigateTo('/sources/add')">
+          <Icon name="lucide:plus-circle" class="mr-2 h-4 w-4" />
+          Add Your First Source
+        </Button>
+      </div>
+    </section>
   </div>
 </template>
+
+<script setup lang="ts">
+import { Button } from '@/components/ui/button'
+import StatsCard from '~/components/dashboard/StatsCard.vue'
+import QuickActionCard from '~/components/dashboard/QuickActionCard.vue'
+import SourceCard from '~/components/sources/SourceCard.vue'
+import PostCard from '~/components/posts/PostCard.vue'
+import { useAuthStore } from '~/stores/auth.store'
+
+// Layout is default by default, but we can explicitly set it
+definePageMeta({
+  layout: 'default',
+})
+
+const authStore = useAuthStore()
+
+const userInitials = computed(() => {
+  const email = authStore.userEmail || ''
+  if (!email) return 'User'
+  const parts = email.split('@')[0].split('.')
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase()
+  }
+  return email[0].toUpperCase()
+})
+
+// Mock data for now - will be replaced with actual API calls
+const stats = ref({
+  totalSources: 0,
+  postsToday: 0,
+  unreadItems: 0,
+  lastUpdated: 'Never',
+})
+
+const recentSources = ref<any[]>([])
+const recentPosts = ref<any[]>([])
+
+// TODO: Fetch actual data from API
+onMounted(async () => {
+  // Fetch stats and recent data
+  // const sourcesData = await fetchUserSources()
+  // const postsData = await fetchRecentPosts()
+})
+</script>

@@ -1,0 +1,102 @@
+<template>
+  <Card class="hover:shadow-md transition-shadow">
+    <CardHeader>
+      <div class="flex items-start justify-between">
+        <div class="flex items-start gap-3 flex-1 min-w-0">
+          <div class="p-2 rounded-lg bg-primary/10 flex-shrink-0">
+            <Icon :name="sourceIcon" class="h-5 w-5 text-primary" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <CardTitle class="text-lg truncate">{{ source.name }}</CardTitle>
+            <CardDescription class="truncate">{{ source.url }}</CardDescription>
+          </div>
+        </div>
+        <Badge :variant="sourceBadgeVariant">{{ sourceTypeLabel }}</Badge>
+      </div>
+    </CardHeader>
+    <CardContent v-if="!preview">
+      <div class="space-y-2 text-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-muted-foreground">Last fetched</span>
+          <span class="text-text">{{ lastFetched }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-muted-foreground">Posts (24h)</span>
+          <span class="text-text">{{ source.postCount || 0 }}</span>
+        </div>
+      </div>
+    </CardContent>
+    <CardFooter v-if="!preview" class="flex justify-end gap-2">
+      <Button variant="ghost" size="sm" @click="$emit('refresh')">
+        <Icon name="lucide:refresh-cw" class="h-4 w-4 mr-2" />
+        Refresh
+      </Button>
+      <Button variant="ghost" size="sm" @click="$emit('view')"> View </Button>
+    </CardFooter>
+  </Card>
+</template>
+
+<script setup lang="ts">
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+
+interface Source {
+  id: string
+  name: string
+  url: string
+  source: string // 'rss' | 'instagram' | etc.
+  postCount?: number
+  lastFetchedAt?: Date | string
+}
+
+const props = defineProps<{
+  source: Source
+  preview?: boolean
+}>()
+
+defineEmits<{
+  refresh: []
+  view: []
+}>()
+
+const sourceIcon = computed(() => {
+  const sourceType = props.source.source.toLowerCase()
+  if (sourceType === 'instagram') return 'lucide:instagram'
+  if (sourceType === 'rss') return 'lucide:rss'
+  return 'lucide:link'
+})
+
+const sourceTypeLabel = computed(() => {
+  return props.source.source.charAt(0).toUpperCase() + props.source.source.slice(1)
+})
+
+const sourceBadgeVariant = computed(() => {
+  const sourceType = props.source.source.toLowerCase()
+  if (sourceType === 'instagram') return 'secondary'
+  if (sourceType === 'rss') return 'default'
+  return 'outline'
+})
+
+const lastFetched = computed(() => {
+  if (!props.source.lastFetchedAt) return 'Never'
+  const date = new Date(props.source.lastFetchedAt)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 1) return 'Just now'
+  if (diffMins < 60) return `${diffMins}m ago`
+  if (diffHours < 24) return `${diffHours}h ago`
+  return `${diffDays}d ago`
+})
+</script>

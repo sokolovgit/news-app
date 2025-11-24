@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { GalleryVerticalEnd } from 'lucide-vue-next'
 import RegisterForm from '~/components/auth/RegisterForm.vue'
+
+definePageMeta({
+  layout: 'auth',
+})
 
 const router = useRouter()
 
@@ -14,30 +17,15 @@ const handleSwitchToLogin = () => {
 </script>
 
 <template>
-  <div class="grid min-h-svh lg:grid-cols-2">
-    <div class="relative flex flex-col gap-4 p-6 md:p-10">
-      <div class="flex justify-center gap-2 md:justify-start">
-        <a href="/" class="flex items-center gap-2 font-medium">
-          <div
-            class="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground"
-          >
-            <GalleryVerticalEnd :size="16" />
-          </div>
-          News App
-        </a>
-      </div>
-      <div class="flex flex-1 items-center justify-center">
-        <div class="w-full max-w-xs">
-          <RegisterForm @success="handleRegisterSuccess" @switch-to-login="handleSwitchToLogin" />
-        </div>
-      </div>
+  <div class="w-full">
+    <div class="mb-8 text-center">
+      <h1 class="text-3xl font-bold text-text mb-2">Create an account</h1>
+      <p class="text-muted">Sign up to get started with News App</p>
     </div>
-    <div class="relative hidden bg-muted lg:block">
-      <img
-        src="https://images.unsplash.com/photo-1585829365295-ab7cd400c167?q=80&w=2670&auto=format&fit=crop"
-        alt="News and Media"
-        class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-      />
+    <RegisterForm @success="handleRegisterSuccess" @switch-to-login="handleSwitchToLogin" />
+    <div class="mt-6 text-center text-sm text-muted">
+      Already have an account?
+      <NuxtLink to="/login" class="text-primary hover:underline font-medium"> Sign in </NuxtLink>
     </div>
   </div>
 </template>

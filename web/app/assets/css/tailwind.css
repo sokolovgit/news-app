@@ -236,6 +236,122 @@ input:-webkit-autofill::first-line {
   }
 }
 
+/* Tabs Styling */
+@layer components {
+  /* Tabs trigger styling - Base state */
+  [data-slot='tabs-trigger'] {
+    background-color: transparent !important;
+    color: hsl(var(--muted-foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  /* Tabs trigger hover state */
+  [data-slot='tabs-trigger']:hover:not([data-state='active']) {
+    background-color: hsl(var(--muted)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* Tabs trigger active state - matches navigation pattern */
+  [data-slot='tabs-trigger'][data-state='active'] {
+    background-color: hsl(var(--muted)) !important;
+    color: hsl(var(--primary)) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  /* Dark mode active state */
+  .dark [data-slot='tabs-trigger'][data-state='active'] {
+    background-color: hsl(var(--muted)) !important;
+    color: hsl(var(--primary)) !important;
+  }
+
+  /* Focus visible state */
+  [data-slot='tabs-trigger']:focus-visible {
+    outline: 2px solid hsl(var(--ring)) !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Disabled state */
+  [data-slot='tabs-trigger']:disabled {
+    pointer-events: none !important;
+    opacity: 0.5 !important;
+  }
+
+  /* Navigation links styling - ensure proper contrast for active state */
+  nav a.bg-muted.text-primary,
+  nav a[class*='bg-muted'][class*='text-primary'] {
+    background-color: hsl(var(--muted)) !important;
+    color: hsl(var(--primary)) !important;
+  }
+
+  /* Ensure inactive nav links have proper colors */
+  nav a.text-muted-foreground:not(.bg-muted) {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  nav a.text-muted-foreground:hover:not(.bg-muted) {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* Dropdown menu content - ensure proper background */
+  [data-slot='dropdown-menu-content'] {
+    background-color: hsl(var(--popover)) !important;
+    color: hsl(var(--popover-foreground)) !important;
+  }
+
+  /* Select content - ensure proper background */
+  [data-slot='select-content'] {
+    background-color: hsl(var(--popover)) !important;
+    color: hsl(var(--popover-foreground)) !important;
+  }
+
+  /* Dialog content - ensure proper background */
+  [data-slot='dialog-content'] {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+  }
+
+  /* Label component - ensure proper text color */
+  [data-slot='label'] {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* Card title - ensure proper text color */
+  [data-slot='card-title'] {
+    color: hsl(var(--card-foreground)) !important;
+  }
+
+  /* Switch component - improve contrast for off state */
+  [data-slot='switch'][data-state='unchecked'] {
+    background-color: hsl(var(--muted)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .dark [data-slot='switch'][data-state='unchecked'] {
+    background-color: hsl(var(--muted)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  /* Switch thumb - ensure proper contrast for unchecked state */
+  [data-slot='switch-thumb'][data-state='unchecked'] {
+    background-color: hsl(var(--foreground)) !important;
+  }
+
+  .dark [data-slot='switch-thumb'][data-state='unchecked'] {
+    background-color: hsl(var(--foreground)) !important;
+  }
+
+  /* Switch thumb - ensure visibility for checked state (white) */
+  [data-slot='switch-thumb'][data-state='checked'] {
+    background-color: hsl(0, 0%, 100%) !important;
+  }
+
+  .dark [data-slot='switch-thumb'][data-state='checked'] {
+    background-color: hsl(0, 0%, 100%) !important;
+  }
+}
+
 /* Toast (Sonner) Styling */
 @layer components {
   /* Base toast container */

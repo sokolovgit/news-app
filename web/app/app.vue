@@ -1,9 +1,9 @@
 <template>
   <Toaster />
-  <div>
+  <NuxtLayout>
     <NuxtPage />
     <NuxtRouteAnnouncer />
-  </div>
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">
