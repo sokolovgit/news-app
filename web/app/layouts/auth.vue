@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-bg flex items-center justify-center p-4">
+  <div class="min-h-screen bg-background flex items-center justify-center p-4">
     <div class="w-full max-w-md">
       <div class="absolute top-4 right-4">
         <ThemeToggle />
@@ -7,7 +7,7 @@
 
       <NuxtLink
         to="/"
-        class="absolute top-4 left-4 flex items-center gap-2 text-sm text-muted hover:text-text transition-colors"
+        class="absolute top-4 left-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <Icon name="lucide:arrow-left" class="h-4 w-4" />
         <span>Back to home</span>

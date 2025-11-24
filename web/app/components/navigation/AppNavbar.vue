@@ -11,7 +11,7 @@
         </button>
         <NuxtLink
           to="/"
-          class="flex items-center gap-2 font-bold text-xl text-primary hover:opacity-80"
+          class="flex items-center gap-2 font-bold text-xl text-primary-foreground hover:opacity-80"
         >
           <Icon name="lucide:newspaper" class="h-6 w-6" />
           <span class="hidden sm:inline">News App</span>

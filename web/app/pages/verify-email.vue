@@ -104,7 +104,7 @@ onUnmounted(() => {
               v-if="verificationState === 'idle' || verificationState === 'verifying'"
               class="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
             >
-              <Icon name="lucide:loader-2" class="h-10 w-10 text-white animate-spin" />
+              <Icon name="lucide:loader-2" class="h-10 w-10 text-primary-foreground animate-spin" />
             </div>
 
             <!-- Success State -->
@@ -112,7 +112,7 @@ onUnmounted(() => {
               v-else-if="verificationState === 'success'"
               class="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center animate-bounce"
             >
-              <Icon name="lucide:check-circle-2" class="h-10 w-10 text-white" />
+              <Icon name="lucide:check-circle-2" class="h-10 w-10 text-primary-foreground" />
             </div>
 
             <!-- Error State -->
@@ -120,7 +120,7 @@ onUnmounted(() => {
               v-else
               class="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center animate-pulse"
             >
-              <Icon name="lucide:x-circle" class="h-10 w-10 text-white" />
+              <Icon name="lucide:x-circle" class="h-10 w-10 text-primary-foreground" />
             </div>
           </div>
         </div>
@@ -129,8 +129,10 @@ onUnmounted(() => {
         <div class="p-8 space-y-6">
           <!-- Verifying State -->
           <div v-if="verificationState === 'verifying'" class="text-center space-y-3">
-            <h1 class="text-2xl font-bold text-text">Verifying Your Email</h1>
-            <p class="text-muted text-sm">Please wait while we verify your email address...</p>
+            <h1 class="text-2xl font-bold text-foreground">Verifying Your Email</h1>
+            <p class="text-muted-foreground text-sm">
+              Please wait while we verify your email address...
+            </p>
 
             <!-- Loading Animation -->
             <div class="flex justify-center gap-2 pt-4">
@@ -152,8 +154,8 @@ onUnmounted(() => {
           <!-- Success State -->
           <div v-else-if="verificationState === 'success'" class="text-center space-y-4">
             <div class="space-y-2">
-              <h1 class="text-2xl font-bold text-text">Email Verified!</h1>
-              <p class="text-muted text-sm">
+              <h1 class="text-2xl font-bold text-foreground">Email Verified!</h1>
+              <p class="text-muted-foreground text-sm">
                 Your email has been successfully verified. You can now access all features.
               </p>
             </div>
@@ -186,7 +188,11 @@ onUnmounted(() => {
               </div>
             </div>
 
-            <Button size="lg" class="w-full bg-accent text-bg hover:bg-accent/90" @click="goToHome">
+            <Button
+              size="lg"
+              class="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              @click="goToHome"
+            >
               <Icon name="lucide:home" class="mr-2 h-4 w-4" />
               Go to Home Now
             </Button>
@@ -195,8 +201,8 @@ onUnmounted(() => {
           <!-- Error State -->
           <div v-else-if="verificationState === 'error'" class="text-center space-y-4">
             <div class="space-y-2">
-              <h1 class="text-2xl font-bold text-text">Verification Failed</h1>
-              <p class="text-muted text-sm">We couldn't verify your email address.</p>
+              <h1 class="text-2xl font-bold text-foreground">Verification Failed</h1>
+              <p class="text-muted-foreground text-sm">We couldn't verify your email address.</p>
             </div>
 
             <!-- Error Icon Animation -->
@@ -219,7 +225,7 @@ onUnmounted(() => {
             <div class="space-y-3 pt-2">
               <Button
                 size="lg"
-                class="w-full bg-accent text-bg hover:bg-accent/90"
+                class="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                 @click="router.push('/')"
               >
                 <Icon name="lucide:home" class="mr-2 h-4 w-4" />
@@ -242,8 +248,10 @@ onUnmounted(() => {
           <!-- Idle State (no token) -->
           <div v-else class="text-center space-y-4">
             <div class="space-y-2">
-              <h1 class="text-2xl font-bold text-text">Invalid Link</h1>
-              <p class="text-muted text-sm">This verification link is invalid or has expired.</p>
+              <h1 class="text-2xl font-bold text-foreground">Invalid Link</h1>
+              <p class="text-muted-foreground text-sm">
+                This verification link is invalid or has expired.
+              </p>
             </div>
 
             <div class="flex justify-center py-4">
@@ -254,7 +262,7 @@ onUnmounted(() => {
 
             <Button
               size="lg"
-              class="w-full bg-accent text-bg hover:bg-accent/90"
+              class="w-full bg-primary text-primary-foreground hover:bg-primary/90"
               @click="router.push('/')"
             >
               <Icon name="lucide:home" class="mr-2 h-4 w-4" />
@@ -266,7 +274,7 @@ onUnmounted(() => {
 
       <!-- Footer -->
       <div class="mt-6 text-center">
-        <p class="text-xs text-muted">
+        <p class="text-xs text-muted-foreground">
           Having trouble?
           <a href="mailto:support@newsapp.com" class="text-accent hover:underline ml-1">
             Contact Support

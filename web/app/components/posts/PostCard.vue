@@ -12,7 +12,7 @@
               :href="post.url"
               target="_blank"
               rel="noopener noreferrer"
-              class="hover:text-primary transition-colors"
+              class="hover:text-primary-foreground transition-colors"
             >
               {{ post.title }}
             </a>

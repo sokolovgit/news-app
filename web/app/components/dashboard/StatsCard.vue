@@ -7,7 +7,7 @@
       <Icon :name="icon" class="h-4 w-4 text-muted-foreground" />
     </CardHeader>
     <CardContent>
-      <div class="text-2xl font-bold text-text">{{ value }}</div>
+      <div class="text-2xl font-bold text-foreground">{{ value }}</div>
       <p v-if="description" class="text-xs text-muted-foreground mt-1">
         {{ description }}
       </p>

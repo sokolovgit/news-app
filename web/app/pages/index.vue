@@ -5,16 +5,16 @@
       class="relative overflow-hidden rounded-2xl bg-linear-to-r from-primary via-secondary to-tertiary p-8 md:p-12"
     >
       <div class="relative z-10">
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+        <h1 class="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
           Welcome back, {{ userInitials }}!
         </h1>
-        <p class="text-lg md:text-xl text-white/90 mb-6 max-w-2xl">
+        <p class="text-lg md:text-xl text-primary-foreground/90 mb-6 max-w-2xl">
           Stay updated with your personalized news feed from all your favorite sources.
         </p>
         <div class="flex flex-wrap gap-4">
           <Button
             size="lg"
-            class="bg-white text-primary hover:bg-white/90"
+            class="bg-white text-primary-foreground hover:bg-white/90"
             @click="navigateTo('/sources/add')"
           >
             <Icon name="lucide:plus-circle" class="mr-2 h-5 w-5" />
@@ -35,7 +35,7 @@
 
     <!-- Stats Cards -->
     <section>
-      <h2 class="text-2xl font-bold text-text mb-4">Overview</h2>
+      <h2 class="text-2xl font-bold text-foreground mb-4">Overview</h2>
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Sources"
@@ -66,7 +66,7 @@
 
     <!-- Quick Actions -->
     <section>
-      <h2 class="text-2xl font-bold text-text mb-4">Quick Actions</h2>
+      <h2 class="text-2xl font-bold text-foreground mb-4">Quick Actions</h2>
       <div class="grid gap-4 md:grid-cols-2">
         <QuickActionCard
           title="Add Source"
@@ -86,8 +86,10 @@
     <!-- Recent Sources Preview -->
     <section v-if="recentSources.length > 0">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-2xl font-bold text-text">Recent Sources</h2>
-        <NuxtLink to="/sources" class="text-sm text-primary hover:underline"> View all </NuxtLink>
+        <h2 class="text-2xl font-bold text-foreground">Recent Sources</h2>
+        <NuxtLink to="/sources" class="text-sm text-primary-foreground hover:underline">
+          View all
+        </NuxtLink>
       </div>
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <SourceCard
@@ -102,8 +104,10 @@
     <!-- Feed Preview -->
     <section v-if="recentPosts.length > 0">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-2xl font-bold text-text">Latest Posts</h2>
-        <NuxtLink to="/feed" class="text-sm text-primary hover:underline"> View all </NuxtLink>
+        <h2 class="text-2xl font-bold text-foreground">Latest Posts</h2>
+        <NuxtLink to="/feed" class="text-sm text-primary-foreground hover:underline">
+          View all
+        </NuxtLink>
       </div>
       <div class="space-y-4">
         <PostCard v-for="post in recentPosts" :key="post.id" :post="post" :preview="true" />
@@ -116,9 +120,9 @@
       class="text-center py-12"
     >
       <div class="max-w-md mx-auto">
-        <Icon name="lucide:inbox" class="h-16 w-16 text-muted mx-auto mb-4" />
-        <h3 class="text-xl font-semibold text-text mb-2">Get Started</h3>
-        <p class="text-muted mb-6">
+        <Icon name="lucide:inbox" class="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+        <h3 class="text-xl font-semibold text-foreground mb-2">Get Started</h3>
+        <p class="text-muted-foreground mb-6">
           Add your first source to start seeing personalized news in your feed.
         </p>
         <Button @click="navigateTo('/sources/add')">

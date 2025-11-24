@@ -53,15 +53,15 @@
             <CardContent class="space-y-4">
               <div>
                 <Label class="text-muted-foreground">Email</Label>
-                <p class="text-text font-medium">{{ userEmail }}</p>
+                <p class="text-foreground font-medium">{{ userEmail }}</p>
               </div>
               <div>
                 <Label class="text-muted-foreground">Account Created</Label>
-                <p class="text-text font-medium">{{ accountCreated }}</p>
+                <p class="text-foreground font-medium">{{ accountCreated }}</p>
               </div>
               <div>
                 <Label class="text-muted-foreground">Email Verified</Label>
-                <p class="text-text font-medium">
+                <p class="text-foreground font-medium">
                   {{ isEmailVerified ? 'Yes' : 'No' }}
                 </p>
               </div>
@@ -76,15 +76,15 @@
             <CardContent class="space-y-4">
               <div>
                 <Label class="text-muted-foreground">Total Sources</Label>
-                <p class="text-text font-medium text-2xl">{{ stats.totalSources }}</p>
+                <p class="text-foreground font-medium text-2xl">{{ stats.totalSources }}</p>
               </div>
               <div>
                 <Label class="text-muted-foreground">Posts Read</Label>
-                <p class="text-text font-medium text-2xl">{{ stats.postsRead }}</p>
+                <p class="text-foreground font-medium text-2xl">{{ stats.postsRead }}</p>
               </div>
               <div>
                 <Label class="text-muted-foreground">Account Age</Label>
-                <p class="text-text font-medium">{{ stats.accountAge }}</p>
+                <p class="text-foreground font-medium">{{ stats.accountAge }}</p>
               </div>
             </CardContent>
           </Card>
@@ -100,8 +100,8 @@
           </CardHeader>
           <CardContent>
             <div v-if="activities.length === 0" class="text-center py-8">
-              <Icon name="lucide:activity" class="h-12 w-12 text-muted mx-auto mb-4" />
-              <p class="text-muted">No recent activity</p>
+              <Icon name="lucide:activity" class="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p class="text-muted-foreground">No recent activity</p>
             </div>
             <div v-else class="space-y-4">
               <div
@@ -110,10 +110,10 @@
                 class="flex items-start gap-4 p-4 rounded-lg hover:bg-muted/50 transition-colors"
               >
                 <div class="p-2 rounded-lg bg-primary/10">
-                  <Icon :name="activity.icon" class="h-4 w-4 text-primary" />
+                  <Icon :name="activity.icon" class="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div class="flex-1">
-                  <p class="text-sm font-medium text-text">{{ activity.title }}</p>
+                  <p class="text-sm font-medium text-foreground">{{ activity.title }}</p>
                   <p class="text-xs text-muted-foreground">{{ activity.time }}</p>
                 </div>
               </div>
@@ -143,7 +143,7 @@
                 <Label>Default Page</Label>
                 <p class="text-sm text-muted-foreground">Page to show when you log in</p>
               </div>
-              <Select defaultValue="feed">
+              <Select default-value="feed">
                 <SelectTrigger class="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -245,4 +245,3 @@ onMounted(async () => {
   // activities.value = userActivities
 })
 </script>
-

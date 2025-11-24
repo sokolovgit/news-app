@@ -33,7 +33,7 @@
     --color-text-value: #1a1a1a;
 
     /* Brand Colors - Light Theme */
-    --color-primary-value: #9b5de0;
+    --color-primary-value: #E4D6FF; /* Light lavender for primary buttons */
     --color-secondary-value: #d78fee;
     --color-tertiary-value: #fdcffa;
     --color-bg-tint-value: #f8f5ff;
@@ -55,26 +55,29 @@
     --card-foreground: 0 0% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
-    --primary: 263 67% 61%; /* #9b5de0 */
-    --primary-foreground: 0 0% 100%;
+    --primary: 263 100% 92%; /* #E4D6FF - light lavender background */
+    --primary-foreground: 263 78% 45%; /* #4A2FC7 - dark purple text */
+    --primary-hover: 263 100% 88%; /* #D3C2FF - hover state */
+    --primary-active: 263 100% 84%; /* #C1AEFF - active state */
     --secondary: 293 78% 74%; /* #d78fee */
     --secondary-foreground: 0 0% 10%;
     --muted: 270 20% 98%;
     --muted-foreground: 0 0% 42%;
-    --accent: 263 67% 61%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 263 100% 92%; /* Match primary for consistency */
+    --accent-foreground: 263 78% 45%; /* Match primary-foreground */
     --destructive: 0 72% 51%; /* #dc2626 */
     --destructive-foreground: 0 0% 100%;
     --success: 150 60% 30%; /* #2d6a4f */
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%; /* #f59e0b */
     --warning-foreground: 0 0% 10%;
-    --info: 263 67% 61%; /* #9b5de0 */
+    --info: 263 100% 92%; /* Match primary */
     --info-foreground: 0 0% 100%;
     --border: 270 30% 92%;
     --input: 270 30% 90%;
-    --ring: 263 67% 61%;
+    --ring: 263 78% 45%; /* Use dark purple for focus rings */
     --radius: 0.5rem;
+    --overlay: 0 0% 0% / 0.8;
   }
 
   .dark {
@@ -109,6 +112,8 @@
     --popover-foreground: 0 0% 96%;
     --primary: 263 100% 81%; /* #c49aff */
     --primary-foreground: 0 0% 10%;
+    --primary-hover: 263 100% 75%; /* Darker purple for hover */
+    --primary-active: 263 100% 70%; /* Even darker for active */
     --secondary: 293 78% 74%; /* #d78fee */
     --secondary-foreground: 0 0% 10%;
     --muted: 252 17% 20%;
@@ -126,6 +131,7 @@
     --border: 252 17% 23%;
     --input: 252 17% 23%;
     --ring: 263 100% 81%;
+    --overlay: 0 0% 0% / 0.8;
   }
 }
 
@@ -140,6 +146,21 @@ body {
   font-feature-settings:
     'rlig' 1,
     'calt' 1;
+}
+
+/* Primary Button Icon Styling - ensure icons use correct stroke/text color */
+button.bg-primary svg,
+[class*='bg-primary'] svg,
+.bg-primary svg {
+  stroke: hsl(var(--primary-foreground)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* Ensure all button icons have proper contrast */
+button[class*='bg-primary'] svg,
+button[class*='text-primary-foreground'] svg {
+  stroke: hsl(var(--primary-foreground)) !important;
+  color: hsl(var(--primary-foreground)) !important;
 }
 
 /* Typography defaults */
@@ -253,8 +274,8 @@ input:-webkit-autofill::first-line {
 
   /* Tabs trigger active state - matches navigation pattern */
   [data-slot='tabs-trigger'][data-state='active'] {
-    background-color: hsl(var(--muted)) !important;
-    color: hsl(var(--primary)) !important;
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
     font-weight: 600 !important;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
     border-color: hsl(var(--border)) !important;
@@ -262,8 +283,14 @@ input:-webkit-autofill::first-line {
 
   /* Dark mode active state */
   .dark [data-slot='tabs-trigger'][data-state='active'] {
-    background-color: hsl(var(--muted)) !important;
-    color: hsl(var(--primary)) !important;
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+  }
+  
+  /* Tabs trigger icons - ensure proper contrast */
+  [data-slot='tabs-trigger'][data-state='active'] svg {
+    stroke: hsl(var(--primary-foreground)) !important;
+    color: hsl(var(--primary-foreground)) !important;
   }
 
   /* Focus visible state */
@@ -281,8 +308,15 @@ input:-webkit-autofill::first-line {
   /* Navigation links styling - ensure proper contrast for active state */
   nav a.bg-muted.text-primary,
   nav a[class*='bg-muted'][class*='text-primary'] {
-    background-color: hsl(var(--muted)) !important;
-    color: hsl(var(--primary)) !important;
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+  }
+  
+  /* Navigation link icons - ensure proper contrast */
+  nav a.bg-muted.text-primary svg,
+  nav a[class*='bg-muted'][class*='text-primary'] svg {
+    stroke: hsl(var(--primary-foreground)) !important;
+    color: hsl(var(--primary-foreground)) !important;
   }
 
   /* Ensure inactive nav links have proper colors */
@@ -299,11 +333,53 @@ input:-webkit-autofill::first-line {
     background-color: hsl(var(--popover)) !important;
     color: hsl(var(--popover-foreground)) !important;
   }
+  
+  /* Dropdown menu item focus state - use primary colors */
+  [data-slot='dropdown-menu-item']:focus,
+  [data-slot='dropdown-menu-item'][data-highlighted] {
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+  }
+  
+  /* Dropdown menu item icons - ensure proper contrast */
+  [data-slot='dropdown-menu-item']:focus svg,
+  [data-slot='dropdown-menu-item'][data-highlighted] svg {
+    stroke: hsl(var(--primary-foreground)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+  }
+  
+  /* Ensure icons have proper contrast even when not focused */
+  [data-slot='dropdown-menu-item'] svg:not([class*='text-']) {
+    color: hsl(var(--foreground)) !important;
+  }
 
   /* Select content - ensure proper background */
   [data-slot='select-content'] {
     background-color: hsl(var(--popover)) !important;
     color: hsl(var(--popover-foreground)) !important;
+  }
+  
+  /* Select item focus state - use primary colors for better contrast */
+  [data-slot='select-item'][data-highlighted] {
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+  }
+  
+  /* Select item icons - ensure proper contrast */
+  [data-slot='select-item'][data-highlighted] svg {
+    stroke: hsl(var(--primary-foreground)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+  }
+  
+  /* Select item checkmark - ensure visibility */
+  [data-slot='select-item'] [data-slot='select-item-indicator'] svg {
+    stroke: hsl(var(--primary-foreground)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+  }
+  
+  [data-slot='select-item'][data-highlighted] [data-slot='select-item-indicator'] svg {
+    stroke: hsl(var(--primary-foreground)) !important;
+    color: hsl(var(--primary-foreground)) !important;
   }
 
   /* Dialog content - ensure proper background */

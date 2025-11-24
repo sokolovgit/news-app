@@ -3,7 +3,7 @@
     <CardHeader>
       <div class="flex items-center gap-3">
         <div class="p-3 rounded-lg bg-primary/10">
-          <Icon :name="icon" class="h-6 w-6 text-primary" />
+          <Icon :name="icon" class="h-6 w-6 text-primary-foreground" />
         </div>
         <div class="flex-1">
           <CardTitle class="text-lg">{{ title }}</CardTitle>

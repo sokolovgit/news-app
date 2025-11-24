@@ -108,7 +108,7 @@ const handleSwitchToRegister = () => {
     <!-- Header -->
     <div class="flex flex-col items-center gap-2 text-center">
       <div class="rounded-full bg-primary/10 p-3 mb-2">
-        <Icon name="lucide:lock-keyhole" class="h-6 w-6 text-primary" />
+        <Icon name="lucide:lock-keyhole" class="h-6 w-6 text-primary-foreground" />
       </div>
       <h1 class="text-2xl font-bold">Welcome back</h1>
       <p class="text-muted-foreground text-sm text-balance">
@@ -177,7 +177,7 @@ const handleSwitchToRegister = () => {
         <FormItem>
           <div class="flex items-center justify-between mb-2">
             <FormLabel class="text-sm font-medium">Password</FormLabel>
-            <a href="#" class="text-xs text-primary underline-offset-4 hover:underline font-medium">
+            <a href="#" class="text-xs text-primary-foreground underline-offset-4 hover:underline font-medium">
               Forgot password?
             </a>
           </div>
@@ -222,7 +222,7 @@ const handleSwitchToRegister = () => {
       <span class="text-muted-foreground">Don't have an account?</span>
       <a
         href="#"
-        class="ml-1 font-medium text-primary underline-offset-4 hover:underline"
+        class="ml-1 font-medium text-primary-foreground underline-offset-4 hover:underline"
         @click.prevent="handleSwitchToRegister"
       >
         Sign up

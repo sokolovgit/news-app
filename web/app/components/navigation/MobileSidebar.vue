@@ -4,8 +4,8 @@
       <div class="flex flex-col h-full">
         <!-- Header -->
         <div class="flex items-center gap-2 mb-6">
-          <Icon name="lucide:newspaper" class="h-6 w-6 text-primary" />
-          <h2 class="text-xl font-bold text-text">News App</h2>
+          <Icon name="lucide:newspaper" class="h-6 w-6 text-primary-foreground" />
+          <h2 class="text-xl font-bold text-foreground">News App</h2>
         </div>
 
         <!-- Navigation Links -->
@@ -31,13 +31,13 @@
               </AvatarFallback>
             </Avatar>
             <div class="flex flex-col flex-1 min-w-0">
-              <p class="text-sm font-medium text-text truncate">{{ userEmail }}</p>
-              <p class="text-xs text-muted truncate">{{ userRoles.join(', ') }}</p>
+              <p class="text-sm font-medium text-foreground truncate">{{ userEmail }}</p>
+              <p class="text-xs text-muted-foreground truncate">{{ userRoles.join(', ') }}</p>
             </div>
           </div>
           <div class="flex flex-col gap-1">
             <button
-              class="flex items-center gap-2 px-2 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-text transition-colors"
+              class="flex items-center gap-2 px-2 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
               @click="openSettings"
             >
               <Icon name="lucide:settings" class="h-4 w-4" />

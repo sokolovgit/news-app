@@ -4,7 +4,7 @@
       <div class="flex items-start justify-between">
         <div class="flex items-start gap-3 flex-1 min-w-0">
           <div class="p-2 rounded-lg bg-primary/10 flex-shrink-0">
-            <Icon :name="sourceIcon" class="h-5 w-5 text-primary" />
+            <Icon :name="sourceIcon" class="h-5 w-5 text-primary-foreground" />
           </div>
           <div class="flex-1 min-w-0">
             <CardTitle class="text-lg truncate">{{ source.name }}</CardTitle>
@@ -18,11 +18,11 @@
       <div class="space-y-2 text-sm">
         <div class="flex items-center justify-between">
           <span class="text-muted-foreground">Last fetched</span>
-          <span class="text-text">{{ lastFetched }}</span>
+          <span class="text-foreground">{{ lastFetched }}</span>
         </div>
         <div class="flex items-center justify-between">
           <span class="text-muted-foreground">Posts (24h)</span>
-          <span class="text-text">{{ source.postCount || 0 }}</span>
+          <span class="text-foreground">{{ source.postCount || 0 }}</span>
         </div>
       </div>
     </CardContent>

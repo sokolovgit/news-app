@@ -10,15 +10,15 @@
             {{ userInitials }}
           </AvatarFallback>
         </Avatar>
-        <span class="hidden md:block text-sm font-medium text-text">{{ userEmail }}</span>
-        <Icon name="lucide:chevron-down" class="hidden md:block h-4 w-4 text-muted" />
+        <span class="hidden md:block text-sm font-medium text-foreground">{{ userEmail }}</span>
+        <Icon name="lucide:chevron-down" class="hidden md:block h-4 w-4 text-muted-foreground" />
       </button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" class="w-56">
       <DropdownMenuLabel class="font-normal">
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">{{ userEmail }}</p>
-          <p class="text-xs leading-none text-muted">{{ userRoles.join(', ') }}</p>
+          <p class="text-xs leading-none text-muted-foreground">{{ userRoles.join(', ') }}</p>
         </div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
