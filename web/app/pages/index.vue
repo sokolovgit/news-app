@@ -14,7 +14,8 @@
         <div class="flex flex-wrap gap-4">
           <Button
             size="lg"
-            class="bg-white text-primary-foreground hover:bg-white/90"
+            variant="outline"
+            class="border-card-foreground/20 text-card-foreground bg-card/50 backdrop-blur-sm transition-all hover:bg-card/80 hover:border-card-foreground/40 hover:scale-105 hover:shadow-lg"
             @click="navigateTo('/sources/add')"
           >
             <Icon name="lucide:plus-circle" class="mr-2 h-5 w-5" />
@@ -23,7 +24,7 @@
           <Button
             size="lg"
             variant="outline"
-            class="border-white text-white hover:bg-white/10"
+            class="border-card-foreground/20 text-card-foreground bg-card/50 backdrop-blur-sm transition-all hover:bg-card/80 hover:border-card-foreground/40 hover:scale-105 hover:shadow-lg"
             @click="navigateTo('/feed')"
           >
             <Icon name="lucide:rss" class="mr-2 h-5 w-5" />
