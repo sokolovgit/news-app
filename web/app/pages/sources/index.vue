@@ -36,10 +36,37 @@
           <SelectItem value="instagram">Instagram</SelectItem>
         </SelectContent>
       </Select>
+      <div class="h-6 w-px bg-border shrink-0" />
       <Button variant="outline" size="sm" @click="toggleView">
         <Icon :name="viewIcon" class="h-4 w-4 mr-2" />
         {{ viewMode === 'grid' ? 'List' : 'Grid' }}
       </Button>
+      <!-- Pagination in Filters Block -->
+      <div
+        v-if="totalPages > 1 && !isLoading && sources.length > 0"
+        class="flex items-center ml-auto gap-4"
+      >
+        <div class="h-6 w-px bg-border shrink-0" />
+        <Pagination
+          :total="pagination.total"
+          :items-per-page="pagination.limit"
+          :page="currentPage"
+          @update:page="handlePageChange"
+        >
+          <PaginationContent>
+            <PaginationPrevious />
+            <PaginationItem
+              v-for="page in visiblePages"
+              :key="page"
+              :value="page"
+              :is-active="page === currentPage"
+            >
+              {{ page }}
+            </PaginationItem>
+            <PaginationNext />
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -81,28 +108,26 @@
     </div>
 
     <!-- Pagination -->
-    <div v-if="!isLoading && sources.length > 0" class="flex items-center justify-between">
-      <div class="text-sm text-muted-foreground">
-        Showing {{ pagination.offset + 1 }}-{{
-          Math.min(pagination.offset + pagination.limit, pagination.total)
-        }}
-        of {{ pagination.total }}
-      </div>
-      <div class="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="pagination.offset === 0"
-          @click="loadPreviousPage"
-        >
-          <Icon name="lucide:chevron-left" class="h-4 w-4 mr-1" />
-          Previous
-        </Button>
-        <Button variant="outline" size="sm" :disabled="!pagination.hasMore" @click="loadNextPage">
-          Next
-          <Icon name="lucide:chevron-right" class="h-4 w-4 ml-1" />
-        </Button>
-      </div>
+    <div v-if="totalPages > 1 && !isLoading" class="flex justify-center">
+      <Pagination
+        :total="pagination.total"
+        :items-per-page="pagination.limit"
+        :page="currentPage"
+        @update:page="handlePageChange"
+      >
+        <PaginationContent>
+          <PaginationPrevious />
+          <PaginationItem
+            v-for="page in visiblePages"
+            :key="page"
+            :value="page"
+            :is-active="page === currentPage"
+          >
+            {{ page }}
+          </PaginationItem>
+          <PaginationNext />
+        </PaginationContent>
+      </Pagination>
     </div>
   </div>
 </template>
@@ -119,6 +144,13 @@ import {
 } from '@/components/ui/select'
 import SourceCard from '~/components/sources/SourceCard.vue'
 import SourceCardSkeleton from '~/components/sources/SourceCardSkeleton.vue'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 import { useApi } from '~/composables/useApi'
 import { SourcesService } from '~/lib/api'
 
@@ -148,9 +180,54 @@ const pagination = ref({
   total: 0,
   hasMore: false,
 })
+const currentPage = ref(1)
 
 const viewIcon = computed(() => {
   return viewMode.value === 'grid' ? 'lucide:list' : 'lucide:grid'
+})
+
+// Calculate total pages
+const totalPages = computed(() => {
+  if (pagination.value.total === 0) return 0
+  return Math.ceil(pagination.value.total / pagination.value.limit)
+})
+
+// Calculate visible pages for pagination
+const visiblePages = computed(() => {
+  const pages: (number | string)[] = []
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= 7) {
+    // Show all pages if 7 or fewer
+    for (let i = 1; i <= total; i++) {
+      pages.push(i)
+    }
+  } else {
+    // Always show first page
+    pages.push(1)
+
+    if (current > 3) {
+      pages.push('ellipsis-start')
+    }
+
+    // Show pages around current
+    const start = Math.max(2, current - 1)
+    const end = Math.min(total - 1, current + 1)
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i)
+    }
+
+    if (current < total - 2) {
+      pages.push('ellipsis-end')
+    }
+
+    // Always show last page
+    pages.push(total)
+  }
+
+  return pages.filter((p) => typeof p === 'number') as number[]
 })
 
 const filteredSources = computed(() => {
@@ -197,9 +274,12 @@ const handleView = (source: Source) => {
   console.log('View source:', source.id)
 }
 
-const loadUserSources = async (offset: number = 0) => {
+const loadUserSources = async (page: number) => {
   isLoading.value = true
   try {
+    // Convert page number to offset
+    const offset = (page - 1) * pagination.value.limit
+
     const response = await sourcesService.getUserSources({
       offset,
       limit: pagination.value.limit,
@@ -221,6 +301,9 @@ const loadUserSources = async (offset: number = 0) => {
       total: response.total,
       hasMore: response.hasMore,
     }
+
+    // Update current page
+    currentPage.value = page
   } catch (error) {
     console.error('Failed to fetch user sources:', error)
   } finally {
@@ -228,18 +311,13 @@ const loadUserSources = async (offset: number = 0) => {
   }
 }
 
-const loadNextPage = () => {
-  if (pagination.value.hasMore) {
-    loadUserSources(pagination.value.offset + pagination.value.limit)
+const handlePageChange = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) {
+    loadUserSources(page)
   }
 }
 
-const loadPreviousPage = () => {
-  const newOffset = Math.max(0, pagination.value.offset - pagination.value.limit)
-  loadUserSources(newOffset)
-}
-
 onMounted(async () => {
-  await loadUserSources(0)
+  await loadUserSources(1)
 })
 </script>
