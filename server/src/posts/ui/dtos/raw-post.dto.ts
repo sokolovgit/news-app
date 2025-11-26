@@ -4,7 +4,7 @@ import { RawPost } from '@/posts/domain/entities';
 import { Content } from '@/posts/domain/types';
 import { SourceDto } from '@/sources/ui/dtos';
 
-export class FeedPostDto {
+export class RawPostDto {
   @ApiProperty({ description: 'Post identifier' })
   id: string;
 
@@ -39,8 +39,8 @@ export class FeedPostDto {
   })
   source?: SourceDto;
 
-  static fromEntity(post: RawPost): FeedPostDto {
-    const dto = new FeedPostDto();
+  static fromEntity(post: RawPost): RawPostDto {
+    const dto = new RawPostDto();
     dto.id = post.getId();
     dto.sourceId = post.getSourceId();
     dto.externalId = post.getExternalId();

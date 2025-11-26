@@ -66,7 +66,6 @@ export interface GetFeedResponse {
 }
 
 export interface GetFeedQuery {
-  sourceIds?: string[]
   sortField?: 'createdAt' | 'updatedAt'
   sortOrder?: 'asc' | 'desc'
   search?: string

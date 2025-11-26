@@ -1,22 +1,21 @@
-import { SourceId } from '@/sources/domain/schemas';
-import { RawPostId } from '@/posts/domain/schemas';
-import { RawPost, RawPostLoadOptions } from '@/posts/domain/entities';
 import { PaginatedResult, Sort } from '@/commons/types';
 
-/**
- * Sortable fields for feed posts
- */
-export type FeedSortField = 'createdAt' | 'updatedAt';
+import { RawPost, RawPostLoadOptions } from '@/posts/domain/entities';
+import { SourceId } from '@/sources/domain/schemas';
+import { RawPostId } from '@/posts/domain/schemas';
 
-/**
- * Sort configuration for feed posts
- */
-export type FeedSort = Sort<FeedSortField>;
+export type RawPostsSortField = 'createdAt' | 'updatedAt';
 
-export type GetFeedPostsParams = {
-  sourceIds: SourceId[];
+export const RAW_POSTS_SORT_FIELDS: readonly RawPostsSortField[] = [
+  'createdAt',
+  'updatedAt',
+];
+
+export type RawPostsSort = Sort<RawPostsSortField>;
+
+export type GetRawPostsParams = {
   search?: string;
-  sort?: FeedSort;
+  sort?: RawPostsSort;
   dateFrom?: Date;
   dateTo?: Date;
   offset: number;
@@ -38,8 +37,8 @@ export abstract class RawPostsRepository {
     externalIds: string[],
   ): Promise<Set<string>>;
 
-  abstract getFeedPosts(
-    params: GetFeedPostsParams,
+  abstract getRawPosts(
+    params: GetRawPostsParams,
     loadOptions?: RawPostLoadOptions,
   ): Promise<PaginatedResult<RawPost>>;
 }

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { OperationModule } from '../operation/operation.module';
 
-import { FeedController } from './feed.controller';
+import { RawPostsController } from './raw-posts.controller';
 
 @Module({
   imports: [OperationModule],
-  controllers: [FeedController],
+  controllers: [RawPostsController],
 })
 export class UiModule {}

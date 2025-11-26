@@ -1,2 +1,1 @@
-export * from './get-feed.request';
-
+export * from './get-raw-posts.request';

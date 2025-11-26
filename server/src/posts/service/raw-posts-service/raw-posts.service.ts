@@ -7,7 +7,7 @@ import { RawPostId } from '@/posts/domain/schemas';
 import { RawPost, RawPostLoadOptions } from '@/posts/domain/entities';
 import { RawPostPayload } from '@/posts/domain/types';
 import { RawPostFactory } from '@/posts/domain/factories';
-import { RawPostsRepository, GetFeedPostsParams } from '../abstracts';
+import { RawPostsRepository, GetRawPostsParams } from '../abstracts';
 import {
   RawPostSaveFailedError,
   RawPostSaveManyFailedError,
@@ -99,12 +99,11 @@ export class RawPostsService {
     return this.rawPostsRepository.existsByExternalIds(sourceId, externalIds);
   }
 
-  async getFeedPosts(
-    params: GetFeedPostsParams,
+  async getRawPosts(
+    params: GetRawPostsParams,
     loadOptions: RawPostLoadOptions = {},
   ): Promise<PaginatedResult<RawPost>> {
     const logParams = {
-      sourceIds: params.sourceIds.length,
       search: params.search,
       sort: params.sort,
       offset: params.offset,
@@ -112,9 +111,9 @@ export class RawPostsService {
     };
 
     this.logger.log(
-      `Getting feed posts with params: ${JSON.stringify(logParams)}`,
+      `Getting raw posts with params: ${JSON.stringify(logParams)}`,
     );
 
-    return await this.rawPostsRepository.getFeedPosts(params, loadOptions);
+    return await this.rawPostsRepository.getRawPosts(params, loadOptions);
   }
 }

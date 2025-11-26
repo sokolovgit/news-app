@@ -1,5 +1,5 @@
 /**
- * Feed API service
+ * Feed API service (uses raw-posts endpoint)
  */
 
 import type { GetFeedQuery, GetFeedResponse } from '~/types/posts.types'
@@ -12,7 +12,7 @@ export class FeedService {
    * Get user feed with pagination and filters
    */
   async getFeed(query?: GetFeedQuery): Promise<GetFeedResponse> {
-    return this.apiClient.get<GetFeedResponse>('/feed', query)
+    return this.apiClient.get<GetFeedResponse>('/raw-posts', query)
   }
 }
 

@@ -1,2 +1,1 @@
-export * from './get-feed.response';
-
+export * from './get-raw-posts.response';

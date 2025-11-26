@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { FeedPostDto } from './feed-post.dto';
-import { GetFeedResponse } from '@/posts/operation/responses';
+import { RawPostDto } from './raw-post.dto';
+import { GetRawPostsResponse } from '@/posts/operation/responses';
 
-export class GetFeedResponseDto {
+export class GetRawPostsResponseDto {
   @ApiProperty({
     description: 'Paginated posts',
-    type: [FeedPostDto],
+    type: [RawPostDto],
   })
-  data: FeedPostDto[];
+  data: RawPostDto[];
 
   @ApiProperty({
     description: 'Total number of posts available',
@@ -34,9 +34,9 @@ export class GetFeedResponseDto {
   })
   hasMore: boolean;
 
-  static fromResponse(response: GetFeedResponse): GetFeedResponseDto {
-    const dto = new GetFeedResponseDto();
-    dto.data = response.data.map((post) => FeedPostDto.fromEntity(post));
+  static fromResponse(response: GetRawPostsResponse): GetRawPostsResponseDto {
+    const dto = new GetRawPostsResponseDto();
+    dto.data = response.data.map((post) => RawPostDto.fromEntity(post));
     dto.total = response.total;
     dto.offset = response.offset;
     dto.limit = response.limit;

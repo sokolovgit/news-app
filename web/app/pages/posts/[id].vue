@@ -65,7 +65,7 @@ const fetchPost = async () => {
     isLoading.value = true
     error.value = null
 
-    // Fetch feed and find the post
+    // Fetch raw posts and find the post
     const response = await feedService.getFeed({ limit: 1000 })
     const foundPost = response.data.find((p) => p.id === postId)
 

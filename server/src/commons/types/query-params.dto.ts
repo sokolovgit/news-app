@@ -60,13 +60,14 @@ export class PaginationQueryDto {
  */
 export class SortQueryDto<T extends string = string> {
   @IsOptional()
-  @IsEnum(['asc', 'desc'])
+  @IsEnum(SortOrder)
   @ApiProperty({
     description: 'Sort order',
     required: false,
-    enum: ['asc', 'desc'],
-    default: 'desc',
-    example: 'desc',
+    enum: SortOrder,
+    enumName: 'SortOrder',
+    default: SortOrder.DESC,
+    example: SortOrder.DESC,
   })
   sortOrder?: SortOrder;
 

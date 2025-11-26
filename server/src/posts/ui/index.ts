@@ -1,3 +1,3 @@
 export * from './ui.module';
-export * from './feed.controller';
+export * from './raw-posts.controller';
 export * from './dtos';

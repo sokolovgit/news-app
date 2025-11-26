@@ -1,2 +1,1 @@
-export * from './get-feed.handler';
-
+export * from './get-raw-posts.handler';

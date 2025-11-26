@@ -92,16 +92,18 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="!isLoading && posts.length === 0" class="text-center py-12">
+    <div v-else-if="!isLoading && filteredPosts.length === 0" class="text-center py-12">
       <Icon name="lucide:inbox" class="h-16 w-16 text-muted-foreground mx-auto mb-4" />
       <h3 class="text-xl font-semibold text-foreground mb-2">No posts yet</h3>
       <p class="text-muted-foreground mb-6">
         {{
           searchQuery
             ? 'No posts match your search.'
-            : sources.length === 0
-              ? 'Add sources to start seeing posts in your feed. Posts will appear here once your sources are fetched.'
-              : 'Your sources have been added, but no posts have been fetched yet. Posts will appear here once they are available.'
+            : selectedSource !== 'all'
+              ? 'No posts found for the selected source.'
+              : sources.length === 0
+                ? 'Add sources to start seeing posts in your feed. Posts will appear here once your sources are fetched.'
+                : 'Your sources have been added, but no posts have been fetched yet. Posts will appear here once they are available.'
         }}
       </p>
       <div class="flex gap-2 justify-center">
@@ -121,7 +123,12 @@
       v-else
       :class="viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3' : 'space-y-4'"
     >
-      <PostPreviewCard v-for="post in posts" :key="post.id" :post="post" @click="handlePostClick" />
+      <PostPreviewCard
+        v-for="post in filteredPosts"
+        :key="post.id"
+        :post="post"
+        @click="handlePostClick"
+      />
     </div>
 
     <!-- Pagination -->
@@ -265,10 +272,6 @@ const buildQuery = (page: number): GetFeedQuery => {
     limit,
   }
 
-  if (selectedSource.value !== 'all') {
-    query.sourceIds = [selectedSource.value]
-  }
-
   if (sortBy.value === 'newest') {
     query.sortField = 'createdAt'
     query.sortOrder = 'desc'
@@ -283,6 +286,14 @@ const buildQuery = (page: number): GetFeedQuery => {
 
   return query
 }
+
+// Filter posts by source client-side (since backend doesn't support sourceIds filter)
+const filteredPosts = computed(() => {
+  if (selectedSource.value === 'all') {
+    return posts.value
+  }
+  return posts.value.filter((post) => post.sourceId === selectedSource.value)
+})
 
 // Fetch feed posts
 const fetchFeed = async (page: number) => {

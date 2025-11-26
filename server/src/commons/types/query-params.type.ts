@@ -3,7 +3,10 @@ import { PaginationParams } from './pagination.type';
 /**
  * Sort order direction
  */
-export type SortOrder = 'asc' | 'desc';
+export enum SortOrder {
+  ASC = 'asc',
+  DESC = 'desc',
+}
 
 /**
  * Generic sort configuration
