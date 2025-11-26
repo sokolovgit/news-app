@@ -11,11 +11,14 @@ import {
   ValidateSourceDto,
   GetUserSourcesQueryDto,
   GetUserSourcesResponseDto,
+  GetAllSourcesQueryDto,
+  GetAllSourcesResponseDto,
 } from './dtos';
 import {
   AddSourceHandler,
   ValidateSourceHandler,
   GetUserSourcesHandler,
+  GetAllSourcesHandler,
 } from '../operation/handlers';
 
 @Controller('sources')
@@ -24,6 +27,7 @@ export class SourcesController {
     private readonly addSourceHandler: AddSourceHandler,
     private readonly validateSourceHandler: ValidateSourceHandler,
     private readonly getUserSourcesHandler: GetUserSourcesHandler,
+    private readonly getAllSourcesHandler: GetAllSourcesHandler,
   ) {}
 
   @Post()
@@ -69,5 +73,23 @@ export class SourcesController {
     );
 
     return GetUserSourcesResponseDto.fromResponse(response);
+  }
+
+  @Get()
+  @Auth()
+  @ApiOperation({
+    summary: 'Get all public sources',
+    description:
+      'Get paginated public sources with subscription status for the current user',
+  })
+  public async getAllSources(
+    @CurrentUser() user: User,
+    @Query() query: GetAllSourcesQueryDto,
+  ): Promise<GetAllSourcesResponseDto> {
+    const response = await this.getAllSourcesHandler.handle(
+      query.toRequest(user),
+    );
+
+    return GetAllSourcesResponseDto.fromResponse(response);
   }
 }

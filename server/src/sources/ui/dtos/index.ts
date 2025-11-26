@@ -5,3 +5,5 @@ export * from './user-source.dto';
 export * from './added-user-source.dto';
 export * from './get-user-sources-query.dto';
 export * from './get-user-sources-response.dto';
+export * from './get-all-sources-query.dto';
+export * from './get-all-sources-response.dto';

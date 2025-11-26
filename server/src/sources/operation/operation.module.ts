@@ -6,6 +6,7 @@ import {
   AddSourceHandler,
   ValidateSourceHandler,
   GetUserSourcesHandler,
+  GetAllSourcesHandler,
 } from './handlers';
 
 import {
@@ -19,6 +20,7 @@ const handlers = [
   ValidateSourceHandler,
   AddSourceHandler,
   GetUserSourcesHandler,
+  GetAllSourcesHandler,
 ];
 
 const processors = [

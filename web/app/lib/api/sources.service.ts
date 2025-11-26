@@ -64,6 +64,32 @@ export interface GetUserSourcesResponse {
   hasMore: boolean
 }
 
+export interface GetAllSourcesParams {
+  offset?: number
+  limit?: number
+}
+
+export interface SourceWithSubscriptionStatusResponse {
+  source: {
+    id: string
+    name: string
+    url: string
+    source: 'telegram' | 'instagram' | 'rss'
+    addedBy?: string
+    createdAt?: string
+    updatedAt?: string
+  }
+  isSubscribed: boolean
+}
+
+export interface GetAllSourcesResponse {
+  data: SourceWithSubscriptionStatusResponse[]
+  total: number
+  offset: number
+  limit: number
+  hasMore: boolean
+}
+
 export class SourcesService {
   constructor(private apiClient: ApiClient) {}
 
@@ -93,6 +119,20 @@ export class SourcesService {
       queryParams.limit = params.limit
     }
     return this.apiClient.get<GetUserSourcesResponse>('/sources/user', queryParams)
+  }
+
+  /**
+   * Get all public sources with subscription status
+   */
+  async getAllSources(params?: GetAllSourcesParams): Promise<GetAllSourcesResponse> {
+    const queryParams: Record<string, string | number | boolean | null | undefined> = {}
+    if (params?.offset !== undefined) {
+      queryParams.offset = params.offset
+    }
+    if (params?.limit !== undefined) {
+      queryParams.limit = params.limit
+    }
+    return this.apiClient.get<GetAllSourcesResponse>('/sources', queryParams)
   }
 }
 

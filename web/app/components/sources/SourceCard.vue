@@ -3,7 +3,7 @@
     <CardHeader>
       <div class="flex items-start justify-between">
         <div class="flex items-start gap-3 flex-1 min-w-0">
-          <div class="p-2 rounded-lg bg-primary/10 flex-shrink-0">
+          <div class="p-2 rounded-lg bg-primary/10 shrink-0">
             <Icon :name="sourceIcon" class="h-5 w-5 text-primary-foreground" />
           </div>
           <div class="flex-1 min-w-0">
@@ -27,11 +27,21 @@
       </div>
     </CardContent>
     <CardFooter v-if="!preview" class="flex justify-end gap-2">
-      <Button variant="ghost" size="sm" @click="$emit('refresh')">
+      <Button
+        v-if="showFollowButton && !isSubscribed"
+        variant="default"
+        size="sm"
+        :disabled="isFollowing"
+        @click="$emit('follow')"
+      >
+        <Icon name="lucide:plus" class="h-4 w-4 mr-2" />
+        {{ isFollowing ? 'Following...' : 'Follow' }}
+      </Button>
+      <Button v-if="showActions" variant="ghost" size="sm" @click="$emit('refresh')">
         <Icon name="lucide:refresh-cw" class="h-4 w-4 mr-2" />
         Refresh
       </Button>
-      <Button variant="ghost" size="sm" @click="$emit('view')"> View </Button>
+      <Button v-if="showActions" variant="ghost" size="sm" @click="$emit('view')"> View </Button>
     </CardFooter>
   </Card>
 </template>
@@ -60,11 +70,16 @@ interface Source {
 const props = defineProps<{
   source: Source
   preview?: boolean
+  isSubscribed?: boolean
+  showFollowButton?: boolean
+  showActions?: boolean
+  isFollowing?: boolean
 }>()
 
 defineEmits<{
   refresh: []
   view: []
+  follow: []
 }>()
 
 const sourceIcon = computed(() => {
