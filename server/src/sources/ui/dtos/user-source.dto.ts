@@ -17,12 +17,6 @@ export class UserSourceDto {
   @ApiProperty()
   sourceId: SourceId;
 
-  @ApiProperty()
-  isNewSource: boolean;
-
-  @ApiProperty()
-  isNewLink: boolean;
-
   @ApiProperty({ type: () => SourceDto })
   source: SourceDto;
 
@@ -35,7 +29,6 @@ export class UserSourceDto {
   static fromEntities(
     userSource: UserSource,
     source: SourceDto,
-    metadata: { isNewSource: boolean; isNewLink: boolean },
   ): UserSourceDto {
     const dto = new UserSourceDto();
 
@@ -44,8 +37,6 @@ export class UserSourceDto {
     dto.sourceId = userSource.getSourceId();
     dto.createdAt = userSource.getCreatedAt();
     dto.updatedAt = userSource.getUpdatedAt();
-    dto.isNewSource = metadata.isNewSource;
-    dto.isNewLink = metadata.isNewLink;
     dto.source = source;
 
     return dto;

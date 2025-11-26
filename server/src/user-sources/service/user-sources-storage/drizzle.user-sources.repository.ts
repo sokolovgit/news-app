@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { and, eq } from 'drizzle-orm';
+import { and, eq, count } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 
@@ -14,6 +14,11 @@ import {
   UserSource,
   UserSourceLoadOptions,
 } from '@/user-sources/domain/entities';
+import {
+  PaginatedResult,
+  PaginationParams,
+  createPaginatedResult,
+} from '@/commons/types';
 
 @Injectable()
 export class DrizzleUserSourcesRepository extends UserSourcesRepository {
@@ -65,6 +70,48 @@ export class DrizzleUserSourcesRepository extends UserSourcesRepository {
       (link): SourceId => link.sourceId as SourceId,
     );
     return sourceIds;
+  }
+
+  async findAllByUser(
+    userId: UserId,
+    loadOptions: UserSourceLoadOptions = {},
+  ): Promise<UserSource[]> {
+    const links = await this.db.query.userSources.findMany({
+      where: eq(userSources.userId, userId),
+      with: this.buildRelations(loadOptions),
+    });
+
+    return links.map((link) =>
+      DrizzleUserSourcesEntityMapper.toEntity(link, loadOptions),
+    );
+  }
+
+  async findAllByUserPaginated(
+    userId: UserId,
+    params: PaginationParams,
+    loadOptions: UserSourceLoadOptions = {},
+  ): Promise<PaginatedResult<UserSource>> {
+    // Get total count
+    const [totalResult] = await this.db
+      .select({ count: count() })
+      .from(userSources)
+      .where(eq(userSources.userId, userId));
+
+    const total = totalResult?.count ?? 0;
+
+    // Get paginated data
+    const links = await this.db.query.userSources.findMany({
+      where: eq(userSources.userId, userId),
+      with: this.buildRelations(loadOptions),
+      limit: params.limit,
+      offset: params.offset,
+    });
+
+    const data = links.map((link) =>
+      DrizzleUserSourcesEntityMapper.toEntity(link, loadOptions),
+    );
+
+    return createPaginatedResult(data, total, params);
   }
 
   private buildRelations(loadOptions: UserSourceLoadOptions) {

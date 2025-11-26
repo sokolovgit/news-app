@@ -1,5 +1,5 @@
 import { ApiOperation } from '@nestjs/swagger';
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 import { Auth } from '@/auth/decorators/auth.decorator';
 import { CurrentUser } from '@/users/decorators';
@@ -7,17 +7,23 @@ import { User } from '@/users/domain/entities';
 
 import {
   AddSourceDto,
-  SourceDto,
-  UserSourceDto,
+  AddedUserSourceDto,
   ValidateSourceDto,
+  GetUserSourcesQueryDto,
+  GetUserSourcesResponseDto,
 } from './dtos';
-import { AddSourceHandler, ValidateSourceHandler } from '../operation/handlers';
+import {
+  AddSourceHandler,
+  ValidateSourceHandler,
+  GetUserSourcesHandler,
+} from '../operation/handlers';
 
 @Controller('sources')
 export class SourcesController {
   constructor(
     private readonly addSourceHandler: AddSourceHandler,
     private readonly validateSourceHandler: ValidateSourceHandler,
+    private readonly getUserSourcesHandler: GetUserSourcesHandler,
   ) {}
 
   @Post()
@@ -30,19 +36,12 @@ export class SourcesController {
   public async addSource(
     @CurrentUser() user: User,
     @Body() addSourceDto: AddSourceDto,
-  ) {
+  ): Promise<AddedUserSourceDto> {
     const response = await this.addSourceHandler.handle(
       addSourceDto.toRequest(user),
     );
 
-    return UserSourceDto.fromEntities(
-      response.userSource,
-      SourceDto.fromEntity(response.source),
-      {
-        isNewSource: response.isNewSource,
-        isNewLink: response.isNewLink,
-      },
-    );
+    return AddedUserSourceDto.fromResponse(response);
   }
 
   @Post('validate')
@@ -53,5 +52,22 @@ export class SourcesController {
   })
   public validateSource(@Body() validateSourceDto: ValidateSourceDto) {
     return this.validateSourceHandler.handle(validateSourceDto.toRequest());
+  }
+
+  @Get('user')
+  @Auth()
+  @ApiOperation({
+    summary: 'Get user sources',
+    description: 'Get paginated sources followed by the current user',
+  })
+  public async getUserSources(
+    @CurrentUser() user: User,
+    @Query() query: GetUserSourcesQueryDto,
+  ): Promise<GetUserSourcesResponseDto> {
+    const response = await this.getUserSourcesHandler.handle(
+      query.toRequest(user),
+    );
+
+    return GetUserSourcesResponseDto.fromResponse(response);
   }
 }

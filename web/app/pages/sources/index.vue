@@ -79,6 +79,31 @@
         @view="handleView(source)"
       />
     </div>
+
+    <!-- Pagination -->
+    <div v-if="!isLoading && sources.length > 0" class="flex items-center justify-between">
+      <div class="text-sm text-muted-foreground">
+        Showing {{ pagination.offset + 1 }}-{{
+          Math.min(pagination.offset + pagination.limit, pagination.total)
+        }}
+        of {{ pagination.total }}
+      </div>
+      <div class="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="pagination.offset === 0"
+          @click="loadPreviousPage"
+        >
+          <Icon name="lucide:chevron-left" class="h-4 w-4 mr-1" />
+          Previous
+        </Button>
+        <Button variant="outline" size="sm" :disabled="!pagination.hasMore" @click="loadNextPage">
+          Next
+          <Icon name="lucide:chevron-right" class="h-4 w-4 ml-1" />
+        </Button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -94,16 +119,35 @@ import {
 } from '@/components/ui/select'
 import SourceCard from '~/components/sources/SourceCard.vue'
 import SourceCardSkeleton from '~/components/sources/SourceCardSkeleton.vue'
+import { useApi } from '~/composables/useApi'
+import { SourcesService } from '~/lib/api'
 
 definePageMeta({
   layout: 'default',
 })
 
+const api = useApi()
+const sourcesService = new SourcesService(api)
+
+interface Source {
+  id: string
+  name: string
+  url: string
+  source: string
+  lastFetchedAt?: string | Date
+}
+
 const viewMode = ref<'grid' | 'list'>('grid')
 const searchQuery = ref('')
 const filterType = ref('all')
 const isLoading = ref(false)
-const sources = ref<any[]>([])
+const sources = ref<Source[]>([])
+const pagination = ref({
+  offset: 0,
+  limit: 20,
+  total: 0,
+  hasMore: false,
+})
 
 const viewIcon = computed(() => {
   return viewMode.value === 'grid' ? 'lucide:list' : 'lucide:grid'
@@ -143,24 +187,59 @@ const handleTypeFilter = () => {
   // Filter is handled by computed property
 }
 
-const handleRefresh = async (source: any) => {
+const handleRefresh = async (source: Source) => {
   // TODO: Implement refresh source
   console.log('Refresh source:', source.id)
 }
 
-const handleView = (source: any) => {
+const handleView = (source: Source) => {
   // TODO: Navigate to source details or filter feed by source
   console.log('View source:', source.id)
 }
 
-// TODO: Fetch sources on mount
-onMounted(async () => {
+const loadUserSources = async (offset: number = 0) => {
   isLoading.value = true
   try {
-    // const sourcesData = await fetchUserSources()
-    // sources.value = sourcesData
+    const response = await sourcesService.getUserSources({
+      offset,
+      limit: pagination.value.limit,
+    })
+
+    // Map user sources to the format expected by SourceCard
+    sources.value = response.data.map((userSource) => ({
+      id: userSource.source.id,
+      name: userSource.source.name,
+      url: userSource.source.url,
+      source: userSource.source.source,
+      lastFetchedAt: userSource.source.updatedAt,
+    }))
+
+    // Update pagination state
+    pagination.value = {
+      offset: response.offset,
+      limit: response.limit,
+      total: response.total,
+      hasMore: response.hasMore,
+    }
+  } catch (error) {
+    console.error('Failed to fetch user sources:', error)
   } finally {
     isLoading.value = false
   }
+}
+
+const loadNextPage = () => {
+  if (pagination.value.hasMore) {
+    loadUserSources(pagination.value.offset + pagination.value.limit)
+  }
+}
+
+const loadPreviousPage = () => {
+  const newOffset = Math.max(0, pagination.value.offset - pagination.value.limit)
+  loadUserSources(newOffset)
+}
+
+onMounted(async () => {
+  await loadUserSources(0)
 })
 </script>

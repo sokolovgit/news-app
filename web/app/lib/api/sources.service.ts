@@ -34,6 +34,36 @@ export interface AddSourceResponse {
   isNewLink: boolean
 }
 
+export interface UserSourceResponse {
+  id: string
+  userId: string
+  sourceId: string
+  source: {
+    id: string
+    name: string
+    url: string
+    source: 'telegram' | 'instagram' | 'rss'
+    addedBy?: string
+    createdAt?: string
+    updatedAt?: string
+  }
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface GetUserSourcesParams {
+  offset?: number
+  limit?: number
+}
+
+export interface GetUserSourcesResponse {
+  data: UserSourceResponse[]
+  total: number
+  offset: number
+  limit: number
+  hasMore: boolean
+}
+
 export class SourcesService {
   constructor(private apiClient: ApiClient) {}
 
@@ -49,6 +79,20 @@ export class SourcesService {
    */
   async addSource(url: string): Promise<AddSourceResponse> {
     return this.apiClient.post<AddSourceResponse>('/sources', { url })
+  }
+
+  /**
+   * Get paginated sources followed by the current user
+   */
+  async getUserSources(params?: GetUserSourcesParams): Promise<GetUserSourcesResponse> {
+    const queryParams: Record<string, string | number | boolean | null | undefined> = {}
+    if (params?.offset !== undefined) {
+      queryParams.offset = params.offset
+    }
+    if (params?.limit !== undefined) {
+      queryParams.limit = params.limit
+    }
+    return this.apiClient.get<GetUserSourcesResponse>('/sources/user', queryParams)
   }
 }
 

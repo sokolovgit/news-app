@@ -4,6 +4,7 @@ import {
 } from '@/user-sources/domain/entities';
 import { SourceId } from '@/sources/domain/schemas';
 import { UserId } from '@/users/domain/schemas';
+import { PaginatedResult, PaginationParams } from '@/commons/types';
 
 export abstract class UserSourcesRepository {
   abstract findByUserAndSource(
@@ -15,4 +16,15 @@ export abstract class UserSourcesRepository {
   abstract save(userSource: UserSource): Promise<UserSource | null>;
 
   abstract findAllSourceIdsByUser(userId: UserId): Promise<SourceId[]>;
+
+  abstract findAllByUser(
+    userId: UserId,
+    loadOptions?: UserSourceLoadOptions,
+  ): Promise<UserSource[]>;
+
+  abstract findAllByUserPaginated(
+    userId: UserId,
+    params: PaginationParams,
+    loadOptions?: UserSourceLoadOptions,
+  ): Promise<PaginatedResult<UserSource>>;
 }
