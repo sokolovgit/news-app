@@ -65,16 +65,8 @@ const fetchPost = async () => {
     isLoading.value = true
     error.value = null
 
-    // Fetch raw posts and find the post
-    const response = await feedService.getFeed({ limit: 1000 })
-    const foundPost = response.data.find((p) => p.id === postId)
-
-    if (!foundPost) {
-      error.value = 'Post not found'
-      return
-    }
-
-    post.value = foundPost
+    // Fetch single post by ID
+    post.value = await feedService.getPostById(postId)
   } catch (err) {
     console.error('Failed to fetch post:', err)
     error.value = err instanceof Error ? err.message : 'Failed to load post'

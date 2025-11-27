@@ -22,115 +22,151 @@ const editorContainer = ref<HTMLElement | null>(null)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let editor: any = null
 
-// Render images directly as HTML (bypassing Editor.js Image tool)
-// Inserts images at correct positions based on content order
-function renderImagesDirectly(
+// Use composable for media URL transformation
+const { getMediaUrl, getMediaType } = useMediaUrl()
+
+// Render media (images/videos) directly as HTML
+// Inserts media at correct positions based on content order
+function renderMediaDirectly(
   container: HTMLElement,
   content: Content,
   editorBlocks: NodeListOf<Element>,
 ) {
-  // Create a map of image positions
-  const imagePositions = new Map<number, { url: string; caption?: string }>()
+  // Create a map of media positions
+  const mediaPositions = new Map<
+    number,
+    { url: string; caption?: string; type: 'image' | 'video' | 'audio' }
+  >()
 
   content.forEach((block, index) => {
-    if (block.type === 'image' && block.data.url) {
-      imagePositions.set(index, {
+    if (
+      (block.type === 'image' || block.type === 'video' || block.type === 'audio') &&
+      block.data.url
+    ) {
+      mediaPositions.set(index, {
         url: block.data.url,
         caption: block.data.caption,
+        type: block.type,
       })
     }
   })
 
-  // Insert images at their correct positions
-  imagePositions.forEach((imageData, position) => {
-    // Find the block at this position (skip images when counting)
+  // Insert media at their correct positions
+  mediaPositions.forEach((mediaData, position) => {
+    // Find the block at this position (skip media when counting)
     let blockIndex = 0
     for (let i = 0; i < position; i++) {
       const block = content[i]
-      if (block && block.type !== 'image') {
+      if (block && block.type !== 'image' && block.type !== 'video' && block.type !== 'audio') {
         blockIndex++
       }
     }
 
-    const imageWrapper = document.createElement('figure')
-    imageWrapper.className = 'editorjs-direct-image my-4'
+    // Transform S3 path to full URL
+    const mediaUrl = getMediaUrl(mediaData.url)
+    const detectedType = getMediaType(mediaData.url)
+    const effectiveType =
+      mediaData.type === 'image' && detectedType === 'video' ? 'video' : mediaData.type
 
-    const img = document.createElement('img')
-    // Don't set crossOrigin - Instagram CDN doesn't support CORS
-    // Setting crossOrigin='anonymous' causes browser to block the image
-    // Also don't set referrerPolicy initially - let browser use default
-    img.src = imageData.url
-    img.alt = imageData.caption || ''
-    img.className = 'max-w-full h-auto rounded-lg block mx-auto'
-    img.loading = 'lazy'
+    const mediaWrapper = document.createElement('figure')
+    mediaWrapper.className = 'editorjs-direct-media my-4'
 
-    // Handle image load errors
-    img.onerror = () => {
-      console.error('Failed to load image:', imageData.url)
-      // Try retrying with no-referrer policy (sometimes helps with CDN restrictions)
-      const retryImg = document.createElement('img')
-      retryImg.referrerPolicy = 'no-referrer'
-      retryImg.src = imageData.url
-      retryImg.alt = imageData.caption || ''
-      retryImg.className = 'max-w-full h-auto rounded-lg block mx-auto'
-      retryImg.loading = 'lazy'
+    if (effectiveType === 'video') {
+      // Render video element
+      const video = document.createElement('video')
+      video.src = mediaUrl
+      video.className = 'max-w-full h-auto rounded-lg block mx-auto'
+      video.controls = true
+      video.preload = 'metadata'
+      video.playsInline = true
 
-      retryImg.onload = () => {
-        // Replace failed image with retry image
-        imageWrapper.replaceChild(retryImg, img)
-        console.log('Image loaded on retry:', imageData.url)
+      video.onerror = () => {
+        console.error('Failed to load video:', mediaUrl)
+        renderMediaError(mediaWrapper, video, mediaUrl, 'Video could not be loaded')
       }
 
-      retryImg.onerror = () => {
-        // Show error message with link to open image
-        img.style.display = 'none'
-        const errorMsg = document.createElement('div')
-        errorMsg.className = 'editorjs-image-error'
-        errorMsg.innerHTML = `
-            <div class="editorjs-image-error-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
-                <circle cx="9" cy="9" r="2"></circle>
-                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
-              </svg>
-            </div>
-            <p class="editorjs-image-error-text">Image could not be loaded</p>
-            <a href="${imageData.url}" target="_blank" rel="noopener noreferrer" class="editorjs-image-error-link">
-              Open image in new tab
-            </a>
-          `
-        imageWrapper.appendChild(errorMsg)
+      mediaWrapper.appendChild(video)
+    } else if (effectiveType === 'audio') {
+      // Render audio element
+      const audio = document.createElement('audio')
+      audio.src = mediaUrl
+      audio.className = 'w-full'
+      audio.controls = true
+      audio.preload = 'metadata'
+
+      audio.onerror = () => {
+        console.error('Failed to load audio:', mediaUrl)
+        renderMediaError(mediaWrapper, audio, mediaUrl, 'Audio could not be loaded')
       }
+
+      mediaWrapper.appendChild(audio)
+    } else {
+      // Render image element
+      const img = document.createElement('img')
+      img.src = mediaUrl
+      img.alt = mediaData.caption || ''
+      img.className = 'max-w-full h-auto rounded-lg block mx-auto'
+      img.loading = 'lazy'
+
+      img.onerror = () => {
+        console.error('Failed to load image:', mediaUrl)
+        renderMediaError(mediaWrapper, img, mediaUrl, 'Image could not be loaded')
+      }
+
+      img.onload = () => {
+        console.log('Image loaded successfully:', mediaUrl)
+      }
+
+      mediaWrapper.appendChild(img)
     }
 
-    // Handle successful load
-    img.onload = () => {
-      console.log('Image loaded successfully:', imageData.url)
-    }
-
-    imageWrapper.appendChild(img)
-
-    if (imageData.caption) {
+    if (mediaData.caption) {
       const caption = document.createElement('figcaption')
       caption.className = 'text-sm text-muted-foreground text-center mt-2'
-      caption.textContent = imageData.caption
-      imageWrapper.appendChild(caption)
+      caption.textContent = mediaData.caption
+      mediaWrapper.appendChild(caption)
     }
 
     // Insert after the corresponding Editor.js block, or at the end if no blocks
     if (editorBlocks.length > 0 && blockIndex < editorBlocks.length) {
       const targetBlock = editorBlocks[blockIndex]
       if (targetBlock && targetBlock.nextSibling) {
-        container.insertBefore(imageWrapper, targetBlock.nextSibling)
+        container.insertBefore(mediaWrapper, targetBlock.nextSibling)
       } else if (targetBlock) {
-        container.appendChild(imageWrapper)
+        container.appendChild(mediaWrapper)
       } else {
-        container.appendChild(imageWrapper)
+        container.appendChild(mediaWrapper)
       }
     } else {
-      container.appendChild(imageWrapper)
+      container.appendChild(mediaWrapper)
     }
   })
+}
+
+// Render error placeholder for failed media
+function renderMediaError(
+  wrapper: HTMLElement,
+  element: HTMLElement,
+  url: string,
+  message: string,
+) {
+  element.style.display = 'none'
+  const errorMsg = document.createElement('div')
+  errorMsg.className = 'editorjs-media-error'
+  errorMsg.innerHTML = `
+    <div class="editorjs-media-error-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
+        <circle cx="9" cy="9" r="2"></circle>
+        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
+      </svg>
+    </div>
+    <p class="editorjs-media-error-text">${message}</p>
+    <a href="${url}" target="_blank" rel="noopener noreferrer" class="editorjs-media-error-link">
+      Open in new tab
+    </a>
+  `
+  wrapper.appendChild(errorMsg)
 }
 
 // Fallback renderer for when Editor.js fails
@@ -142,11 +178,18 @@ function renderFallback(container: HTMLElement, content: Content) {
           return `<p>${block.data.text}</p>`
         case 'header':
           return `<h${block.data.level}>${block.data.text}</h${block.data.level}>`
-        case 'image':
-          return `<figure class="my-4"><img src="${block.data.url}" alt="${block.data.caption || ''}" class="max-w-full h-auto rounded-lg" /><figcaption class="text-sm text-muted-foreground text-center mt-2">${block.data.caption || ''}</figcaption></figure>`
-        case 'audio':
-        case 'video':
-          return `<div class="my-4"><a href="${block.data.url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${block.data.caption || block.data.url}</a></div>`
+        case 'image': {
+          const imageUrl = getMediaUrl(block.data.url)
+          return `<figure class="editorjs-direct-media my-4"><img src="${imageUrl}" alt="${block.data.caption || ''}" class="max-w-full h-auto rounded-lg" />${block.data.caption ? `<figcaption class="text-sm text-muted-foreground text-center mt-2">${block.data.caption}</figcaption>` : ''}</figure>`
+        }
+        case 'video': {
+          const videoUrl = getMediaUrl(block.data.url)
+          return `<figure class="editorjs-direct-media my-4"><video src="${videoUrl}" controls class="max-w-full h-auto rounded-lg" preload="metadata" playsinline></video>${block.data.caption ? `<figcaption class="text-sm text-muted-foreground text-center mt-2">${block.data.caption}</figcaption>` : ''}</figure>`
+        }
+        case 'audio': {
+          const audioUrl = getMediaUrl(block.data.url)
+          return `<figure class="editorjs-direct-media my-4"><audio src="${audioUrl}" controls class="w-full" preload="metadata"></audio>${block.data.caption ? `<figcaption class="text-sm text-muted-foreground text-center mt-2">${block.data.caption}</figcaption>` : ''}</figure>`
+        }
         default:
           return ''
       }
@@ -154,13 +197,15 @@ function renderFallback(container: HTMLElement, content: Content) {
     .join('')
 }
 
-// Convert backend content format to Editor.js format (excluding images)
+// Convert backend content format to Editor.js format (excluding media)
 function convertContentToEditorJs(content: Content) {
-  // Filter out images - we'll render them separately
-  const nonImageBlocks = content.filter((block) => block.type !== 'image')
+  // Filter out media - we'll render them separately
+  const nonMediaBlocks = content.filter(
+    (block) => block.type !== 'image' && block.type !== 'video' && block.type !== 'audio',
+  )
 
   return {
-    blocks: nonImageBlocks.map((block) => {
+    blocks: nonMediaBlocks.map((block) => {
       switch (block.type) {
         case 'paragraph':
           return {
@@ -175,30 +220,6 @@ function convertContentToEditorJs(content: Content) {
             data: {
               text: block.data.text,
               level: block.data.level,
-            },
-          }
-        case 'audio':
-          return {
-            type: 'embed',
-            data: {
-              service: 'audio',
-              source: block.data.url,
-              embed: block.data.url,
-              width: 600,
-              height: 200,
-              caption: block.data.caption || '',
-            },
-          }
-        case 'video':
-          return {
-            type: 'embed',
-            data: {
-              service: 'video',
-              source: block.data.url,
-              embed: block.data.url,
-              width: 600,
-              height: 400,
-              caption: block.data.caption || '',
             },
           }
         default:
@@ -219,25 +240,13 @@ onMounted(async () => {
 
   try {
     // Dynamically import Editor.js and plugins only on client side
-    // Note: We don't import Image tool - we render images directly as HTML
-    const [
-      { default: EditorJS },
-      { default: Header },
-      { default: List },
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore - Editor.js plugins don't have perfect TypeScript support
-      { default: Embed },
-    ] = await Promise.all([
+    const [{ default: EditorJS }, { default: Header }, { default: List }] = await Promise.all([
       import('@editorjs/editorjs'),
       import('@editorjs/header'),
       import('@editorjs/list'),
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore - Editor.js plugins don't have perfect TypeScript support
-      import('@editorjs/embed'),
     ])
 
     const editorJsData = convertContentToEditorJs(props.content)
-    console.log('Editor.js data:', editorJsData)
 
     // Create a wrapper for Editor.js content
     const editorWrapper = document.createElement('div')
@@ -261,32 +270,18 @@ onMounted(async () => {
           class: List as any,
           inlineToolbar: true,
         },
-        embed: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          class: Embed as any,
-          config: {
-            services: {
-              youtube: true,
-              codepen: true,
-              twitter: true,
-              instagram: true,
-            },
-          },
-        },
       },
     })
 
     // Wait for editor to render
     await editor.isReady
-    console.log('Editor.js rendered successfully')
 
-    // Render images directly at correct positions
-    // Get all rendered Editor.js blocks
+    // Render media directly at correct positions
     const editorBlocks = editorWrapper.querySelectorAll('.ce-block')
-    renderImagesDirectly(editorContainer.value, props.content, editorBlocks)
+    renderMediaDirectly(editorContainer.value, props.content, editorBlocks)
   } catch (error) {
     console.error('Failed to load Editor.js:', error)
-    // Fallback: render images directly if Editor.js fails
+    // Fallback: render content directly if Editor.js fails
     if (editorContainer.value && props.content.length > 0) {
       renderFallback(editorContainer.value, props.content)
     }
@@ -308,9 +303,9 @@ watch(
     const editorJsData = convertContentToEditorJs(newContent)
     await editor.render(editorJsData)
 
-    // Re-render images at correct positions
+    // Re-render media at correct positions
     const editorBlocks = editorWrapper.querySelectorAll('.ce-block')
-    renderImagesDirectly(editorContainer.value, newContent, editorBlocks)
+    renderMediaDirectly(editorContainer.value, newContent, editorBlocks)
   },
   { deep: true },
 )
@@ -353,14 +348,15 @@ onUnmounted(() => {
   margin: 0.5rem 0;
 }
 
-/* Direct image rendering (bypassing Editor.js Image tool) */
-.editorjs-renderer .editorjs-direct-image {
+/* Direct media rendering */
+.editorjs-renderer .editorjs-direct-media {
   margin: 1rem 0;
   display: block;
   width: 100%;
 }
 
-.editorjs-renderer .editorjs-direct-image img {
+.editorjs-renderer .editorjs-direct-media img,
+.editorjs-renderer .editorjs-direct-media video {
   max-width: 100%;
   width: 100%;
   height: auto;
@@ -370,7 +366,12 @@ onUnmounted(() => {
   object-fit: contain;
 }
 
-.editorjs-renderer .editorjs-direct-image figcaption {
+.editorjs-renderer .editorjs-direct-media audio {
+  width: 100%;
+  display: block;
+}
+
+.editorjs-renderer .editorjs-direct-media figcaption {
   margin-top: 0.5rem;
   font-size: 0.875rem;
   color: hsl(var(--muted-foreground));
@@ -379,8 +380,8 @@ onUnmounted(() => {
   font-style: italic;
 }
 
-/* Image error placeholder styling */
-.editorjs-renderer .editorjs-image-error {
+/* Media error placeholder styling */
+.editorjs-renderer .editorjs-media-error {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -395,25 +396,25 @@ onUnmounted(() => {
   transition: all 0.2s ease;
 }
 
-.editorjs-renderer .editorjs-image-error:hover {
+.editorjs-renderer .editorjs-media-error:hover {
   box-shadow:
     0 4px 6px -1px rgb(0 0 0 / 0.1),
     0 2px 4px -2px rgb(0 0 0 / 0.1);
   border-color: hsl(var(--border) / 0.8);
 }
 
-.editorjs-renderer .editorjs-image-error-icon {
+.editorjs-renderer .editorjs-media-error-icon {
   margin-bottom: 0.75rem;
   color: hsl(var(--muted-foreground));
   opacity: 0.5;
 }
 
-.editorjs-renderer .editorjs-image-error-icon svg {
+.editorjs-renderer .editorjs-media-error-icon svg {
   width: 40px;
   height: 40px;
 }
 
-.editorjs-renderer .editorjs-image-error-text {
+.editorjs-renderer .editorjs-media-error-text {
   margin-bottom: 0.875rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -421,7 +422,7 @@ onUnmounted(() => {
   line-height: 1.5;
 }
 
-.editorjs-renderer .editorjs-image-error-link {
+.editorjs-renderer .editorjs-media-error-link {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
@@ -436,14 +437,14 @@ onUnmounted(() => {
   border: 1px solid hsl(var(--primary) / 0.2);
 }
 
-.editorjs-renderer .editorjs-image-error-link:hover {
+.editorjs-renderer .editorjs-media-error-link:hover {
   color: hsl(var(--primary-foreground));
   background: hsl(var(--primary));
   border-color: hsl(var(--primary));
   text-decoration: none;
 }
 
-.editorjs-renderer .editorjs-image-error-link::after {
+.editorjs-renderer .editorjs-media-error-link::after {
   content: '↗';
   font-size: 0.75rem;
   margin-left: 0.125rem;
@@ -478,74 +479,6 @@ onUnmounted(() => {
 .editorjs-renderer :deep(.ce-list__item) {
   margin: 0.25rem 0;
   line-height: 1.6;
-}
-
-/* Image styles */
-.editorjs-renderer :deep(.image-tool) {
-  margin: 1rem 0;
-  display: block;
-  width: 100%;
-}
-
-.editorjs-renderer :deep(.image-tool__image) {
-  max-width: 100%;
-  width: 100%;
-  height: auto;
-  border-radius: 0.5rem;
-  display: block;
-  margin: 0 auto;
-}
-
-.editorjs-renderer :deep(.image-tool__image-picture) {
-  max-width: 100%;
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.editorjs-renderer :deep(.image-tool__image img),
-.editorjs-renderer :deep(.image-tool__image-picture img) {
-  max-width: 100%;
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 0.5rem;
-  object-fit: contain;
-}
-
-.editorjs-renderer :deep(.image-tool__caption) {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: hsl(var(--muted-foreground));
-  text-align: center;
-  display: block;
-}
-
-/* Ensure image wrapper is visible */
-.editorjs-renderer :deep(.cdx-block[data-type='image']) {
-  display: block;
-  width: 100%;
-}
-
-.editorjs-renderer :deep(.cdx-block[data-type='image'] .cdx-block__content) {
-  display: block;
-  width: 100%;
-}
-
-/* Embed styles */
-.editorjs-renderer :deep(.embed-tool) {
-  margin: 1rem 0;
-}
-
-.editorjs-renderer :deep(.embed-tool__content) {
-  max-width: 100%;
-}
-
-.editorjs-renderer :deep(.embed-tool__caption) {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: hsl(var(--muted-foreground));
-  text-align: center;
 }
 
 /* Hide toolbar in read-only mode */

@@ -3,6 +3,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Controller, Get, Param, Res } from '@nestjs/common';
 
 import { GetMediaHandler } from '../operation/handlers';
+import { ParseMediaPathPipe } from '../pipes';
 
 @ApiTags('Media')
 @Controller('media')
@@ -12,7 +13,7 @@ export class MediaController {
   @Get('*path')
   @ApiOperation({ summary: 'Get media file by path' })
   async getMedia(
-    @Param('*') path: string,
+    @Param('path', ParseMediaPathPipe) path: string,
     @Res() res: Response,
   ): Promise<void> {
     const result = await this.getMediaHandler.handle({ path });

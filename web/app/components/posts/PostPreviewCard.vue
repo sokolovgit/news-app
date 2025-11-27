@@ -85,6 +85,9 @@ const emit = defineEmits<{
 
 const showComplaintDialog = ref(false)
 
+// Use composable for media URL transformation
+const { getMediaUrl } = useMediaUrl()
+
 const sourceName = computed(() => {
   return props.post.source?.name || 'Unknown Source'
 })
@@ -129,7 +132,10 @@ const previewContent = computed(() => {
 })
 
 const previewText = computed(() => previewContent.value?.text || null)
-const previewImage = computed(() => previewContent.value?.image || null)
+const previewImage = computed(() => {
+  const imageUrl = previewContent.value?.image
+  return imageUrl ? getMediaUrl(imageUrl) : null
+})
 
 const handleClick = () => {
   emit('click', props.post)

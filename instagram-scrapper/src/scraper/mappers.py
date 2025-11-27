@@ -113,8 +113,8 @@ class InstagramPostMapper:
 
         # Handle single post (image or video)
         if post.typename != "GraphSidecar":
-            if post.is_video:
-                if post.video_url:
+        if post.is_video:
+            if post.video_url:
                     add_media(post.video_url, is_video=True)
             else:
                 if post.url:

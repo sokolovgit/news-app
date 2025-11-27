@@ -97,19 +97,19 @@ class Settings(BaseSettings):
     def get_session_file_path(self) -> Optional[Path]:
         """
         Get Path object for session file if configured.
-        
+
         Supports both absolute and relative paths. Relative paths are resolved
         relative to the project root (where .env file is located).
         """
         if not self.instagram_session_path:
             return None
-        
+
         path = Path(self.instagram_session_path)
-        
+
         # If path is absolute, use it as-is
         if path.is_absolute():
             return path
-        
+
         # For relative paths, resolve relative to project root
         # Find project root by looking for .env file or pyproject.toml
         project_root = self._find_project_root()
@@ -119,17 +119,17 @@ class Settings(BaseSettings):
     def _find_project_root() -> Path:
         """
         Find the project root directory by looking for .env or pyproject.toml.
-        
+
         Returns:
             Path to project root, or current working directory if not found
         """
         current = Path.cwd()
-        
+
         # Check current directory and parent directories
         for path in [current] + list(current.parents):
             if (path / ".env").exists() or (path / "pyproject.toml").exists():
                 return path
-        
+
         # Fallback to current working directory
         return current
 
