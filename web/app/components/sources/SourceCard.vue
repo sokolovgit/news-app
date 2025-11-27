@@ -26,23 +26,37 @@
         </div>
       </div>
     </CardContent>
-    <CardFooter v-if="!preview" class="flex justify-end gap-2">
-      <Button
-        v-if="showFollowButton && !isSubscribed"
-        variant="default"
-        size="sm"
-        :disabled="isFollowing"
-        @click="$emit('follow')"
-      >
-        <Icon name="lucide:plus" class="h-4 w-4 mr-2" />
-        {{ isFollowing ? 'Following...' : 'Follow' }}
+    <CardFooter v-if="!preview" class="flex justify-between items-center">
+      <Button v-if="showReportButton" variant="ghost" size="sm" @click="showComplaintDialog = true">
+        <Icon name="lucide:flag" class="h-4 w-4 mr-2" />
+        Report
       </Button>
-      <Button v-if="showActions" variant="ghost" size="sm" @click="$emit('refresh')">
-        <Icon name="lucide:refresh-cw" class="h-4 w-4 mr-2" />
-        Refresh
-      </Button>
-      <Button v-if="showActions" variant="ghost" size="sm" @click="$emit('view')"> View </Button>
+      <div class="flex gap-2">
+        <Button
+          v-if="showFollowButton && !isSubscribed"
+          variant="default"
+          size="sm"
+          :disabled="isFollowing"
+          @click="$emit('follow')"
+        >
+          <Icon name="lucide:plus" class="h-4 w-4 mr-2" />
+          {{ isFollowing ? 'Following...' : 'Follow' }}
+        </Button>
+        <Button v-if="showActions" variant="ghost" size="sm" @click="$emit('refresh')">
+          <Icon name="lucide:refresh-cw" class="h-4 w-4 mr-2" />
+          Refresh
+        </Button>
+        <Button v-if="showActions" variant="ghost" size="sm" @click="$emit('view')"> View </Button>
+      </div>
     </CardFooter>
+
+    <ComplaintDialog
+      :open="showComplaintDialog"
+      target-type="source"
+      :target-id="source.id"
+      @update:open="showComplaintDialog = $event"
+      @submitted="$emit('complaint-submitted')"
+    />
   </Card>
 </template>
 
@@ -57,6 +71,7 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import ComplaintDialog from '@/components/complaints/ComplaintDialog.vue'
 
 interface Source {
   id: string
@@ -73,6 +88,7 @@ const props = defineProps<{
   isSubscribed?: boolean
   showFollowButton?: boolean
   showActions?: boolean
+  showReportButton?: boolean
   isFollowing?: boolean
 }>()
 
@@ -80,7 +96,10 @@ defineEmits<{
   refresh: []
   view: []
   follow: []
+  'complaint-submitted': []
 }>()
+
+const showComplaintDialog = ref(false)
 
 const sourceIcon = computed(() => {
   const sourceType = props.source.source.toLowerCase()

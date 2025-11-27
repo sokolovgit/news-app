@@ -120,6 +120,7 @@
             :is-subscribed="true"
             :show-follow-button="false"
             :show-actions="true"
+            :show-report-button="true"
             @refresh="handleRefresh(source)"
             @view="handleView(source)"
           />
@@ -256,6 +257,7 @@
             :is-subscribed="source.isSubscribed"
             :show-follow-button="true"
             :show-actions="source.isSubscribed"
+            :show-report-button="true"
             :is-following="followingSourceIds.has(source.id)"
             @refresh="handleRefresh(source)"
             @view="handleView(source)"

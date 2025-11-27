@@ -38,19 +38,40 @@
         <Icon name="lucide:calendar" class="h-3 w-3" />
         {{ formattedDate }}
       </div>
-      <div
-        class="flex items-center gap-1 text-primary opacity-0 group-hover:opacity-100 transition-opacity"
-      >
-        Read more
-        <Icon name="lucide:arrow-right" class="h-3 w-3" />
+      <div class="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          class="h-7 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+          @click.stop="showComplaintDialog = true"
+        >
+          <Icon name="lucide:flag" class="h-3 w-3 mr-1" />
+          Report
+        </Button>
+        <div
+          class="flex items-center gap-1 text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          Read more
+          <Icon name="lucide:arrow-right" class="h-3 w-3" />
+        </div>
       </div>
     </CardFooter>
+
+    <ComplaintDialog
+      :open="showComplaintDialog"
+      target-type="post"
+      :target-id="post.id"
+      @update:open="showComplaintDialog = $event"
+      @submitted="$emit('complaint-submitted')"
+    />
   </Card>
 </template>
 
 <script setup lang="ts">
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import ComplaintDialog from '@/components/complaints/ComplaintDialog.vue'
 import type { FeedPost } from '~/types/posts.types'
 
 const props = defineProps<{
@@ -59,7 +80,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   click: [post: FeedPost]
+  'complaint-submitted': []
 }>()
+
+const showComplaintDialog = ref(false)
 
 const sourceName = computed(() => {
   return props.post.source?.name || 'Unknown Source'

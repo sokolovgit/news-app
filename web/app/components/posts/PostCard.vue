@@ -38,13 +38,27 @@
         <Icon name="lucide:calendar" class="h-3 w-3" />
         {{ formattedDate }}
       </div>
-      <Button v-if="post.source?.url" variant="outline" size="sm" as-child>
-        <a :href="post.source.url" target="_blank" rel="noopener noreferrer">
-          <Icon name="lucide:external-link" class="h-4 w-4 mr-2" />
-          View Source
-        </a>
-      </Button>
+      <div class="flex items-center gap-2">
+        <Button variant="ghost" size="sm" @click="showComplaintDialog = true">
+          <Icon name="lucide:flag" class="h-4 w-4 mr-2" />
+          Report
+        </Button>
+        <Button v-if="post.source?.url" variant="outline" size="sm" as-child>
+          <a :href="post.source.url" target="_blank" rel="noopener noreferrer">
+            <Icon name="lucide:external-link" class="h-4 w-4 mr-2" />
+            View Source
+          </a>
+        </Button>
+      </div>
     </CardFooter>
+
+    <ComplaintDialog
+      :open="showComplaintDialog"
+      target-type="post"
+      :target-id="post.id"
+      @update:open="showComplaintDialog = $event"
+      @submitted="$emit('complaint-submitted')"
+    />
   </Card>
 </template>
 
@@ -53,6 +67,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import EditorJsRenderer from './EditorJsRenderer.vue'
+import ComplaintDialog from '@/components/complaints/ComplaintDialog.vue'
 import type { FeedPost } from '~/types/posts.types'
 
 const props = defineProps<{
@@ -62,7 +77,10 @@ const props = defineProps<{
 
 defineEmits<{
   bookmark: []
+  'complaint-submitted': []
 }>()
+
+const showComplaintDialog = ref(false)
 
 const sourceName = computed(() => {
   return props.post.source?.name || 'Unknown Source'
