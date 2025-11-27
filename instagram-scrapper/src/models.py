@@ -106,3 +106,20 @@ class ResultJobData(BaseModel):
 
     class Config:
         populate_by_name = True
+
+
+class MediaUploadJobData(BaseModel):
+    """Job data for media upload queue."""
+
+    sourceType: Literal["instagram", "telegram"] = Field(..., alias="sourceType")
+    sourceId: str = Field(..., alias="sourceId")
+    postExternalId: str = Field(..., alias="postExternalId")
+    mediaIndex: int = Field(..., alias="mediaIndex")
+    targetPath: str = Field(..., alias="targetPath")
+    contentType: str = Field(..., alias="contentType")
+    source: Literal["url", "buffer"]
+    sourceUrl: Optional[str] = Field(None, alias="sourceUrl")
+    buffer: Optional[str] = None  # Base64 encoded
+
+    class Config:
+        populate_by_name = True

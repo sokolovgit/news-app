@@ -9,6 +9,7 @@ from src.config import get_settings
 from src.scraper.instagram_scraper import InstagramScraper
 from src.scraper.queue_worker import InstagramQueueWorker
 from src.scraper.result_publisher import ResultPublisher
+from src.scraper.media_upload_publisher import MediaUploadPublisher
 
 
 def setup_logging() -> None:
@@ -48,10 +49,12 @@ class InstagramScrapperApp:
             # Initialize components
             scraper = InstagramScraper(self.settings)
             publisher = ResultPublisher(self.settings)
+            media_publisher = MediaUploadPublisher(self.settings)
             self.worker = InstagramQueueWorker(
                 self.settings,
                 scraper,
                 publisher,
+                media_publisher,
             )
 
             # Start the worker
@@ -63,6 +66,9 @@ class InstagramScrapperApp:
             )
             self.logger.info(
                 f"Results will be published to: {self.settings.fetch_results_queue}",
+            )
+            self.logger.info(
+                f"Media uploads will be published to: {self.settings.media_upload_queue}",
             )
 
             # Wait for shutdown signal

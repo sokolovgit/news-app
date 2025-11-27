@@ -11,6 +11,7 @@ from src.models import CollectorJobData
 from src.scraper.instagram_scraper import InstagramScraper
 from src.scraper.mappers import InstagramPostMapper
 from src.scraper.result_publisher import ResultPublisher
+from src.scraper.media_upload_publisher import MediaUploadPublisher
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +24,13 @@ class InstagramQueueWorker:
         settings: Settings,
         scraper: InstagramScraper,
         publisher: ResultPublisher,
+        media_publisher: MediaUploadPublisher,
     ):
         """Initialize queue worker."""
         self.settings = settings
         self.scraper = scraper
         self.publisher = publisher
+        self.media_publisher = media_publisher
         self.worker: Worker | None = None
 
     def start(self) -> None:
@@ -85,8 +88,24 @@ class InstagramQueueWorker:
                 cursor=job_data.cursor,
             )
 
-            # Map posts to FetchedPost format
-            fetched_posts = [InstagramPostMapper.to_fetched_post(post) for post in posts]
+            # Map posts to FetchedPost format and collect media upload jobs
+            fetched_posts = []
+            all_media_jobs = []
+
+            for post in posts:
+                fetched_post, media_jobs = InstagramPostMapper.to_fetched_post(
+                    post,
+                    source_id=job_data.sourceId,
+                )
+                fetched_posts.append(fetched_post)
+                all_media_jobs.extend(media_jobs)
+
+            # Queue media upload jobs in bulk
+            if all_media_jobs:
+                await self.media_publisher.publish_bulk(all_media_jobs)
+                logger.info(
+                    f"Queued {len(all_media_jobs)} media upload jobs for source {job_data.sourceId}",
+                )
 
             # Calculate processing time
             processing_time = int(
@@ -106,7 +125,8 @@ class InstagramQueueWorker:
             )
 
             logger.info(
-                f"Successfully processed job {job_id}: {len(fetched_posts)} posts fetched",
+                f"Successfully processed job {job_id}: {len(fetched_posts)} posts, "
+                f"{len(all_media_jobs)} media files",
             )
 
         except Exception as error:
@@ -157,5 +177,6 @@ class InstagramQueueWorker:
             await self.worker.close()
 
         await self.publisher.close()
+        await self.media_publisher.close()
 
         logger.info("Instagram queue worker stopped")

@@ -9,6 +9,7 @@ import { BaseConfigService } from '../commons/config/base-config.service';
 
 import { EmailQueue } from '@/mails/domain/queues';
 import { SourceQueue, SourceJobScheduler } from '@/sources/domain/queues';
+import { MediaQueue } from '@/media';
 
 import type {
   JobsOptions,
@@ -132,6 +133,17 @@ export class ConfigService extends BaseConfigService<EnvType> {
       removeOnFail: 1000,
     },
 
+    // Media upload queue
+    [MediaQueue.MEDIA_UPLOAD]: <JobsOptions>{
+      attempts: 5,
+      backoff: {
+        type: 'exponential',
+        delay: 2000,
+      },
+      removeOnComplete: 100,
+      removeOnFail: 1000,
+    },
+
     [SourceQueue.CALCULATE_SOURCE_PRIORITY]: <
       UpsertJobSchedulerConfig<string, null>
     >{
@@ -160,6 +172,14 @@ export class ConfigService extends BaseConfigService<EnvType> {
     appHash: this.env.TELEGRAM_APP_HASH,
     session: this.env.TELEGRAM_SESSION,
     phone: this.env.TELEGRAM_PHONE,
+  };
+
+  s3 = {
+    endpoint: this.env.S3_ENDPOINT,
+    accessKey: this.env.S3_ACCESS_KEY,
+    secretKey: this.env.S3_SECRET_KEY,
+    bucket: this.env.S3_BUCKET,
+    region: this.env.S3_REGION,
   };
 
   isProduction(): boolean {

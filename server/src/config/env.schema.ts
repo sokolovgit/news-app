@@ -55,6 +55,13 @@ export const envValidationSchema = z.object({
   TELEGRAM_PHONE: z.string(),
 
   CLIENT_URL: z.url().default('http://localhost:3001'),
+
+  // S3/MinIO Configuration
+  S3_ENDPOINT: z.string().default('http://localhost:9001'),
+  S3_ACCESS_KEY: z.string().default('admin'),
+  S3_SECRET_KEY: z.string().default('password'),
+  S3_BUCKET: z.string().default('news-app-media'),
+  S3_REGION: z.string().default('us-east-1'),
 });
 
 export type EnvType = z.infer<typeof envValidationSchema>;

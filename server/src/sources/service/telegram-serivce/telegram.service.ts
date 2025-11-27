@@ -9,6 +9,12 @@ import { LoggerService } from '@/logger';
 
 import { TelegramClientNotConnectedError } from '@/sources/domain/errors';
 
+export type DownloadedMedia = {
+  buffer: Buffer;
+  contentType: string;
+  extension: string;
+};
+
 @Injectable()
 export class TelegramService implements OnModuleInit {
   private client: TelegramClient;
@@ -77,5 +83,90 @@ export class TelegramService implements OnModuleInit {
     );
 
     return messages.reverse();
+  }
+
+  /**
+   * Download media from a Telegram message.
+   * Returns buffer with content type and extension.
+   */
+  async downloadMedia(message: Api.Message): Promise<DownloadedMedia | null> {
+    if (!this.client.connected) {
+      throw new TelegramClientNotConnectedError();
+    }
+
+    const media = message.media;
+    if (!media) {
+      return null;
+    }
+
+    try {
+      // Download media to buffer
+      const buffer = (await this.client.downloadMedia(message)) as Buffer;
+
+      if (!buffer) {
+        return null;
+      }
+
+      // Determine content type and extension
+      const { contentType, extension } = this.getMediaTypeInfo(media);
+
+      this.logger.debug(
+        `Downloaded media from message ${message.id}: ${buffer.length} bytes, ${contentType}`,
+      );
+
+      return {
+        buffer,
+        contentType,
+        extension,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to download media from message ${message.id}: ${error}`,
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Get content type and extension for media.
+   */
+  private getMediaTypeInfo(media: Api.TypeMessageMedia): {
+    contentType: string;
+    extension: string;
+  } {
+    if (media instanceof Api.MessageMediaPhoto) {
+      return { contentType: 'image/jpeg', extension: 'jpg' };
+    }
+
+    if (media instanceof Api.MessageMediaDocument) {
+      const doc = media.document;
+      if (doc instanceof Api.Document) {
+        const mimeType = doc.mimeType || 'application/octet-stream';
+
+        // Get extension from mime type or filename attribute
+        let extension = 'bin';
+        for (const attr of doc.attributes) {
+          if (attr instanceof Api.DocumentAttributeFilename) {
+            const parts = attr.fileName.split('.');
+            if (parts.length > 1) {
+              extension = parts[parts.length - 1].toLowerCase();
+            }
+            break;
+          }
+          if (attr instanceof Api.DocumentAttributeVideo) {
+            extension = 'mp4';
+            break;
+          }
+          if (attr instanceof Api.DocumentAttributeAudio) {
+            extension = 'mp3';
+            break;
+          }
+        }
+
+        return { contentType: mimeType, extension };
+      }
+    }
+
+    return { contentType: 'application/octet-stream', extension: 'bin' };
   }
 }

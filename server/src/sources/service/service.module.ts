@@ -4,6 +4,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { PostsModule } from '@/posts/posts.module';
 import { UserSourcesModule } from '@/user-sources';
 import { UserActivityModule } from '@/user-activity/user-activity.module';
+import { MediaModule } from '@/media';
 
 import { SourcesRepository } from './abstracts';
 import { DrizzleSourcesRepository } from './sources-storage';
@@ -69,6 +70,7 @@ const queues = [
     PostsModule,
     UserSourcesModule,
     UserActivityModule,
+    MediaModule,
     BullModule.registerQueue(...queues),
   ],
   providers: [...repositories, ...schedulers, ...services, ...queueServices],

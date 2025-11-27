@@ -5,6 +5,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from './commons/config';
 import { RedisModule } from './commons/redis';
 import { CacheModule } from './commons/cache';
+import { S3Module } from './commons/s3';
 // import { RabbitmqModule } from './commons/rabbitmq';
 import { ConfigService, envValidationSchema } from './config';
 import { LoggerModule, RequestLoggerMiddleware } from './logger';
@@ -20,6 +21,7 @@ import { SourcesModule } from './sources/sources.module';
 import { UserActivityModule } from './user-activity/user-activity.module';
 import { PostsModule } from './posts/posts.module';
 import { ComplaintsModule } from './complaints/complaints.module';
+import { MediaModule } from './media/media.module';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { ComplaintsModule } from './complaints/complaints.module';
     LoggerModule.forRootAsync(),
     RedisModule.forRoot(),
     CacheModule.forRoot(),
+    S3Module.forRoot(),
     // RabbitmqModule.forRoot(),
     BullModule.forRootAsync({
       inject: [ConfigService],
@@ -48,6 +51,7 @@ import { ComplaintsModule } from './complaints/complaints.module';
     UserActivityModule,
     PostsModule,
     ComplaintsModule,
+    MediaModule,
   ],
   providers: [
     {

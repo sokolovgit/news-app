@@ -55,7 +55,27 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+  minio:
+    image: minio/minio
+    container_name: news_app_minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password
+    ports:
+      - '9001:9000' # S3 API
+      - '9002:9001' # Web Console
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   postgres_data:
   redis_data:
   rabbitmq_data:
+  minio_data:

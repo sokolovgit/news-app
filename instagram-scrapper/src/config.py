@@ -59,6 +59,34 @@ class Settings(BaseSettings):
         alias="WORKER_CONCURRENCY",
     )
 
+    # S3/MinIO Configuration
+    s3_endpoint: str = Field(
+        default="http://localhost:9001",
+        description="S3/MinIO endpoint URL",
+        alias="S3_ENDPOINT",
+    )
+    s3_access_key: str = Field(
+        default="admin",
+        description="S3 access key",
+        alias="S3_ACCESS_KEY",
+    )
+    s3_secret_key: str = Field(
+        default="password",
+        description="S3 secret key",
+        alias="S3_SECRET_KEY",
+    )
+    s3_bucket: str = Field(
+        default="news-app-media",
+        description="S3 bucket name for media storage",
+        alias="S3_BUCKET",
+    )
+
+    # Media upload queue
+    media_upload_queue: str = Field(
+        default="media.upload",
+        description="Queue name for media upload jobs",
+    )
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

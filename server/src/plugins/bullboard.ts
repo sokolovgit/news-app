@@ -10,6 +10,7 @@ import { ConfigService } from '@/config';
 
 import { EmailQueue } from '@/mails/domain/queues';
 import { SourceQueue } from '@/sources/domain/queues';
+import { MediaQueue } from '@/media/domain/queues';
 
 export const setupBullBoard = (app: INestApplication): void => {
   const configService = app.get(ConfigService);
@@ -30,7 +31,11 @@ export const setupBullBoard = (app: INestApplication): void => {
 };
 
 const buildBullBoardQueues = (redisUrl: string): BullMQAdapter[] => {
-  const queues = [...Object.values(EmailQueue), ...Object.values(SourceQueue)];
+  const queues = [
+    ...Object.values(EmailQueue),
+    ...Object.values(SourceQueue),
+    ...Object.values(MediaQueue),
+  ];
 
   return queues.map((queueName) => {
     return new BullMQAdapter(
