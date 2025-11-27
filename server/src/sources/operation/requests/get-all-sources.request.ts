@@ -7,4 +7,3 @@ export class GetAllSourcesRequest {
     public readonly pagination: PaginationParams,
   ) {}
 }
-

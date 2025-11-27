@@ -10,6 +10,7 @@ export type RawPostProperties = {
   externalId: string;
   title?: string;
   content: Content;
+  isBanned?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -63,6 +64,14 @@ export class RawPost {
 
   getUpdatedAt(): Date | undefined {
     return this.props.updatedAt;
+  }
+
+  getIsBanned(): boolean {
+    return this.props.isBanned ?? false;
+  }
+
+  isBanned(): boolean {
+    return this.getIsBanned();
   }
 
   toJSON() {

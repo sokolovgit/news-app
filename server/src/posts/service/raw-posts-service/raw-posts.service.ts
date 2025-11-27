@@ -116,4 +116,12 @@ export class RawPostsService {
 
     return await this.rawPostsRepository.getRawPosts(params, loadOptions);
   }
+
+  async banPost(postId: RawPostId): Promise<void> {
+    this.logger.log(`Banning post with ID: ${postId}`);
+
+    await this.rawPostsRepository.banPost(postId);
+
+    this.logger.log(`Post ${postId} banned successfully`);
+  }
 }

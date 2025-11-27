@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, and } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 
@@ -30,7 +30,7 @@ export class DrizzleSourcesRepository extends SourcesRepository {
     relations: SourceLoadOptions = {},
   ): Promise<Source | null> {
     const source = await this.db.query.sources.findFirst({
-      where: eq(sources.id, id),
+      where: and(eq(sources.id, id), eq(sources.isBanned, false)),
       with: this.buildRelations(relations),
     });
 
@@ -44,7 +44,7 @@ export class DrizzleSourcesRepository extends SourcesRepository {
     relations: SourceLoadOptions = {},
   ): Promise<Source | null> {
     const source = await this.db.query.sources.findFirst({
-      where: eq(sources.url, url),
+      where: and(eq(sources.url, url), eq(sources.isBanned, false)),
       with: this.buildRelations(relations),
     });
 
@@ -68,6 +68,7 @@ export class DrizzleSourcesRepository extends SourcesRepository {
 
   async findAll(loadOptions: SourceLoadOptions = {}): Promise<Source[]> {
     const allSources = await this.db.query.sources.findMany({
+      where: eq(sources.isBanned, false),
       with: this.buildRelations(loadOptions),
     });
 
@@ -81,6 +82,7 @@ export class DrizzleSourcesRepository extends SourcesRepository {
     loadOptions: SourceLoadOptions = {},
   ): Promise<PaginatedResult<Source>> {
     const result = await this.db.query.sources.findMany({
+      where: eq(sources.isBanned, false),
       offset: params.offset,
       limit: params.limit,
       with: this.buildRelations(loadOptions),
@@ -106,6 +108,7 @@ export class DrizzleSourcesRepository extends SourcesRepository {
       lastError?: string | null;
       status?: SourceStatus;
       fetchMetadata?: Record<string, unknown>;
+      isBanned?: boolean;
     },
   ): Promise<void> {
     const updateData: Record<string, unknown> = {
@@ -130,6 +133,10 @@ export class DrizzleSourcesRepository extends SourcesRepository {
 
     if (metadata.fetchMetadata !== undefined) {
       updateData.fetchMetadata = metadata.fetchMetadata;
+    }
+
+    if (metadata.isBanned !== undefined) {
+      updateData.isBanned = metadata.isBanned;
     }
 
     await this.db

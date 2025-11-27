@@ -41,4 +41,6 @@ export abstract class RawPostsRepository {
     params: GetRawPostsParams,
     loadOptions?: RawPostLoadOptions,
   ): Promise<PaginatedResult<RawPost>>;
+
+  abstract banPost(postId: RawPostId): Promise<void>;
 }

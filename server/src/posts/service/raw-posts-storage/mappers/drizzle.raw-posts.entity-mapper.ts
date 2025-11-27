@@ -20,6 +20,7 @@ export class DrizzleRawPostsEntityMapper {
         externalId: data.externalId,
         title: data.title ?? undefined,
         content: data.content,
+        isBanned: data.isBanned ?? false,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
       },
@@ -38,6 +39,7 @@ export class DrizzleRawPostsEntityMapper {
       externalId: entity.getExternalId(),
       title: entity.getTitle(),
       content: entity.getContent(),
+      isBanned: entity.getIsBanned(),
       createdAt: entity.getCreatedAt(),
       updatedAt: entity.getUpdatedAt(),
     };

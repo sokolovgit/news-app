@@ -42,7 +42,7 @@ export class DrizzleRawPostsRepository extends RawPostsRepository {
     relations: RawPostLoadOptions = {},
   ): Promise<RawPost | null> {
     const rawPost = await this.db.query.rawPosts.findFirst({
-      where: eq(rawPosts.id, id),
+      where: and(eq(rawPosts.id, id), eq(rawPosts.isBanned, false)),
       with: this.buildRelations(relations),
     });
 
@@ -146,6 +146,9 @@ export class DrizzleRawPostsRepository extends RawPostsRepository {
       conditions.push(lte(rawPosts.createdAt, params.dateTo));
     }
 
+    // Always filter out banned posts
+    conditions.push(eq(rawPosts.isBanned, false));
+
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     const sortField =
@@ -180,6 +183,16 @@ export class DrizzleRawPostsRepository extends RawPostsRepository {
       offset: params.offset,
       limit: params.limit,
     });
+  }
+
+  async banPost(postId: RawPostId): Promise<void> {
+    await this.db
+      .update(rawPosts)
+      .set({
+        isBanned: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(rawPosts.id, postId));
   }
 
   private buildRelations(relations?: RawPostLoadOptions) {

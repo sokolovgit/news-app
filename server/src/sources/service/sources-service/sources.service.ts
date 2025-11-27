@@ -119,6 +119,7 @@ export class SourcesService {
       lastError?: string | null;
       status?: SourceStatus;
       fetchMetadata?: Record<string, unknown>;
+      isBanned?: boolean;
     },
   ): Promise<void> {
     this.logger.debug(

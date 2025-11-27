@@ -31,6 +31,7 @@ export abstract class SourcesRepository {
       lastError?: string | null;
       status?: SourceStatus;
       fetchMetadata?: Record<string, unknown>;
+      isBanned?: boolean;
     },
   ): Promise<void>;
 }

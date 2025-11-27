@@ -44,7 +44,12 @@ export class SourcesOrchestratorService {
       return;
     }
 
-    // 2. Check if source should be skipped (paused, error state, etc.)
+    // 2. Check if source should be skipped (banned, paused, error state, etc.)
+    if (source.isBanned()) {
+      this.logger.debug(`Source ${sourceId} is banned, skipping orchestration`);
+      return;
+    }
+
     const isPaused = source.isPaused();
     if (isPaused) {
       this.logger.debug(`Source ${sourceId} is paused, skipping orchestration`);

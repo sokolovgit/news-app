@@ -9,4 +9,3 @@ export class GetAllSourcesQueryDto extends PaginationQueryDto {
     return new GetAllSourcesRequest(user.getId(), pagination);
   }
 }
-

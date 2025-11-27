@@ -13,6 +13,7 @@ import {
   emailVerificationRelations,
   emailVerifications,
 } from '@/auth/domain/schemas';
+import { complaints, complaintRelations } from '@/complaints/domain/schemas';
 
 const relations = {
   userRelations,
@@ -22,6 +23,7 @@ const relations = {
   emailVerificationRelations,
   sourceRelations,
   rawPostRelations,
+  complaintRelations,
 };
 
 const drizzleSchemas = {
@@ -32,6 +34,7 @@ const drizzleSchemas = {
   sources,
   userSources,
   rawPosts,
+  complaints,
 };
 
 export const drizzle = {

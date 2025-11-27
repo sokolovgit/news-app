@@ -4,6 +4,7 @@ import {
   timestamp,
   varchar,
   jsonb,
+  boolean,
 } from 'drizzle-orm/pg-core';
 
 import {
@@ -49,6 +50,7 @@ export const sources = pgTable('sources', {
   lastError: varchar('last_error'),
   status: pgSourceStatus('status').default(SourceStatus.ACTIVE),
   fetchMetadata: jsonb('fetch_metadata'),
+  isBanned: boolean('is_banned').default(false).notNull(),
 
   ...timestamps,
 });

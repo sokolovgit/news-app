@@ -16,6 +16,7 @@ export type SourceProperties = {
   lastError?: string;
   status?: SourceStatus;
   fetchMetadata?: Record<string, unknown>;
+  isBanned?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -101,6 +102,14 @@ export class Source {
 
   hasError(): boolean {
     return this.getStatus() === SourceStatus.ERROR;
+  }
+
+  getIsBanned(): boolean {
+    return this.props.isBanned ?? false;
+  }
+
+  isBanned(): boolean {
+    return this.getIsBanned();
   }
 
   toJSON() {

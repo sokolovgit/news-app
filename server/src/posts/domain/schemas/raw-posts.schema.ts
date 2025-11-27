@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { jsonb, pgTable, unique, varchar } from 'drizzle-orm/pg-core';
+import { jsonb, pgTable, unique, varchar, boolean } from 'drizzle-orm/pg-core';
 
 import { Uuid } from '@/commons/utils';
 import { SourceId, sources } from '@/sources/domain/schemas';
@@ -20,6 +20,7 @@ export const rawPosts = pgTable(
 
     title: varchar('title'),
     content: jsonb('content').$type<Content>().notNull(),
+    isBanned: boolean('is_banned').default(false).notNull(),
 
     ...timestamps,
   },

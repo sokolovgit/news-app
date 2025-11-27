@@ -32,6 +32,7 @@ export class DrizzleSourcesEntityMapper {
           (data.status as SourceProperties['status']) ?? SourceStatus.ACTIVE,
         fetchMetadata:
           (data.fetchMetadata as Record<string, unknown>) ?? undefined,
+        isBanned: data.isBanned ?? false,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
       },
@@ -55,6 +56,7 @@ export class DrizzleSourcesEntityMapper {
       lastError: entity.getLastError(),
       status: entity.getStatus(),
       fetchMetadata: entity.getFetchMetadata(),
+      isBanned: entity.getIsBanned(),
       createdAt: entity.getCreatedAt(),
       updatedAt: entity.getUpdatedAt(),
     };

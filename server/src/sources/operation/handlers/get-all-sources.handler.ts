@@ -6,7 +6,10 @@ import { UserSourcesService } from '@/user-sources';
 import { createPaginatedResult } from '@/commons/types';
 
 import { GetAllSourcesRequest } from '../requests';
-import { GetAllSourcesResponse, SourceWithSubscriptionStatus } from '../responses';
+import {
+  GetAllSourcesResponse,
+  SourceWithSubscriptionStatus,
+} from '../responses';
 
 @Injectable()
 export class GetAllSourcesHandler {
@@ -16,9 +19,7 @@ export class GetAllSourcesHandler {
     private readonly userSourcesService: UserSourcesService,
   ) {}
 
-  async handle(
-    request: GetAllSourcesRequest,
-  ): Promise<GetAllSourcesResponse> {
+  async handle(request: GetAllSourcesRequest): Promise<GetAllSourcesResponse> {
     this.logger.log(
       `Handling get all sources request for user ${request.userId}, offset=${request.pagination.offset}, limit=${request.pagination.limit}`,
     );
@@ -48,4 +49,3 @@ export class GetAllSourcesHandler {
     );
   }
 }
-

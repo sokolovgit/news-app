@@ -19,6 +19,7 @@ import { CookiesModule } from './cookies';
 import { SourcesModule } from './sources/sources.module';
 import { UserActivityModule } from './user-activity/user-activity.module';
 import { PostsModule } from './posts/posts.module';
+import { ComplaintsModule } from './complaints/complaints.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { PostsModule } from './posts/posts.module';
     SourcesModule,
     UserActivityModule,
     PostsModule,
+    ComplaintsModule,
   ],
   providers: [
     {

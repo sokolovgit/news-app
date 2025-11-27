@@ -6,5 +6,5 @@ export interface SourceWithSubscriptionStatus {
   isSubscribed: boolean;
 }
 
-export type GetAllSourcesResponse = PaginatedResult<SourceWithSubscriptionStatus>;
-
+export type GetAllSourcesResponse =
+  PaginatedResult<SourceWithSubscriptionStatus>;
