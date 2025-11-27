@@ -1,61 +1,177 @@
 <template>
-  <Card class="hover:shadow-md transition-all cursor-pointer group" @click="handleClick">
-    <CardHeader>
-      <div class="flex items-start justify-between gap-4">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 mb-2">
-            <Badge variant="outline" class="text-xs">{{ sourceName }}</Badge>
-            <span class="text-xs text-muted-foreground">{{ timeAgo }}</span>
-          </div>
-          <CardTitle
-            v-if="post.title"
-            class="text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors"
-          >
-            {{ post.title }}
-          </CardTitle>
-        </div>
-      </div>
-    </CardHeader>
-    <CardContent>
-      <!-- Preview content - show first paragraph or image -->
-      <div v-if="previewContent" class="space-y-2">
-        <div v-if="previewText" class="text-sm text-muted-foreground line-clamp-3">
-          {{ previewText }}
-        </div>
-        <div v-if="previewImage" class="rounded-lg overflow-hidden">
-          <img
-            :src="previewImage"
-            :alt="post.title || 'Post preview'"
-            class="w-full h-48 object-cover"
-            loading="lazy"
-          />
-        </div>
-      </div>
-      <p v-else class="text-sm text-muted-foreground">No preview available</p>
-    </CardContent>
-    <CardFooter class="flex justify-between items-center text-xs text-muted-foreground">
-      <div class="flex items-center gap-2">
-        <Icon name="lucide:calendar" class="h-3 w-3" />
-        {{ formattedDate }}
-      </div>
-      <div class="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          class="h-7 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-          @click.stop="showComplaintDialog = true"
-        >
-          <Icon name="lucide:flag" class="h-3 w-3 mr-1" />
-          Report
-        </Button>
+  <Card
+    class="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer"
+    @click="handleClick"
+  >
+    <!-- Media Preview Section -->
+    <div v-if="mediaPreview" class="relative">
+      <!-- Image Preview -->
+      <div v-if="mediaPreview.type === 'image'" class="relative overflow-hidden">
+        <img
+          :src="mediaPreview.url"
+          :alt="post.title || 'Post preview'"
+          class="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+          @error="handleImageError"
+        />
         <div
-          class="flex items-center gap-1 text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+          class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
+        />
+      </div>
+
+      <!-- Video Preview with Play Overlay -->
+      <div v-else-if="mediaPreview.type === 'video'" class="relative overflow-hidden bg-zinc-900">
+        <video
+          ref="videoRef"
+          :src="mediaPreview.url"
+          class="w-full h-52 object-cover"
+          muted
+          preload="metadata"
+          @loadedmetadata="handleVideoLoaded"
+          @error="handleVideoError"
+        />
+        <!-- Play Button Overlay -->
+        <div
+          class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/30 transition-colors"
         >
-          Read more
-          <Icon name="lucide:arrow-right" class="h-3 w-3" />
+          <div
+            class="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300"
+          >
+            <Icon name="lucide:play" class="h-7 w-7 text-zinc-900 ml-1" />
+          </div>
+        </div>
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"
+        />
+        <!-- Video Duration Badge -->
+        <Badge
+          v-if="videoDuration"
+          class="absolute bottom-3 right-3 bg-black/70 text-white border-0 text-xs font-mono"
+        >
+          {{ videoDuration }}
+        </Badge>
+      </div>
+
+      <!-- Audio Preview -->
+      <div
+        v-else-if="mediaPreview.type === 'audio'"
+        class="relative h-32 bg-gradient-to-br from-violet-500/20 via-fuchsia-500/20 to-pink-500/20 flex items-center justify-center"
+      >
+        <div class="flex items-center gap-4">
+          <div
+            class="w-14 h-14 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20"
+          >
+            <Icon name="lucide:music" class="h-6 w-6 text-white" />
+          </div>
+          <!-- Audio Waveform Decoration -->
+          <div class="flex items-end gap-1 h-8">
+            <div
+              v-for="i in 12"
+              :key="i"
+              class="w-1 bg-white/40 rounded-full animate-pulse"
+              :style="{
+                height: `${Math.random() * 100}%`,
+                animationDelay: `${i * 0.1}s`,
+              }"
+            />
+          </div>
         </div>
       </div>
-    </CardFooter>
+
+      <!-- Media Type Badge -->
+      <Badge
+        v-if="mediaPreview.type !== 'image'"
+        class="absolute top-3 left-3 gap-1.5 text-xs font-medium"
+        :class="{
+          'bg-rose-500/90 hover:bg-rose-500 text-white border-0': mediaPreview.type === 'video',
+          'bg-violet-500/90 hover:bg-violet-500 text-white border-0': mediaPreview.type === 'audio',
+        }"
+      >
+        <Icon
+          :name="mediaPreview.type === 'video' ? 'lucide:video' : 'lucide:headphones'"
+          class="h-3 w-3"
+        />
+        {{ mediaPreview.type === 'video' ? 'Video' : 'Audio' }}
+      </Badge>
+
+      <!-- Source Badge on Media -->
+      <div class="absolute top-3 right-3">
+        <Badge class="bg-black/60 text-white border-0 backdrop-blur-sm text-xs">
+          {{ sourceName }}
+        </Badge>
+      </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="p-4">
+      <!-- Header without media -->
+      <div v-if="!mediaPreview" class="flex items-center gap-2 mb-3">
+        <Badge variant="outline" class="text-xs">{{ sourceName }}</Badge>
+        <span class="text-xs text-muted-foreground">{{ timeAgo }}</span>
+      </div>
+
+      <!-- Title -->
+      <h3
+        v-if="post.title"
+        class="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors duration-200 mb-2"
+        :class="mediaPreview ? 'text-base' : 'text-lg'"
+      >
+        {{ post.title }}
+      </h3>
+
+      <!-- Preview Text -->
+      <p
+        v-if="previewText"
+        class="text-sm text-muted-foreground line-clamp-2 leading-relaxed"
+        :class="{ 'line-clamp-3': !mediaPreview && !post.title }"
+      >
+        {{ cleanPreviewText }}
+      </p>
+
+      <!-- No Content Fallback -->
+      <p
+        v-if="!previewText && !post.title && !mediaPreview"
+        class="text-sm text-muted-foreground italic"
+      >
+        No preview available
+      </p>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-between mt-4 pt-3 border-t border-border/50">
+        <div class="flex items-center gap-3 text-xs text-muted-foreground">
+          <div class="flex items-center gap-1.5">
+            <Icon name="lucide:clock" class="h-3.5 w-3.5" />
+            <span>{{ timeAgo }}</span>
+          </div>
+          <!-- Content Type Icons -->
+          <div v-if="contentTypes.length > 0" class="flex items-center gap-1">
+            <Icon
+              v-for="type in contentTypes"
+              :key="type"
+              :name="getContentTypeIcon(type)"
+              class="h-3.5 w-3.5 text-muted-foreground/70"
+            />
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+            @click.stop="showComplaintDialog = true"
+          >
+            <Icon name="lucide:flag" class="h-3.5 w-3.5" />
+          </Button>
+          <div
+            class="flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            Read
+            <Icon name="lucide:arrow-right" class="h-3.5 w-3.5" />
+          </div>
+        </div>
+      </div>
+    </div>
 
     <ComplaintDialog
       :open="showComplaintDialog"
@@ -68,11 +184,11 @@
 </template>
 
 <script setup lang="ts">
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import ComplaintDialog from '@/components/complaints/ComplaintDialog.vue'
-import type { FeedPost } from '~/types/posts.types'
+import type { FeedPost, ContentBlockType } from '~/types/posts.types'
 
 const props = defineProps<{
   post: FeedPost
@@ -84,9 +200,13 @@ const emit = defineEmits<{
 }>()
 
 const showComplaintDialog = ref(false)
+const videoRef = ref<HTMLVideoElement | null>(null)
+const videoDuration = ref<string | null>(null)
+const imageError = ref(false)
+const videoError = ref(false)
 
 // Use composable for media URL transformation
-const { getMediaUrl } = useMediaUrl()
+const { getMediaUrl, getMediaType } = useMediaUrl()
 
 const sourceName = computed(() => {
   return props.post.source?.name || 'Unknown Source'
@@ -108,34 +228,108 @@ const timeAgo = computed(() => {
   return date.toLocaleDateString()
 })
 
-const formattedDate = computed(() => {
-  if (!props.post.createdAt) return 'Unknown date'
-  const date = new Date(props.post.createdAt)
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+// Get all content types present in the post
+const contentTypes = computed(() => {
+  if (!props.post.content) return []
+  const types = new Set<string>()
+  props.post.content.forEach((block) => {
+    if (block.type === 'image' || block.type === 'video' || block.type === 'audio') {
+      types.add(block.type)
+    }
   })
+  return Array.from(types)
 })
 
-// Extract preview content
-const previewContent = computed(() => {
+const getContentTypeIcon = (type: string) => {
+  switch (type) {
+    case 'image':
+      return 'lucide:image'
+    case 'video':
+      return 'lucide:video'
+    case 'audio':
+      return 'lucide:headphones'
+    default:
+      return 'lucide:file'
+  }
+}
+
+// Extract media preview (image, video, or audio)
+const mediaPreview = computed(() => {
   if (!props.post.content || props.post.content.length === 0) return null
 
-  const firstParagraph = props.post.content.find((block) => block.type === 'paragraph')
+  // Priority: image > video > audio
   const firstImage = props.post.content.find((block) => block.type === 'image')
-
-  return {
-    text: firstParagraph?.type === 'paragraph' ? firstParagraph.data.text : null,
-    image: firstImage?.type === 'image' ? firstImage.data.url : null,
+  if (firstImage && firstImage.type === 'image' && !imageError.value) {
+    // Check if the "image" is actually a video file
+    const detectedType = getMediaType(firstImage.data.url)
+    if (detectedType === 'video') {
+      return {
+        type: 'video' as const,
+        url: getMediaUrl(firstImage.data.url),
+        caption: firstImage.data.caption,
+      }
+    }
+    return {
+      type: 'image' as const,
+      url: getMediaUrl(firstImage.data.url),
+      caption: firstImage.data.caption,
+    }
   }
+
+  const firstVideo = props.post.content.find((block) => block.type === 'video')
+  if (firstVideo && firstVideo.type === 'video' && !videoError.value) {
+    return {
+      type: 'video' as const,
+      url: getMediaUrl(firstVideo.data.url),
+      caption: firstVideo.data.caption,
+    }
+  }
+
+  const firstAudio = props.post.content.find((block) => block.type === 'audio')
+  if (firstAudio && firstAudio.type === 'audio') {
+    return {
+      type: 'audio' as const,
+      url: getMediaUrl(firstAudio.data.url),
+      caption: firstAudio.data.caption,
+    }
+  }
+
+  return null
 })
 
-const previewText = computed(() => previewContent.value?.text || null)
-const previewImage = computed(() => {
-  const imageUrl = previewContent.value?.image
-  return imageUrl ? getMediaUrl(imageUrl) : null
+// Extract preview text
+const previewText = computed(() => {
+  if (!props.post.content) return null
+  const firstParagraph = props.post.content.find((block) => block.type === 'paragraph')
+  return firstParagraph?.type === 'paragraph' ? firstParagraph.data.text : null
 })
+
+// Clean preview text (remove HTML tags)
+const cleanPreviewText = computed(() => {
+  if (!previewText.value) return null
+  return previewText.value.replace(/<[^>]*>/g, '').trim()
+})
+
+// Format video duration
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
+const handleVideoLoaded = () => {
+  if (videoRef.value && videoRef.value.duration) {
+    videoDuration.value = formatDuration(videoRef.value.duration)
+  }
+}
+
+const handleImageError = () => {
+  imageError.value = true
+}
+
+const handleVideoError = () => {
+  videoError.value = true
+}
 
 const handleClick = () => {
   emit('click', props.post)

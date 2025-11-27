@@ -1,38 +1,68 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-8">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-foreground">Your Feed</h1>
-        <p class="text-muted-foreground mt-1">Latest posts from your sources</p>
+        <div class="flex items-center gap-3 mb-2">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center"
+          >
+            <Icon name="lucide:rss" class="h-5 w-5 text-primary" />
+          </div>
+          <h1 class="text-3xl font-bold text-foreground tracking-tight">Your Feed</h1>
+        </div>
+        <p class="text-muted-foreground">
+          Stay updated with the latest content from your sources
+        </p>
       </div>
       <div class="flex items-center gap-2">
-        <Button variant="outline" size="sm" @click="refreshFeed">
+        <Button
+          variant="outline"
+          size="sm"
+          class="gap-2 border-border/50 hover:border-primary/30"
+          @click="refreshFeed"
+        >
           <Icon
             name="lucide:refresh-cw"
-            class="h-4 w-4 mr-2"
+            class="h-4 w-4"
             :class="{ 'animate-spin': isRefreshing }"
           />
           Refresh
         </Button>
-        <Button variant="outline" size="sm" @click="toggleView">
-          <Icon :name="viewIcon" class="h-4 w-4" />
-        </Button>
+        <div class="flex items-center rounded-lg border border-border/50 p-0.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="h-8 px-3 rounded-md"
+            :class="{ 'bg-muted': viewMode === 'list' }"
+            @click="viewMode = 'list'"
+          >
+            <Icon name="lucide:list" class="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            class="h-8 px-3 rounded-md"
+            :class="{ 'bg-muted': viewMode === 'grid' }"
+            @click="viewMode = 'grid'"
+          >
+            <Icon name="lucide:grid-3x3" class="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
 
     <!-- Filters -->
     <div
-      class="flex flex-wrap items-center justify-between gap-4 p-4 bg-card rounded-lg border border-border"
+      class="flex flex-wrap items-center justify-between gap-4 p-4 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50"
     >
-      <div class="flex flex-wrap items-center gap-4">
-        <div class="flex items-center gap-2">
-          <Icon name="lucide:filter" class="h-4 w-4 text-muted-foreground" />
-          <span class="text-sm font-medium text-foreground">Filters:</span>
-        </div>
+      <div class="flex flex-wrap items-center gap-3">
         <Select v-model="selectedSource" @update:model-value="handleSourceFilter">
-          <SelectTrigger class="w-[180px]">
-            <SelectValue placeholder="All Sources" />
+          <SelectTrigger class="w-[180px] border-border/50 bg-background/50">
+            <div class="flex items-center gap-2">
+              <Icon name="lucide:layers" class="h-4 w-4 text-muted-foreground" />
+              <SelectValue placeholder="All Sources" />
+            </div>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Sources</SelectItem>
@@ -42,8 +72,11 @@
           </SelectContent>
         </Select>
         <Select v-model="sortBy" @update:model-value="handleSort">
-          <SelectTrigger class="w-[180px]">
-            <SelectValue placeholder="Sort by" />
+          <SelectTrigger class="w-[160px] border-border/50 bg-background/50">
+            <div class="flex items-center gap-2">
+              <Icon name="lucide:arrow-up-down" class="h-4 w-4 text-muted-foreground" />
+              <SelectValue placeholder="Sort by" />
+            </div>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="newest">Newest First</SelectItem>
@@ -51,12 +84,16 @@
             <SelectItem value="source">By Source</SelectItem>
           </SelectContent>
         </Select>
-        <div class="relative max-w-xs">
+        <div class="relative">
           <Icon
             name="lucide:search"
             class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
           />
-          <Input v-model="searchQuery" placeholder="Search posts..." class="pl-9" />
+          <Input
+            v-model="searchQuery"
+            placeholder="Search posts..."
+            class="pl-9 w-[200px] md:w-[280px] border-border/50 bg-background/50"
+          />
         </div>
       </div>
       <!-- Pagination in Filters Block -->
@@ -86,19 +123,26 @@
     <!-- Loading State -->
     <div
       v-if="isLoading && posts.length === 0"
-      :class="viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3' : 'space-y-4'"
+      :class="viewMode === 'grid' ? 'grid gap-5 md:grid-cols-2 lg:grid-cols-3' : 'grid gap-5 grid-cols-1 lg:grid-cols-2'"
     >
       <PostCardSkeleton v-for="i in 6" :key="i" />
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="!isLoading && filteredPosts.length === 0" class="text-center py-12">
-      <Icon name="lucide:inbox" class="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+    <div
+      v-else-if="!isLoading && filteredPosts.length === 0"
+      class="text-center py-16 px-4"
+    >
+      <div
+        class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-muted/80 to-muted/30 flex items-center justify-center"
+      >
+        <Icon name="lucide:inbox" class="h-10 w-10 text-muted-foreground" />
+      </div>
       <h3 class="text-xl font-semibold text-foreground mb-2">No posts yet</h3>
-      <p class="text-muted-foreground mb-6">
+      <p class="text-muted-foreground mb-8 max-w-md mx-auto">
         {{
           searchQuery
-            ? 'No posts match your search.'
+            ? 'No posts match your search. Try different keywords.'
             : selectedSource !== 'all'
               ? 'No posts found for the selected source.'
               : sources.length === 0
@@ -106,13 +150,13 @@
                 : 'Your sources have been added, but no posts have been fetched yet. Posts will appear here once they are available.'
         }}
       </p>
-      <div class="flex gap-2 justify-center">
-        <Button v-if="!searchQuery" @click="navigateTo('/sources/add')">
-          <Icon name="lucide:plus-circle" class="mr-2 h-4 w-4" />
+      <div class="flex gap-3 justify-center">
+        <Button v-if="!searchQuery" class="gap-2" @click="navigateTo('/sources/add')">
+          <Icon name="lucide:plus-circle" class="h-4 w-4" />
           {{ sources.length === 0 ? 'Add Your First Source' : 'Add More Sources' }}
         </Button>
-        <Button v-if="sources.length > 0" variant="outline" @click="refreshFeed">
-          <Icon name="lucide:refresh-cw" class="mr-2 h-4 w-4" />
+        <Button v-if="sources.length > 0" variant="outline" class="gap-2" @click="refreshFeed">
+          <Icon name="lucide:refresh-cw" class="h-4 w-4" />
           Refresh Feed
         </Button>
       </div>
@@ -121,7 +165,7 @@
     <!-- Posts Grid/List -->
     <div
       v-else
-      :class="viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3' : 'space-y-4'"
+      :class="viewMode === 'grid' ? 'grid gap-5 md:grid-cols-2 lg:grid-cols-3' : 'grid gap-5 grid-cols-1 lg:grid-cols-2'"
     >
       <PostPreviewCard
         v-for="post in filteredPosts"
@@ -203,13 +247,6 @@ const limit = 20
 // Debounce search query
 const debouncedSearchQuery = useDebounce(searchQuery, 500)
 
-const viewIcon = computed(() => {
-  return viewMode.value === 'list' ? 'lucide:grid' : 'lucide:list'
-})
-
-const toggleView = () => {
-  viewMode.value = viewMode.value === 'list' ? 'grid' : 'list'
-}
 
 // Extract unique sources from posts
 const extractSources = (posts: FeedPost[]) => {
