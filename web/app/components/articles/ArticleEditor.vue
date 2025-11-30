@@ -421,6 +421,7 @@ onMounted(async () => {
       { default: Delimiter },
       { default: InlineCode },
       { default: Marker },
+      { default: DragDrop },
     ] = await Promise.all([
       import('@editorjs/editorjs'),
       import('@editorjs/header'),
@@ -431,6 +432,8 @@ onMounted(async () => {
       import('@editorjs/inline-code'),
       // @ts-expect-error - no types available
       import('@editorjs/marker'),
+      // @ts-expect-error - no types available
+      import('editorjs-drag-drop'),
     ])
 
     // Transform S3 paths to full URLs for Editor.js display
@@ -509,6 +512,9 @@ onMounted(async () => {
         debouncedEmitUpdate()
       },
       onReady: () => {
+        // Enable drag and drop for block reordering
+        new DragDrop(editor)
+
         // Focus the editor
         const contentEditable = editorContainer.value?.querySelector(
           '[contenteditable]',
@@ -808,5 +814,29 @@ watch(
   box-shadow:
     0 4px 12px -2px rgba(0, 0, 0, 0.3),
     0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Drag and Drop styling */
+.article-content :deep(.ce-block) {
+  cursor: grab;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.article-content :deep(.ce-block:active) {
+  cursor: grabbing;
+}
+
+.article-content :deep(.ce-block--drop-target) {
+  border-top: 2px solid hsl(var(--primary));
+}
+
+.article-content :deep(.ce-block--dragging) {
+  opacity: 0.6;
+  transform: scale(1.01);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.15);
+  background: hsl(var(--card));
+  border-radius: 0.5rem;
 }
 </style>
