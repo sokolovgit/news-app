@@ -2,11 +2,10 @@ import { BullModule } from '@nestjs/bullmq';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
-import { ConfigModule } from './commons/config';
+import { S3Module } from './commons/s3';
 import { RedisModule } from './commons/redis';
 import { CacheModule } from './commons/cache';
-import { S3Module } from './commons/s3';
-// import { RabbitmqModule } from './commons/rabbitmq';
+import { ConfigModule } from './commons/config';
 import { ConfigService, envValidationSchema } from './config';
 import { LoggerModule, RequestLoggerMiddleware } from './logger';
 
@@ -15,13 +14,13 @@ import { ActiveUserInterceptor } from './user-activity/interceptors';
 import { AuthModule } from './auth/auth.module';
 import { MailsModule } from './mails/mails.module';
 import { UsersModule } from './users/users.module';
+import { MediaModule } from './media/media.module';
+import { PostsModule } from './posts/posts.module';
 import { DrizzleModule } from './database';
 import { CookiesModule } from './cookies';
 import { SourcesModule } from './sources/sources.module';
-import { UserActivityModule } from './user-activity/user-activity.module';
-import { PostsModule } from './posts/posts.module';
 import { ComplaintsModule } from './complaints/complaints.module';
-import { MediaModule } from './media/media.module';
+import { UserActivityModule } from './user-activity/user-activity.module';
 
 @Module({
   imports: [
@@ -33,7 +32,6 @@ import { MediaModule } from './media/media.module';
     RedisModule.forRoot(),
     CacheModule.forRoot(),
     S3Module.forRoot(),
-    // RabbitmqModule.forRoot(),
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
