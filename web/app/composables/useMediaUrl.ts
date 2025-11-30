@@ -16,10 +16,21 @@ export function useMediaUrl() {
   }
 
   /**
-   * Check if this is an S3 media path (starts with source type)
+   * Known S3 path prefixes for different media types
+   */
+  const s3PathPrefixes = [
+    'telegram/',
+    'instagram/',
+    'covers/',
+    'articles/',
+    'uploads/',
+  ]
+
+  /**
+   * Check if this is an S3 media path (starts with known prefix)
    */
   function isS3Path(url: string): boolean {
-    return url.startsWith('telegram/') || url.startsWith('instagram/')
+    return s3PathPrefixes.some(prefix => url.startsWith(prefix))
   }
 
   /**

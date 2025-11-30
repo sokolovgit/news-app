@@ -4,3 +4,4 @@ export type UploadResult = {
   contentType: string;
   size: number;
 };
+

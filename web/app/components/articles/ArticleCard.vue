@@ -6,7 +6,7 @@
     <!-- Cover Image -->
     <div v-if="article.coverImageUrl" class="relative overflow-hidden">
       <img
-        :src="article.coverImageUrl"
+        :src="getMediaUrl(article.coverImageUrl)"
         :alt="article.title"
         class="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
         loading="lazy"
@@ -118,6 +118,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { Article } from '~/types/articles.types'
 import { ArticleStatus } from '~/types/articles.types'
+import { useMediaUrl } from '~/composables/useMediaUrl'
+
+const { getMediaUrl } = useMediaUrl()
 
 interface Props {
   article: Article

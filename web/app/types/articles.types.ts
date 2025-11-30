@@ -30,14 +30,20 @@ export interface ImageBlockData {
 }
 
 export interface ListBlockData {
-  style: 'ordered' | 'unordered'
-  items: ListItem[]
-  meta?: Record<string, unknown>
+  style: 'ordered' | 'unordered' | 'checklist'
+  items: (string | ListItem)[]
+  meta?: {
+    counterType?: 'numeric' | 'lower-roman' | 'upper-roman' | 'lower-alpha' | 'upper-alpha'
+    start?: number
+  }
 }
 
 export interface ListItem {
   content: string
-  meta?: Record<string, unknown>
+  meta?: {
+    checked?: boolean
+    counterType?: string
+  }
   items?: ListItem[]
 }
 

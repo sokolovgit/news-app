@@ -14,3 +14,4 @@ export type UploadMediaFromUrlRequest = {
   url: string;
   folder?: string;
 };
+

@@ -28,7 +28,7 @@
         }"
       >
         <img
-          :src="(block.data as ImageBlockData).file?.url"
+          :src="getMediaUrl((block.data as ImageBlockData).file?.url || '')"
           :alt="(block.data as ImageBlockData).caption || 'Image'"
           class="rounded-lg w-full object-cover"
           loading="lazy"
@@ -40,7 +40,32 @@
         />
       </figure>
 
-      <!-- List -->
+      <!-- Checklist -->
+      <ul
+        v-else-if="block.type === 'list' && (block.data as ListBlockData).style === 'checklist'"
+        class="my-4 space-y-2"
+      >
+        <li
+          v-for="(item, itemIndex) in (block.data as ListBlockData).items"
+          :key="itemIndex"
+          class="flex items-start gap-2"
+        >
+          <span
+            class="mt-1 flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center"
+            :class="isItemChecked(item) 
+              ? 'bg-primary border-primary text-primary-foreground' 
+              : 'border-muted-foreground/40'"
+          >
+            <Icon v-if="isItemChecked(item)" name="lucide:check" class="w-3 h-3" />
+          </span>
+          <span 
+            :class="isItemChecked(item) ? 'line-through text-muted-foreground' : ''"
+            v-html="sanitizeHtml(getListItemContent(item))" 
+          />
+        </li>
+      </ul>
+
+      <!-- Ordered/Unordered List -->
       <component
         :is="(block.data as ListBlockData).style === 'ordered' ? 'ol' : 'ul'"
         v-else-if="block.type === 'list'"
@@ -155,10 +180,13 @@ import type {
   WarningBlockData,
 } from '~/types/articles.types'
 import DOMPurify from 'isomorphic-dompurify'
+import { useMediaUrl } from '~/composables/useMediaUrl'
 
 defineProps<{
   content: EditorJsContent
 }>()
+
+const { getMediaUrl } = useMediaUrl()
 
 const sanitizeHtml = (html: string): string => {
   if (typeof window === 'undefined') return html
@@ -171,6 +199,11 @@ const sanitizeHtml = (html: string): string => {
 const getListItemContent = (item: string | ListItem): string => {
   if (typeof item === 'string') return item
   return item.content || ''
+}
+
+const isItemChecked = (item: string | ListItem): boolean => {
+  if (typeof item === 'string') return false
+  return item.meta?.checked === true
 }
 
 const getHeaderClass = (level: number): string => {

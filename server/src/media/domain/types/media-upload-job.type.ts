@@ -22,3 +22,4 @@ export type UrlMediaUploadJobData = BaseMediaUploadJobData & {
 export type MediaUploadJobData =
   | BufferMediaUploadJobData
   | UrlMediaUploadJobData;
+
