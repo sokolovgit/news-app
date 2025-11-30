@@ -1,7 +1,7 @@
 import { ComplaintId } from '../schemas';
 import { UserId } from '@/users/domain/schemas';
 import { SourceId } from '@/sources/domain/schemas';
-import { RawPostId } from '@/posts/domain/schemas';
+import { RawPostId } from '@/raw-posts/domain/schemas';
 import {
   ComplaintStatus,
   ComplaintReason,

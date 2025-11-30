@@ -21,6 +21,7 @@
       <!-- Desktop Navigation -->
       <div class="hidden md:flex items-center gap-1">
         <NavLink to="/feed" label="Feed" icon="lucide:rss" />
+        <NavLink to="/articles" label="Articles" icon="lucide:file-text" />
         <NavLink to="/sources" label="Sources" icon="lucide:book-open" />
         <NavLink to="/profile" label="Profile" icon="lucide:user" />
       </div>

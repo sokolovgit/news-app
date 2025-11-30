@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { SourcesModule } from '@/sources/sources.module';
-import { PostsModule } from '@/posts/posts.module';
+import { RawPostsModule } from '@/raw-posts/raw-posts.module';
 
 import { ComplaintsRepository } from './abstracts';
 import { DrizzleComplaintsRepository } from './complaints-storage';
@@ -18,7 +18,7 @@ const repositories = [
 const services = [ComplaintsService, ComplaintsValidationService];
 
 @Module({
-  imports: [SourcesModule, PostsModule],
+  imports: [SourcesModule, RawPostsModule],
   providers: [...repositories, ...services],
   exports: [...services],
 })

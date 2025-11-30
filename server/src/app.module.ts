@@ -15,7 +15,8 @@ import { AuthModule } from './auth/auth.module';
 import { MailsModule } from './mails/mails.module';
 import { UsersModule } from './users/users.module';
 import { MediaModule } from './media/media.module';
-import { PostsModule } from './posts/posts.module';
+import { RawPostsModule } from './raw-posts/raw-posts.module';
+import { ArticlesModule } from './articles/articles.module';
 import { DrizzleModule } from './database';
 import { CookiesModule } from './cookies';
 import { SourcesModule } from './sources/sources.module';
@@ -47,7 +48,8 @@ import { UserActivityModule } from './user-activity/user-activity.module';
     MailsModule,
     SourcesModule,
     UserActivityModule,
-    PostsModule,
+    RawPostsModule,
+    ArticlesModule,
     ComplaintsModule,
     MediaModule,
   ],

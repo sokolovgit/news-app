@@ -69,7 +69,7 @@ export class TelegramCollectorService implements CollectorService {
         await this.mediaUploadQueueService.addBulkJobs(mediaUploadJobs);
         this.logger.debug(
           `Queued ${mediaUploadJobs.length} media uploads for source ${sourceId}`,
-      );
+        );
       }
 
       const processingTime = Date.now() - startTime;

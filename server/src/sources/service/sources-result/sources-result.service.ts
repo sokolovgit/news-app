@@ -3,10 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { LoggerService } from '@/logger';
 import { CacheService } from '@/commons/cache';
 import { SourcesService } from '@/sources/service/sources-service';
-import { RawPostsService } from '@/posts/service/raw-posts-service';
-import { RawPostFactory } from '@/posts/domain/factories';
-import { ContentBlockType } from '@/posts/domain/enums';
-import { Content } from '@/posts/domain/types';
+import { RawPostsService } from '@/raw-posts/service/raw-posts-service';
+import { RawPostFactory } from '@/raw-posts/domain/factories';
+import { ContentBlockType } from '@/raw-posts/domain/enums';
+import { Content } from '@/raw-posts/domain/types';
 
 import { SourceId } from '@/sources/domain/schemas';
 import { SourceStatus } from '@/sources/domain/enums';

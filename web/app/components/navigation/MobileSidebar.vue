@@ -11,6 +11,7 @@
         <!-- Navigation Links -->
         <nav class="flex flex-col gap-1 flex-1">
           <MobileNavLink to="/feed" label="Feed" icon="lucide:rss" @click="close" />
+          <MobileNavLink to="/articles" label="Articles" icon="lucide:file-text" @click="close" />
           <MobileNavLink to="/sources" label="Sources" icon="lucide:book-open" @click="close" />
           <MobileNavLink
             to="/sources/add"

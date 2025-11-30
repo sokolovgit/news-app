@@ -19,9 +19,9 @@ import { ComplaintsRepository, GetComplaintsParams } from '../abstracts';
 import { UserId } from '@/users/domain/schemas';
 import { ComplaintFactory } from '@/complaints/domain/factories';
 import { SourcesService } from '@/sources/service/sources-service';
-import { RawPostsService } from '@/posts/service/raw-posts-service';
+import { RawPostsService } from '@/raw-posts/service/raw-posts-service';
 import { SourceId } from '@/sources/domain/schemas';
-import { RawPostId } from '@/posts/domain/schemas';
+import { RawPostId } from '@/raw-posts/domain/schemas';
 
 @Injectable()
 export class ComplaintsService {

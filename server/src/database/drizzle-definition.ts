@@ -4,7 +4,7 @@ import {
   userSources,
   userSourceRelations,
 } from '@/user-sources/domain/schemas';
-import { rawPostRelations, rawPosts } from '@/posts/domain/schemas';
+import { rawPostRelations, rawPosts } from '@/raw-posts/domain/schemas';
 import {
   oauthAccounts,
   oauthAccountRelations,
@@ -14,6 +14,12 @@ import {
   emailVerifications,
 } from '@/auth/domain/schemas';
 import { complaints, complaintRelations } from '@/complaints/domain/schemas';
+import {
+  articles,
+  articleRelations,
+  articleRawPosts,
+  articleRawPostRelations,
+} from '@/articles/domain/schemas';
 
 const relations = {
   userRelations,
@@ -24,6 +30,8 @@ const relations = {
   sourceRelations,
   rawPostRelations,
   complaintRelations,
+  articleRelations,
+  articleRawPostRelations,
 };
 
 const drizzleSchemas = {
@@ -35,6 +43,8 @@ const drizzleSchemas = {
   userSources,
   rawPosts,
   complaints,
+  articles,
+  articleRawPosts,
 };
 
 export const drizzle = {

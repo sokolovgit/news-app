@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 
-import { PostsModule } from '@/posts/posts.module';
+import { RawPostsModule } from '@/raw-posts/raw-posts.module';
 import { UserSourcesModule } from '@/user-sources';
 import { UserActivityModule } from '@/user-activity/user-activity.module';
 import { MediaModule } from '@/media';
@@ -67,7 +67,7 @@ const queues = [
 
 @Module({
   imports: [
-    PostsModule,
+    RawPostsModule,
     UserSourcesModule,
     UserActivityModule,
     MediaModule,

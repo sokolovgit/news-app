@@ -1,8 +1,0 @@
-import { RawPostId } from '@/posts/domain/schemas';
-import { UserId } from '@/users/domain/schemas';
-
-export type GetRawPostByIdRequest = {
-  postId: RawPostId;
-  userId: UserId;
-};
-

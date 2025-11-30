@@ -20,6 +20,20 @@
           variant="outline"
           size="sm"
           class="gap-2 border-border/50 hover:border-primary/30"
+          :class="{ 'bg-primary/10 border-primary/50': isSelectionMode }"
+          @click="toggleSelectionMode"
+        >
+          <Icon
+            name="lucide:check-square"
+            class="h-4 w-4"
+            :class="{ 'text-primary': isSelectionMode }"
+          />
+          {{ isSelectionMode ? 'Cancel' : 'Select' }}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          class="gap-2 border-border/50 hover:border-primary/30"
           @click="refreshFeed"
         >
           <Icon
@@ -171,8 +185,32 @@
         v-for="post in filteredPosts"
         :key="post.id"
         :post="post"
+        :selectable="isSelectionMode"
+        :is-selected="selectedPostIds.has(post.id)"
         @click="handlePostClick"
+        @toggle-select="handleToggleSelect"
       />
+    </div>
+
+    <!-- Selection Footer -->
+    <div
+      v-if="isSelectionMode && selectedPostIds.size > 0"
+      class="fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur-sm border-t border-border p-4 z-50"
+    >
+      <div class="container mx-auto flex items-center justify-between max-w-7xl">
+        <div class="flex items-center gap-3">
+          <Badge variant="secondary" class="text-sm">
+            {{ selectedPostIds.size }} selected
+          </Badge>
+          <Button variant="ghost" size="sm" @click="clearSelection">
+            Clear
+          </Button>
+        </div>
+        <Button class="gap-2" @click="createArticleFromSelection">
+          <Icon name="lucide:pen-square" class="h-4 w-4" />
+          Create Article
+        </Button>
+      </div>
     </div>
 
     <!-- Pagination -->
@@ -203,6 +241,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
 import {
   Select,
   SelectContent,
@@ -243,6 +282,10 @@ const sources = ref<SourceDto[]>([])
 const total = ref(0)
 const currentPage = ref(1)
 const limit = 20
+
+// Selection mode
+const isSelectionMode = ref(false)
+const selectedPostIds = ref<Set<string>>(new Set())
 
 // Debounce search query
 const debouncedSearchQuery = useDebounce(searchQuery, 500)
@@ -413,7 +456,39 @@ const handlePageChange = (page: number) => {
 }
 
 const handlePostClick = (post: FeedPost) => {
-  navigateTo(`/posts/${post.id}`)
+  if (!isSelectionMode.value) {
+    navigateTo(`/posts/${post.id}`)
+  }
+}
+
+const toggleSelectionMode = () => {
+  isSelectionMode.value = !isSelectionMode.value
+  if (!isSelectionMode.value) {
+    selectedPostIds.value.clear()
+  }
+}
+
+const handleToggleSelect = (post: FeedPost) => {
+  if (selectedPostIds.value.has(post.id)) {
+    selectedPostIds.value.delete(post.id)
+  } else {
+    selectedPostIds.value.add(post.id)
+  }
+  // Trigger reactivity
+  selectedPostIds.value = new Set(selectedPostIds.value)
+}
+
+const clearSelection = () => {
+  selectedPostIds.value.clear()
+  selectedPostIds.value = new Set()
+}
+
+const createArticleFromSelection = () => {
+  const ids = Array.from(selectedPostIds.value)
+  navigateTo({
+    path: '/articles/create',
+    query: { sourcePostIds: ids },
+  })
 }
 
 // Fetch posts on mount

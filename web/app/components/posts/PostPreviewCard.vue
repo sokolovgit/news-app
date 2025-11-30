@@ -1,8 +1,21 @@
 <template>
   <Card
     class="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer"
+    :class="{ 'ring-2 ring-primary ring-offset-2 ring-offset-background': isSelected }"
     @click="handleClick"
   >
+    <!-- Selection Checkbox -->
+    <div
+      v-if="selectable"
+      class="absolute top-3 left-3 z-10"
+      @click.stop="toggleSelection"
+    >
+      <Checkbox
+        :checked="isSelected"
+        class="h-5 w-5 border-2 border-white/80 bg-black/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+      />
+    </div>
+
     <!-- Media Preview Section -->
     <div v-if="mediaPreview" class="relative">
       <!-- Image Preview -->
@@ -187,16 +200,23 @@
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import ComplaintDialog from '@/components/complaints/ComplaintDialog.vue'
 import type { FeedPost, ContentBlockType } from '~/types/posts.types'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   post: FeedPost
-}>()
+  selectable?: boolean
+  isSelected?: boolean
+}>(), {
+  selectable: false,
+  isSelected: false,
+})
 
 const emit = defineEmits<{
   click: [post: FeedPost]
   'complaint-submitted': []
+  'toggle-select': [post: FeedPost]
 }>()
 
 const showComplaintDialog = ref(false)
@@ -331,8 +351,16 @@ const handleVideoError = () => {
   videoError.value = true
 }
 
+const toggleSelection = () => {
+  emit('toggle-select', props.post)
+}
+
 const handleClick = () => {
-  emit('click', props.post)
-  navigateTo(`/posts/${props.post.id}`)
+  if (props.selectable) {
+    toggleSelection()
+  } else {
+    emit('click', props.post)
+    navigateTo(`/posts/${props.post.id}`)
+  }
 }
 </script>

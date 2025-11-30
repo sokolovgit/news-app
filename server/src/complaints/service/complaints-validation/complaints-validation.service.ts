@@ -6,9 +6,9 @@ import {
 } from '@/complaints/domain/enums';
 import { InvalidComplaintError } from '@/complaints/domain/errors';
 import { SourcesService } from '@/sources/service/sources-service';
-import { RawPostsService } from '@/posts/service/raw-posts-service';
+import { RawPostsService } from '@/raw-posts/service/raw-posts-service';
 import { SourceId } from '@/sources/domain/schemas';
-import { RawPostId } from '@/posts/domain/schemas';
+import { RawPostId } from '@/raw-posts/domain/schemas';
 
 @Injectable()
 export class ComplaintsValidationService {
