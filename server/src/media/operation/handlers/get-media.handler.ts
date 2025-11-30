@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { S3Service, S3ObjectStream } from '@/commons/s3';
 import { LoggerService } from '@/logger';
-
+import { MediaNotFoundError } from '@/media/domain/errors';
 import { GetMediaRequest } from '../requests';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class GetMediaHandler {
 
       if (errorName === 'NoSuchKey' || errorName === 'NotFound') {
         this.logger.warn(`Media not found: ${request.path}`);
-        throw new NotFoundException('Media not found');
+        throw new MediaNotFoundError(request.path);
       }
 
       this.logger.error(`Error fetching media ${request.path}: ${String(err)}`);

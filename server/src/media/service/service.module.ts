@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 
-import { MediaQueue } from '../domain/queues';
+import { MediaQueue } from '@/media/domain/queues';
 
-import { MediaUploadService } from './media-upload.service';
-import { MediaUploadQueueService } from './media-upload-queue.service';
+import { MediaUploadService } from './media-upload-service';
+import { MediaUploadQueueService } from './media-queue-service';
 
 @Module({
   imports: [

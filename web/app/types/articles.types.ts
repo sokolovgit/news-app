@@ -8,17 +8,117 @@ export enum ArticleStatus {
   ARCHIVED = 'archived',
 }
 
-export interface EditorJsBlock {
-  id?: string
-  type: string
-  data: Record<string, unknown>
+// === Editor.js Block Data Types ===
+
+export interface ParagraphBlockData {
+  text: string
 }
+
+export interface HeaderBlockData {
+  text: string
+  level: 1 | 2 | 3 | 4 | 5 | 6
+}
+
+export interface ImageBlockData {
+  file: {
+    url: string
+  }
+  caption?: string
+  withBorder?: boolean
+  withBackground?: boolean
+  stretched?: boolean
+}
+
+export interface ListBlockData {
+  style: 'ordered' | 'unordered'
+  items: ListItem[]
+  meta?: Record<string, unknown>
+}
+
+export interface ListItem {
+  content: string
+  meta?: Record<string, unknown>
+  items?: ListItem[]
+}
+
+export interface QuoteBlockData {
+  text: string
+  caption?: string
+  alignment?: 'left' | 'center'
+}
+
+export interface CodeBlockData {
+  code: string
+  language?: string
+}
+
+export interface EmbedBlockData {
+  service: string
+  source: string
+  embed: string
+  width?: number
+  height?: number
+  caption?: string
+}
+
+export interface DelimiterBlockData {
+  // No data
+}
+
+export interface WarningBlockData {
+  title: string
+  message: string
+}
+
+// === Block Types ===
+
+export type EditorJsBlockType =
+  | 'paragraph'
+  | 'header'
+  | 'image'
+  | 'list'
+  | 'quote'
+  | 'code'
+  | 'embed'
+  | 'delimiter'
+  | 'warning'
+
+export interface EditorJsBlock<T = unknown> {
+  id?: string
+  type: EditorJsBlockType
+  data: T
+}
+
+export type ParagraphBlock = EditorJsBlock<ParagraphBlockData> & { type: 'paragraph' }
+export type HeaderBlock = EditorJsBlock<HeaderBlockData> & { type: 'header' }
+export type ImageBlock = EditorJsBlock<ImageBlockData> & { type: 'image' }
+export type ListBlock = EditorJsBlock<ListBlockData> & { type: 'list' }
+export type QuoteBlock = EditorJsBlock<QuoteBlockData> & { type: 'quote' }
+export type CodeBlock = EditorJsBlock<CodeBlockData> & { type: 'code' }
+export type EmbedBlock = EditorJsBlock<EmbedBlockData> & { type: 'embed' }
+export type DelimiterBlock = EditorJsBlock<DelimiterBlockData> & { type: 'delimiter' }
+export type WarningBlock = EditorJsBlock<WarningBlockData> & { type: 'warning' }
+
+export type ContentBlock =
+  | ParagraphBlock
+  | HeaderBlock
+  | ImageBlock
+  | ListBlock
+  | QuoteBlock
+  | CodeBlock
+  | EmbedBlock
+  | DelimiterBlock
+  | WarningBlock
+
+// === Main Content Type ===
 
 export interface EditorJsContent {
   time?: number
-  blocks: EditorJsBlock[]
+  blocks: ContentBlock[]
   version?: string
 }
+
+// === Article Types ===
 
 export interface ArticleAuthor {
   id: string
@@ -81,4 +181,3 @@ export interface UpdateArticleRequest {
   coverImageUrl?: string
   sourceRawPostIds?: string[]
 }
-

@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { S3Service } from '@/commons/s3';
 import { LoggerService } from '@/logger';
-
-import { MediaUploadJobData } from './types';
+import { MediaUploadJobData } from '@/media/domain/types';
 
 @Injectable()
 export class MediaUploadService {
@@ -36,3 +35,4 @@ export class MediaUploadService {
     );
   }
 }
+

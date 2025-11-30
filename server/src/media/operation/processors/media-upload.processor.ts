@@ -3,8 +3,8 @@ import { Job } from 'bullmq';
 
 import { LoggerService } from '@/logger';
 import { MediaQueue } from '@/media/domain/queues';
-import { MediaUploadJobData } from '@/media/service/types';
-import { MediaUploadService } from '@/media/service/media-upload.service';
+import { MediaUploadJobData } from '@/media/domain/types';
+import { MediaUploadService } from '@/media/service/media-upload-service';
 
 @Processor(MediaQueue.MEDIA_UPLOAD, {
   concurrency: 5,

@@ -9,7 +9,7 @@ import { BaseConfigService } from '../commons/config/base-config.service';
 
 import { EmailQueue } from '@/mails/domain/queues';
 import { SourceQueue, SourceJobScheduler } from '@/sources/domain/queues';
-import { MediaQueue } from '@/media';
+import { MediaQueue } from '@/media/domain/queues';
 
 import type {
   JobsOptions,

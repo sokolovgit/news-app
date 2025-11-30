@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 
 import { ServiceModule as MediaServiceModule } from '../service/service.module';
 
-import { GetMediaHandler } from './handlers';
+import { GetMediaHandler, UploadMediaHandler } from './handlers';
 import { MediaUploadProcessor } from './processors';
 
-const handlers = [GetMediaHandler];
+const handlers = [GetMediaHandler, UploadMediaHandler];
 const processors = [MediaUploadProcessor];
 
 @Module({

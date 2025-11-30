@@ -18,11 +18,19 @@
 
     <!-- Post Content -->
     <div v-else-if="post" class="space-y-6">
-      <!-- Back Button -->
-      <Button variant="ghost" @click="navigateTo('/feed')">
-        <Icon name="lucide:arrow-left" class="h-4 w-4 mr-2" />
-        Back to Feed
-      </Button>
+      <!-- Header Actions -->
+      <div class="flex items-center justify-between">
+        <Button variant="ghost" @click="navigateTo('/feed')">
+          <Icon name="lucide:arrow-left" class="h-4 w-4 mr-2" />
+          Back to Feed
+        </Button>
+
+        <!-- Create Article Button -->
+        <Button variant="outline" class="gap-2" @click="createArticleFromPost">
+          <Icon name="lucide:pen-square" class="h-4 w-4" />
+          Create Article
+        </Button>
+      </div>
 
       <!-- Post Card -->
       <PostCard :post="post" />
@@ -50,6 +58,16 @@ const feedService = new FeedService(api)
 const post = ref<FeedPost | null>(null)
 const isLoading = ref(true)
 const error = ref<string | null>(null)
+
+// Create article from current post
+const createArticleFromPost = () => {
+  if (post.value) {
+    navigateTo({
+      path: '/articles/create',
+      query: { sourcePostIds: post.value.id },
+    })
+  }
+}
 
 // Fetch post by ID
 const fetchPost = async () => {

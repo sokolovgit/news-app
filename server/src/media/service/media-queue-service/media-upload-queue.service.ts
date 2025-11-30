@@ -4,8 +4,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 
 import { LoggerService } from '@/logger';
 import { MediaQueue } from '@/media/domain/queues';
-
-import { MediaUploadJobData } from './types';
+import { MediaUploadJobData } from '@/media/domain/types';
 
 @Injectable()
 export class MediaUploadQueueService {
@@ -61,3 +60,4 @@ export class MediaUploadQueueService {
     return addedJobs.map((job) => job.id!);
   }
 }
+

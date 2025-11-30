@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 
-import { MediaController } from './ui/media.controller';
-import { OperationModule } from './operation/operation.module';
+import { ServiceModule } from './service';
+import { UiModule } from './ui';
 
 @Module({
-  imports: [OperationModule],
-  controllers: [MediaController],
-  exports: [OperationModule],
+  imports: [ServiceModule, UiModule],
+  exports: [ServiceModule],
 })
 export class MediaModule {}

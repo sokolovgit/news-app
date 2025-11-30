@@ -230,6 +230,10 @@ export class ApiClient {
   async delete<T = unknown>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: 'DELETE' })
   }
+
+  async uploadFile<T = unknown>(endpoint: string, formData: FormData): Promise<T> {
+    return this.request<T>(endpoint, { method: 'POST', body: formData })
+  }
 }
 
 /**

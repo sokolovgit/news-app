@@ -1,21 +1,22 @@
 <template>
-  <div class="max-w-4xl mx-auto space-y-6">
+  <div class="max-w-4xl mx-auto space-y-6 pb-24">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between sticky top-16 z-40 py-4 bg-background/80 backdrop-blur-sm border-b border-border/50 -mx-4 px-4">
       <div class="flex items-center gap-3">
         <Button variant="ghost" size="sm" @click="navigateTo('/articles')">
           <Icon name="lucide:arrow-left" class="h-4 w-4 mr-2" />
           Back
         </Button>
-        <div class="h-6 w-px bg-border" />
-        <h1 class="text-xl font-semibold text-foreground">New Article</h1>
+        <div class="h-5 w-px bg-border" />
+        <h1 class="text-lg font-semibold text-foreground">New Article</h1>
       </div>
       <div class="flex items-center gap-2">
-        <Button variant="outline" :disabled="isSaving" @click="saveDraft">
+        <Button variant="outline" size="sm" :disabled="isSaving" @click="saveDraft">
           <Icon v-if="isSaving" name="lucide:loader-2" class="h-4 w-4 mr-2 animate-spin" />
+          <Icon v-else name="lucide:save" class="h-4 w-4 mr-2" />
           Save Draft
         </Button>
-        <Button :disabled="isSaving || !canPublish" @click="saveAndPublish">
+        <Button size="sm" :disabled="isSaving || !canPublish" @click="saveAndPublish">
           <Icon v-if="isSaving" name="lucide:loader-2" class="h-4 w-4 mr-2 animate-spin" />
           <Icon v-else name="lucide:send" class="h-4 w-4 mr-2" />
           Publish
@@ -40,6 +41,42 @@
       :initial-cover-image-url="coverImageUrl"
       @update="handleEditorUpdate"
     />
+
+    <!-- Floating action bar -->
+    <div class="fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur-sm border-t border-border p-4 z-50">
+      <div class="max-w-4xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="text-sm text-muted-foreground">
+            <span v-if="wordCount > 0">{{ wordCount }} words</span>
+            <span v-else>Start writing...</span>
+          </div>
+          <div v-if="sourcePosts.length > 0" class="text-sm text-muted-foreground">
+            • {{ sourcePosts.length }} source{{ sourcePosts.length > 1 ? 's' : '' }}
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-muted-foreground mr-2">
+            {{ canPublish ? 'Ready to publish' : 'Add title & content to publish' }}
+          </span>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            :disabled="isSaving"
+            @click="saveDraft"
+          >
+            Save Draft
+          </Button>
+          <Button 
+            size="sm" 
+            :disabled="isSaving || !canPublish"
+            @click="saveAndPublish"
+          >
+            <Icon name="lucide:send" class="h-4 w-4 mr-1" />
+            Publish
+          </Button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -55,6 +92,7 @@ import { toast } from 'vue-sonner'
 
 definePageMeta({
   layout: 'default',
+  middleware: ['auth'],
 })
 
 const route = useRoute()
@@ -73,6 +111,32 @@ const sourcePosts = ref<FeedPost[]>([])
 const sourceRawPostIds = ref<string[]>([])
 
 const isSaving = ref(false)
+
+// Word count
+const wordCount = computed(() => {
+  let count = 0
+  count += title.value.split(/\s+/).filter(Boolean).length
+  count += description.value.split(/\s+/).filter(Boolean).length
+  
+  content.value.blocks.forEach((block) => {
+    if (block.type === 'paragraph' && block.data.text) {
+      count += block.data.text.replace(/<[^>]*>/g, '').split(/\s+/).filter(Boolean).length
+    } else if (block.type === 'header' && block.data.text) {
+      count += block.data.text.replace(/<[^>]*>/g, '').split(/\s+/).filter(Boolean).length
+    } else if (block.type === 'list' && block.data.items) {
+      const items = block.data.items as Array<string | { content?: string }>
+      items.forEach((item) => {
+        if (typeof item === 'string') {
+          count += item.split(/\s+/).filter(Boolean).length
+        } else if (typeof item === 'object' && item.content) {
+          count += item.content.replace(/<[^>]*>/g, '').split(/\s+/).filter(Boolean).length
+        }
+      })
+    }
+  })
+  
+  return count
+})
 
 // Check if article can be published (has title and content)
 const canPublish = computed(() => {
@@ -94,6 +158,7 @@ onMounted(async () => {
       sourcePosts.value = posts
     } catch (error) {
       console.error('Failed to load source posts:', error)
+      toast.error('Failed to load source posts')
     }
   }
 })
@@ -204,4 +269,3 @@ const saveAndPublish = async () => {
   }
 }
 </script>
-

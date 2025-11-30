@@ -1,3 +1,3 @@
-export * from './media-upload.service';
-export * from './media-upload-queue.service';
-export * from './types';
+export * from './service.module';
+export * from './media-upload-service';
+export * from './media-queue-service';

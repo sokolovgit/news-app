@@ -169,6 +169,16 @@
 
         <div class="flex items-center gap-2">
           <Button
+            v-if="!selectable"
+            variant="ghost"
+            size="sm"
+            class="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+            title="Create article from this post"
+            @click.stop="createArticle"
+          >
+            <Icon name="lucide:pen-square" class="h-3.5 w-3.5" />
+          </Button>
+          <Button
             variant="ghost"
             size="sm"
             class="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
@@ -362,5 +372,12 @@ const handleClick = () => {
     emit('click', props.post)
     navigateTo(`/posts/${props.post.id}`)
   }
+}
+
+const createArticle = () => {
+  navigateTo({
+    path: '/articles/create',
+    query: { sourcePostIds: props.post.id },
+  })
 }
 </script>
