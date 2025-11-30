@@ -163,11 +163,16 @@ export class TelegramCollectorService implements CollectorService {
       avatarUrl: undefined,
     };
 
-    // Extract metrics
+    // Extract metrics - sum up all reaction counts, not just count of reaction types
     const metrics = {
-      likes: message.reactions ? message.reactions.results.length : undefined,
+      likes: message.reactions
+        ? message.reactions.results.reduce(
+            (total, reaction) => total + (reaction.count || 0),
+            0,
+          )
+        : undefined,
       comments: undefined,
-      shares: undefined,
+      shares: message.forwards || undefined,
     };
 
     const publishedAt = message.date

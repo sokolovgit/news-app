@@ -111,16 +111,9 @@ class InstagramPostMapper:
                 ),
             )
 
-        # Handle single post (image or video)
-        if post.typename != "GraphSidecar":
-        if post.is_video:
-            if post.video_url:
-                    add_media(post.video_url, is_video=True)
-            else:
-                if post.url:
-                    add_media(post.url, is_video=False)
-        else:
-            # Handle sidecar (multiple images/videos)
+        # Handle single post (image or video) vs sidecar (carousel)
+        if post.typename == "GraphSidecar":
+            # Handle sidecar (multiple images/videos in carousel)
             try:
                 for node in post.get_sidecar_nodes():
                     if node.is_video:
@@ -137,9 +130,15 @@ class InstagramPostMapper:
                 if post.is_video:
                     if post.video_url:
                         add_media(post.video_url, is_video=True)
-                else:
-                    if post.url:
-                        add_media(post.url, is_video=False)
+                elif post.url:
+                    add_media(post.url, is_video=False)
+        else:
+            # Handle single post (image or video)
+            if post.is_video:
+                if post.video_url:
+                    add_media(post.video_url, is_video=True)
+            elif post.url:
+                add_media(post.url, is_video=False)
 
         return s3_paths, media_jobs
 

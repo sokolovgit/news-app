@@ -2,39 +2,41 @@ import { Api } from 'telegram';
 import { FetchedPost } from '@/sources/service/sources-result/types';
 
 export class TelegramMessageToFetchedPostMapper {
+  /**
+   * Convert Telegram API Message to FetchedPost format
+   * Note: This mapper is for simple mapping without media download.
+   * For full processing with media download, use TelegramCollectorService.processMessage()
+   */
   static toFetchedPost(message: Api.Message): FetchedPost {
     const mediaUrls: string[] = [];
 
-    // Extract media URLs
+    // Extract media URLs with proper extensions for type detection
     if (message.photo) {
-      const imageUrl = `/media/telegram/${message.id}.jpg`;
-      mediaUrls.push(imageUrl);
+      mediaUrls.push(`/media/telegram/${message.id}.jpg`);
     }
 
     if (message.video) {
-      const videoUrl = `/media/telegram/${message.id}.mp4`;
-      mediaUrls.push(videoUrl);
+      mediaUrls.push(`/media/telegram/${message.id}.mp4`);
     }
 
     if (message.audio) {
-      const audioUrl = `/media/telegram/${message.id}.mp3`;
-      mediaUrls.push(audioUrl);
+      mediaUrls.push(`/media/telegram/${message.id}.mp3`);
     }
 
-    // Extract author information
+    // Extract author information from post author or fallback
     const author = {
       username: message.postAuthor?.toString() || 'unknown',
       displayName: message.postAuthor?.toString() || 'Unknown',
       avatarUrl: undefined, // Telegram API doesn't provide avatar in message
     };
 
-    // Extract metrics if available
-    const metrics = {
-      views: message.views,
-      reactions: message.reactions
-        ? message.reactions.results.length
-        : undefined,
-    };
+    // Extract metrics - sum up all reaction counts, not just count of reaction types
+    const totalReactions = message.reactions
+      ? message.reactions.results.reduce(
+          (total, reaction) => total + (reaction.count || 0),
+          0,
+        )
+      : undefined;
 
     const publishedAt = message.date
       ? new Date(message.date * 1000).toISOString()
@@ -47,9 +49,9 @@ export class TelegramMessageToFetchedPostMapper {
       publishedAt,
       author,
       metrics: {
-        likes: metrics.reactions,
+        likes: totalReactions,
         comments: undefined, // Telegram doesn't provide comment count in message
-        shares: undefined, // Telegram doesn't provide share count
+        shares: message.forwards || undefined, // Forward count as shares
       },
     };
   }

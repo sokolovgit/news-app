@@ -121,25 +121,133 @@ export class SourcesResultService {
   private convertToContent(post: FetchedPost): Content {
     const content: Content = [];
 
-    // Add text content as paragraph
+    // Parse and split text content into blocks
     if (post.content) {
-      content.push({
-        type: ContentBlockType.PARAGRAPH,
-        data: { text: post.content },
-      });
+      const textBlocks = this.parseTextContent(post.content);
+      content.push(...textBlocks);
     }
 
-    // Add media URLs as image/video blocks
+    // Add media URLs as appropriate blocks based on file extension
     for (const mediaUrl of post.mediaUrls || []) {
-      // Determine if it's a video based on URL or metadata
-      // For now, assume all are images
-      content.push({
-        type: ContentBlockType.IMAGE,
-        data: { url: mediaUrl },
-      });
+      const mediaBlock = this.createMediaBlock(mediaUrl);
+      content.push(mediaBlock);
     }
 
     return content;
+  }
+
+  /**
+   * Parse text content into multiple content blocks
+   * Splits by paragraphs (double newlines) and detects headers
+   */
+  private parseTextContent(text: string): Content {
+    const blocks: Content = [];
+
+    // Normalize line endings and split by double newlines (paragraph breaks)
+    const normalizedText = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const paragraphs = normalizedText.split(/\n\n+/);
+
+    for (const paragraph of paragraphs) {
+      const trimmed = paragraph.trim();
+      if (!trimmed) continue;
+
+      // Check if this paragraph contains multiple lines (could be a list or structured content)
+      const lines = trimmed.split('\n');
+
+      if (lines.length === 1) {
+        // Single line - check if it's a header
+        const block = this.parseLineAsBlock(trimmed);
+        blocks.push(block);
+      } else {
+        // Multiple lines in same paragraph - process each line
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          if (!trimmedLine) continue;
+
+          const block = this.parseLineAsBlock(trimmedLine);
+          blocks.push(block);
+        }
+      }
+    }
+
+    return blocks;
+  }
+
+  /**
+   * Parse a single line and determine if it's a header or paragraph
+   */
+  private parseLineAsBlock(line: string):
+    | {
+        type: ContentBlockType.HEADER;
+        data: { text: string; level: 1 | 2 | 3 };
+      }
+    | { type: ContentBlockType.PARAGRAPH; data: { text: string } } {
+    // Check for Markdown-style headers (# Header)
+    const headerMatch = line.match(/^(#{1,3})\s+(.+)$/);
+    if (headerMatch) {
+      const level = Math.min(headerMatch[1].length, 3) as 1 | 2 | 3;
+      return {
+        type: ContentBlockType.HEADER,
+        data: { text: headerMatch[2].trim(), level },
+      };
+    }
+
+    // Check for bold text that looks like a header (short line, all caps or title case)
+    // Common patterns: **Title**, __Title__, TITLE IN CAPS
+    const boldMatch = line.match(/^(?:\*\*|__)(.+?)(?:\*\*|__)$/);
+    if (boldMatch && boldMatch[1].length <= 100) {
+      return {
+        type: ContentBlockType.HEADER,
+        data: { text: boldMatch[1].trim(), level: 2 },
+      };
+    }
+
+    // Check for ALL CAPS short lines (likely headers in social media)
+    if (
+      line.length <= 80 &&
+      line === line.toUpperCase() &&
+      /[A-ZА-ЯІЇЄҐ]/.test(line)
+    ) {
+      return {
+        type: ContentBlockType.HEADER,
+        data: { text: line, level: 2 },
+      };
+    }
+
+    // Default: regular paragraph
+    return {
+      type: ContentBlockType.PARAGRAPH,
+      data: { text: line },
+    };
+  }
+
+  /**
+   * Create a properly typed media block based on URL/file extension
+   */
+  private createMediaBlock(
+    url: string,
+  ):
+    | { type: ContentBlockType.IMAGE; data: { url: string } }
+    | { type: ContentBlockType.VIDEO; data: { url: string } }
+    | { type: ContentBlockType.AUDIO; data: { url: string } } {
+    // Extract extension from URL (handle query params)
+    const urlWithoutParams = url.split('?')[0];
+    const extension = urlWithoutParams.split('.').pop()?.toLowerCase() || '';
+
+    // Video extensions
+    const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v', 'wmv'];
+    if (videoExtensions.includes(extension)) {
+      return { type: ContentBlockType.VIDEO, data: { url } };
+    }
+
+    // Audio extensions
+    const audioExtensions = ['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac', 'wma'];
+    if (audioExtensions.includes(extension)) {
+      return { type: ContentBlockType.AUDIO, data: { url } };
+    }
+
+    // Default to image for all other extensions (jpg, jpeg, png, gif, webp, etc.)
+    return { type: ContentBlockType.IMAGE, data: { url } };
   }
 
   /**

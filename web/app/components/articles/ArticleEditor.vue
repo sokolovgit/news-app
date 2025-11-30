@@ -45,7 +45,7 @@
           <p
             class="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors"
           >
-            Click to add cover image
+            Click to add cover image (max 10MB)
           </p>
           <p class="text-xs text-muted-foreground/60 mt-1">Recommended: 1600 × 840px</p>
         </div>
