@@ -22,6 +22,7 @@ import { CookiesModule } from './cookies';
 import { SourcesModule } from './sources/sources.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { UserActivityModule } from './user-activity/user-activity.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { UserActivityModule } from './user-activity/user-activity.module';
     ArticlesModule,
     ComplaintsModule,
     MediaModule,
+    AdminModule,
   ],
   providers: [
     {

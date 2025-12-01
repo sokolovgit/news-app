@@ -26,6 +26,10 @@
         <Icon name="lucide:user" class="mr-2 h-4 w-4" />
         <span>Profile</span>
       </DropdownMenuItem>
+      <DropdownMenuItem v-if="isAdmin" class="cursor-pointer" @click="navigateTo('/admin')">
+        <Icon name="lucide:shield" class="mr-2 h-4 w-4" />
+        <span>Admin Panel</span>
+      </DropdownMenuItem>
       <DropdownMenuItem class="cursor-pointer" @click="openSettings">
         <Icon name="lucide:settings" class="mr-2 h-4 w-4" />
         <span>Settings</span>
@@ -56,8 +60,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAuthStore } from '~/stores/auth.store'
 import { useColorMode } from '#imports'
+import { UserRole } from '~/models/user.model'
 
 const authStore = useAuthStore()
+
+const isAdmin = computed(() => authStore.userRoles.includes(UserRole.ADMIN))
 const router = useRouter()
 const colorMode = useColorMode()
 

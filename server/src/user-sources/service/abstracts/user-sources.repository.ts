@@ -41,5 +41,7 @@ export abstract class UserSourcesRepository {
     filters?: UserSourcesFilterParams,
   ): Promise<PaginatedResult<UserSource>>;
 
-  abstract getDistinctSourceTypesByUser(userId: UserId): Promise<PublicSource[]>;
+  abstract getDistinctSourceTypesByUser(
+    userId: UserId,
+  ): Promise<PublicSource[]>;
 }

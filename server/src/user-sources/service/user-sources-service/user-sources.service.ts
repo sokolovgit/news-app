@@ -4,10 +4,7 @@ import { uuid } from '@/commons/utils';
 import { LoadState, PaginatedResult, PaginationParams } from '@/commons/types';
 
 import { LoggerService } from '@/logger';
-import {
-  UserSourcesRepository,
-  UserSourcesFilterParams,
-} from '../abstracts';
+import { UserSourcesRepository, UserSourcesFilterParams } from '../abstracts';
 
 import {
   UserSource,

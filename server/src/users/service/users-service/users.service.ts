@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
 import { uuid } from '@/commons/utils';
-import { LoadState } from '@/commons/types';
+import { LoadState, PaginatedResult, PaginationParams } from '@/commons/types';
 
 import { LoggerService } from '@/logger';
 
 import { UserId } from '@/users/domain/schemas';
-import { UsersRepository } from '../abstracts';
+import { UsersRepository, UsersFilterParams } from '../abstracts';
 import { User, UserLoadOptions } from '@/users/domain/entities';
 import { UserCreationFailedError } from '@/users/domain/errors';
 
@@ -97,5 +97,24 @@ export class UsersService {
     );
 
     return savedUser;
+  }
+
+  /**
+   * Get all users with pagination and filters (admin only)
+   */
+  async getAllUsersPaginated(
+    params: PaginationParams,
+    filters?: UsersFilterParams,
+    loadOptions?: UserLoadOptions,
+  ): Promise<PaginatedResult<User>> {
+    this.logger.debug(
+      `Getting all users paginated: ${JSON.stringify(params)}, filters: ${JSON.stringify(filters)}`,
+    );
+
+    return this.usersRepository.getAllUsersPaginated(
+      params,
+      filters,
+      loadOptions,
+    );
   }
 }

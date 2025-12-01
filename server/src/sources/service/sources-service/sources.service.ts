@@ -119,7 +119,7 @@ export class SourcesService {
     this.logger.debug(
       `Getting sources paginated with filters: offset=${params.offset}, limit=${params.limit}, search=${filters?.search}, sourceType=${filters?.sourceType}`,
     );
-    return this.sourcesRepository.findAllPaginatedFiltered(
+    return await this.sourcesRepository.findAllPaginatedFiltered(
       params,
       filters,
       loadOptions,

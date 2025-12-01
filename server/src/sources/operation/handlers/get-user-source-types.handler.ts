@@ -27,4 +27,3 @@ export class GetUserSourceTypesHandler {
     return sourceTypes;
   }
 }
-

@@ -4,10 +4,7 @@ import { and, eq, count, ilike, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 
-import {
-  UserSourcesRepository,
-  UserSourcesFilterParams,
-} from '../abstracts';
+import { UserSourcesRepository, UserSourcesFilterParams } from '../abstracts';
 import { DrizzleUserSourcesEntityMapper } from './mappers';
 
 import { UserId } from '@/users/domain/schemas';
@@ -163,9 +160,13 @@ export class DrizzleUserSourcesRepository extends UserSourcesRepository {
       `;
 
       const countResult = await this.db.execute(
-        sql.raw(`${countQuery.replace(/\$(\d+)/g, (_, num) => `'${queryParams[parseInt(num) - 1]}'`)}`),
+        sql.raw(
+          `${countQuery.replace(/\$(\d+)/g, (_, num) => `'${queryParams[parseInt(num) - 1]}'`)}`,
+        ),
       );
-      const total = Number((countResult.rows[0] as { count: string })?.count ?? 0);
+      const total = Number(
+        (countResult.rows[0] as { count: string })?.count ?? 0,
+      );
 
       // Get paginated data with filters
       const dataQuery = `
@@ -179,18 +180,25 @@ export class DrizzleUserSourcesRepository extends UserSourcesRepository {
       `;
 
       const dataResult = await this.db.execute(
-        sql.raw(`${dataQuery.replace(/\$(\d+)/g, (_, num) => `'${queryParams[parseInt(num) - 1]}'`)}`),
+        sql.raw(
+          `${dataQuery.replace(/\$(\d+)/g, (_, num) => `'${queryParams[parseInt(num) - 1]}'`)}`,
+        ),
       );
 
       // Fetch full user sources with relations for the filtered IDs
-      const userSourceIds = (dataResult.rows as { id: string }[]).map((r) => r.id);
+      const userSourceIds = (dataResult.rows as { id: string }[]).map(
+        (r) => r.id,
+      );
 
       if (userSourceIds.length === 0) {
         return createPaginatedResult([], total, params);
       }
 
       const links = await this.db.query.userSources.findMany({
-        where: sql`${userSources.id} IN (${sql.join(userSourceIds.map((id) => sql`${id}`), sql`, `)})`,
+        where: sql`${userSources.id} IN (${sql.join(
+          userSourceIds.map((id) => sql`${id}`),
+          sql`, `,
+        )})`,
         with: this.buildRelations(loadOptions),
       });
 

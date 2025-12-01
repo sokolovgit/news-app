@@ -5,6 +5,7 @@ import {
   ComplaintReason,
   ComplaintTargetType,
 } from '@/complaints/domain/enums';
+import { UserDto } from '@/users/ui/dtos/user.dto';
 
 export class ComplaintDto {
   @ApiProperty({
@@ -86,8 +87,22 @@ export class ComplaintDto {
   })
   updatedAt: Date;
 
+  @ApiProperty({
+    type: UserDto,
+    description: 'User who reported the complaint',
+    required: false,
+  })
+  reporter?: UserDto;
+
+  @ApiProperty({
+    type: UserDto,
+    description: 'User who resolved the complaint',
+    required: false,
+  })
+  resolver?: UserDto;
+
   static fromEntity(complaint: Complaint): ComplaintDto {
-    return {
+    const dto: ComplaintDto = {
       id: complaint.getId(),
       targetType: complaint.getTargetType(),
       targetId: complaint.getTargetId(),
@@ -95,11 +110,26 @@ export class ComplaintDto {
       description: complaint.getDescription(),
       status: complaint.getStatus(),
       reportedBy: complaint.getReportedBy(),
+
       resolvedBy: complaint.getResolvedBy(),
       resolvedAt: complaint.getResolvedAt(),
       resolutionNote: complaint.getResolutionNote(),
       createdAt: complaint.getCreatedAt()!,
       updatedAt: complaint.getUpdatedAt()!,
     };
+
+    const reporter = complaint.getReporter();
+
+    if (reporter) {
+      dto.reporter = UserDto.fromUserEntity(reporter);
+    }
+
+    const resolver = complaint.getResolver();
+
+    if (resolver) {
+      dto.resolver = UserDto.fromUserEntity(resolver);
+    }
+
+    return dto;
   }
 }

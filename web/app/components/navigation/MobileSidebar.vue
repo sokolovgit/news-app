@@ -20,6 +20,13 @@
             @click="close"
           />
           <MobileNavLink to="/profile" label="Profile" icon="lucide:user" @click="close" />
+          <MobileNavLink
+            v-if="isAdmin"
+            to="/admin"
+            label="Admin Panel"
+            icon="lucide:shield"
+            @click="close"
+          />
         </nav>
 
         <!-- User Section -->
@@ -63,6 +70,7 @@ import MobileNavLink from './MobileNavLink.vue'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { useAuthStore } from '~/stores/auth.store'
+import { UserRole } from '~/models/user.model'
 
 defineProps<{
   isOpen: boolean
@@ -77,6 +85,7 @@ const router = useRouter()
 
 const userEmail = computed(() => authStore.userEmail || 'User')
 const userRoles = computed(() => authStore.userRoles)
+const isAdmin = computed(() => authStore.userRoles.includes(UserRole.ADMIN))
 
 const userInitials = computed(() => {
   const email = userEmail.value

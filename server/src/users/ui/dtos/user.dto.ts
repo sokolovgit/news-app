@@ -28,10 +28,34 @@ export class UserDto {
   })
   roles: UserRole[];
 
-  constructor(props: { id: string; email: string; roles: UserRole[] }) {
+  @ApiProperty({
+    example: '2024-01-01T00:00:00.000Z',
+    description: 'The date when the user was created',
+    type: Date,
+    required: false,
+  })
+  createdAt?: Date;
+
+  @ApiProperty({
+    example: '2024-01-01T00:00:00.000Z',
+    description: 'The date when the user was last updated',
+    type: Date,
+    required: false,
+  })
+  updatedAt?: Date;
+
+  constructor(props: {
+    id: string;
+    email: string;
+    roles: UserRole[];
+    createdAt?: Date;
+    updatedAt?: Date;
+  }) {
     this.id = props.id;
     this.email = props.email;
     this.roles = props.roles;
+    this.createdAt = props.createdAt;
+    this.updatedAt = props.updatedAt;
   }
 
   public static fromUserEntity(user: User): UserDto {
@@ -39,6 +63,8 @@ export class UserDto {
       id: user.getId(),
       email: user.getEmail(),
       roles: user.getRoles(),
+      createdAt: user.getCreatedAt(),
+      updatedAt: user.getUpdatedAt(),
     });
   }
 }
