@@ -43,6 +43,7 @@
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="telegram">Telegram</SelectItem>
               <SelectItem value="instagram">Instagram</SelectItem>
+              <SelectItem value="twitter">Twitter/X</SelectItem>
               <SelectItem value="rss">RSS</SelectItem>
             </SelectContent>
           </Select>
@@ -175,6 +176,7 @@
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="telegram">Telegram</SelectItem>
               <SelectItem value="instagram">Instagram</SelectItem>
+              <SelectItem value="twitter">Twitter/X</SelectItem>
               <SelectItem value="rss">RSS</SelectItem>
             </SelectContent>
           </Select>

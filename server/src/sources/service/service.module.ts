@@ -64,6 +64,9 @@ const queues = [
     name: SourceQueue.RSS_FETCHER,
   },
   {
+    name: SourceQueue.TWITTER_FETCHER,
+  },
+  {
     name: SourceQueue.FETCH_RESULTS,
   },
 ];

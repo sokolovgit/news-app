@@ -133,6 +133,17 @@ export class ConfigService extends BaseConfigService<EnvType> {
       removeOnFail: 1000,
     },
 
+    // Twitter collector queue (external Python script consumes this)
+    [SourceQueue.TWITTER_FETCHER]: <JobsOptions>{
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 5000,
+      },
+      removeOnComplete: 100,
+      removeOnFail: 1000,
+    },
+
     // Unified results queue
     [SourceQueue.FETCH_RESULTS]: <JobsOptions>{
       attempts: 5, // Critical - must store results

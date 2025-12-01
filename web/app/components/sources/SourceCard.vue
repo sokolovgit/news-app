@@ -106,6 +106,7 @@ const sourceIcon = computed(() => {
   if (sourceType === 'instagram') return 'lucide:instagram'
   if (sourceType === 'telegram') return 'lucide:send'
   if (sourceType === 'rss') return 'lucide:rss'
+  if (sourceType === 'twitter') return 'lucide:twitter'
   return 'lucide:link'
 })
 
@@ -118,6 +119,7 @@ const sourceBadgeVariant = computed(() => {
   if (sourceType === 'instagram') return 'secondary'
   if (sourceType === 'telegram') return 'outline'
   if (sourceType === 'rss') return 'default'
+  if (sourceType === 'twitter') return 'secondary'
   return 'outline'
 })
 

@@ -2,7 +2,7 @@
  * Utility functions for building source URLs
  */
 
-export type SourceType = 'telegram' | 'instagram' | 'rss'
+export type SourceType = 'telegram' | 'instagram' | 'twitter' | 'rss'
 
 /**
  * Checks if a string is a valid URL
@@ -80,6 +80,8 @@ export function buildSourceUrl(input: string, sourceType: SourceType): string {
     return `https://t.me/${handle}`
   } else if (sourceType === 'instagram') {
     return `https://instagram.com/${handle}`
+  } else if (sourceType === 'twitter') {
+    return `https://x.com/${handle}`
   }
 
   throw new Error(`Unsupported source type: ${sourceType}`)

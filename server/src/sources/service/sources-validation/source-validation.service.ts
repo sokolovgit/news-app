@@ -19,6 +19,13 @@ const INSTAGRAM_HOSTS = new Set([
   'www.instagram.com',
   'm.instagram.com',
 ]);
+const TWITTER_HOSTS = new Set([
+  'twitter.com',
+  'www.twitter.com',
+  'mobile.twitter.com',
+  'x.com',
+  'www.x.com',
+]);
 
 // Common RSS feed file extensions and path patterns
 const RSS_PATH_PATTERNS = [
@@ -199,6 +206,42 @@ export class SourcesValidationService {
       };
     }
 
+    if (TWITTER_HOSTS.has(host)) {
+      if (segments.length === 0) {
+        throw new InvalidSourceUrlError(
+          url.toString(),
+          'Twitter/X username missing',
+        );
+      }
+
+      const username = segments[0];
+
+      // Skip special Twitter paths
+      const reservedPaths = [
+        'home',
+        'explore',
+        'notifications',
+        'messages',
+        'settings',
+        'i',
+        'search',
+        'compose',
+        'intent',
+        'hashtag',
+      ];
+      if (reservedPaths.includes(username.toLowerCase())) {
+        throw new InvalidSourceUrlError(
+          url.toString(),
+          'Invalid Twitter/X profile URL',
+        );
+      }
+
+      return {
+        name: username,
+        source: PublicSource.TWITTER,
+      };
+    }
+
     // Check for RSS feed patterns
     if (this.isRssFeedUrl(url)) {
       const feedName = this.extractRssFeedName(url);
@@ -210,7 +253,7 @@ export class SourcesValidationService {
 
     throw new InvalidSourceUrlError(
       url.toString(),
-      'Unsupported source type. Only Telegram, Instagram, and RSS feeds are supported.',
+      'Unsupported source type. Only Telegram, Instagram, Twitter/X, and RSS feeds are supported.',
     );
   }
 

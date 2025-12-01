@@ -8,7 +8,7 @@
       </Button>
       <h1 class="text-3xl font-bold text-foreground">Add Source</h1>
       <p class="text-muted-foreground mt-1">
-        Add Telegram channels, Instagram accounts, or RSS feeds to your feed
+        Add Telegram channels, Instagram accounts, Twitter/X profiles, or RSS feeds to your feed
       </p>
     </div>
 
@@ -20,9 +20,10 @@
       </CardHeader>
       <CardContent>
         <Tabs v-model="selectedType" class="w-full">
-          <TabsList class="grid w-full grid-cols-3">
+          <TabsList class="grid w-full grid-cols-4">
             <TabsTrigger value="telegram">Telegram</TabsTrigger>
             <TabsTrigger value="instagram">Instagram</TabsTrigger>
+            <TabsTrigger value="twitter">Twitter/X</TabsTrigger>
             <TabsTrigger value="rss">RSS Feed</TabsTrigger>
           </TabsList>
           <TabsContent value="telegram" class="mt-4">
@@ -43,6 +44,17 @@
                 <p class="font-medium text-foreground">Instagram Account</p>
                 <p class="text-sm text-muted-foreground">
                   Follow an Instagram account to see their posts in your feed.
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="twitter" class="mt-4">
+            <div class="flex items-start gap-3 p-4 bg-card rounded-lg border border-border">
+              <Icon name="lucide:twitter" class="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p class="font-medium text-foreground">Twitter/X Account</p>
+                <p class="text-sm text-muted-foreground">
+                  Follow a Twitter/X account to see their tweets in your feed.
                 </p>
               </div>
             </div>
@@ -182,6 +194,7 @@ const validationStatus = ref<{
 
 const previewIcon = computed(() => {
   if (selectedType.value === 'instagram') return 'lucide:instagram'
+  if (selectedType.value === 'twitter') return 'lucide:twitter'
   if (selectedType.value === 'rss') return 'lucide:rss'
   return 'lucide:send'
 })
@@ -190,6 +203,8 @@ const urlPlaceholder = computed(() => {
   switch (selectedType.value) {
     case 'instagram':
       return 'Instagram username (e.g., @username)'
+    case 'twitter':
+      return 'Twitter/X username (e.g., @username)'
     case 'rss':
       return 'RSS feed URL (e.g., https://example.com/feed)'
     default:
@@ -213,6 +228,14 @@ const validateUrl = () => {
 
     if (!instagramPattern.test(trimmed.replace('@', '')) && !urlPattern.test(trimmed)) {
       urlError.value = 'Please enter a valid Instagram username (e.g., @username) or URL'
+    }
+  } else if (selectedType.value === 'twitter') {
+    // Twitter/X username validation - allow @username or full URL
+    const twitterPattern = /^@?[a-zA-Z0-9_]+$/
+    const urlPattern = /^https?:\/\/(www\.)?(twitter\.com|x\.com)\/[a-zA-Z0-9_]+/
+
+    if (!twitterPattern.test(trimmed.replace('@', '')) && !urlPattern.test(trimmed)) {
+      urlError.value = 'Please enter a valid Twitter/X username (e.g., @username) or URL'
     }
   } else if (selectedType.value === 'rss') {
     // RSS feed validation - must be a valid URL

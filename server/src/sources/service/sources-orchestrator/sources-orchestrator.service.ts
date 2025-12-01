@@ -23,6 +23,8 @@ export class SourcesOrchestratorService {
     private readonly telegramQueue: Queue<CollectorJobData>,
     @InjectQueue(SourceQueue.RSS_FETCHER)
     private readonly rssQueue: Queue<CollectorJobData>,
+    @InjectQueue(SourceQueue.TWITTER_FETCHER)
+    private readonly twitterQueue: Queue<CollectorJobData>,
   ) {}
 
   /**
@@ -128,6 +130,10 @@ export class SourcesOrchestratorService {
         await this.rssQueue.add('fetch-rss', jobData, jobOptions);
         break;
 
+      case PublicSource.TWITTER:
+        await this.twitterQueue.add('fetch-twitter', jobData, jobOptions);
+        break;
+
       default: {
         this.logger.error(`Unknown source type ${String(sourceType)}`);
         throw new Error(`Unknown source type ${String(sourceType)}`);
@@ -139,6 +145,7 @@ export class SourcesOrchestratorService {
    * Extract externalId from URL based on source type
    * For Instagram: extract username from URL
    * For Telegram: extract channel/username from URL
+   * For Twitter: extract username from URL
    * For RSS: use the full URL as externalId
    */
   private extractExternalId(url: string, sourceType: PublicSource): string {
@@ -155,6 +162,14 @@ export class SourcesOrchestratorService {
         // Examples: https://t.me/channel -> channel
         const telegramMatch = url.match(/t\.me\/([^/?#]+)/);
         return telegramMatch ? telegramMatch[1] : url;
+      }
+
+      case PublicSource.TWITTER: {
+        // Extract username from Twitter/X URL
+        // Examples: https://twitter.com/nasa -> nasa
+        // Examples: https://x.com/nasa -> nasa
+        const twitterMatch = url.match(/(?:twitter\.com|x\.com)\/([^/?#]+)/);
+        return twitterMatch ? twitterMatch[1] : url;
       }
 
       case PublicSource.RSS: {
@@ -181,6 +196,9 @@ export class SourcesOrchestratorService {
 
       case PublicSource.RSS:
         return this.configService.bullmq[SourceQueue.RSS_FETCHER];
+
+      case PublicSource.TWITTER:
+        return this.configService.bullmq[SourceQueue.TWITTER_FETCHER];
 
       default:
         this.logger.error(`Unknown source type ${String(sourceType)}`);

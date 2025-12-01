@@ -6,6 +6,7 @@ export enum SourceQueue {
   INSTAGRAM_FETCHER = 'sources.instagram-fetcher',
   TELEGRAM_FETCHER = 'sources.telegram-fetcher',
   RSS_FETCHER = 'sources.rss-fetcher',
+  TWITTER_FETCHER = 'sources.twitter-fetcher',
 
   FETCH_RESULTS = 'sources.fetch-results',
 }
