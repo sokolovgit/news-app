@@ -20,26 +20,26 @@
           variant="outline"
           size="sm"
           class="gap-2 border-border/50 hover:border-primary/30"
-          :class="{ 'bg-primary/10 border-primary/50': isSelectionMode }"
-          @click="toggleSelectionMode"
+          :class="{ 'bg-primary/10 border-primary/50': feedStore.isSelectionMode }"
+          @click="feedStore.toggleSelectionMode"
         >
           <Icon
             name="lucide:check-square"
             class="h-4 w-4"
-            :class="{ 'text-primary': isSelectionMode }"
+            :class="{ 'text-primary': feedStore.isSelectionMode }"
           />
-          {{ isSelectionMode ? 'Cancel' : 'Select' }}
+          {{ feedStore.isSelectionMode ? 'Cancel' : 'Select' }}
         </Button>
         <Button
           variant="outline"
           size="sm"
           class="gap-2 border-border/50 hover:border-primary/30"
-          @click="refreshFeed"
+          @click="feedStore.refreshPosts"
         >
           <Icon
             name="lucide:refresh-cw"
             class="h-4 w-4"
-            :class="{ 'animate-spin': isRefreshing }"
+            :class="{ 'animate-spin': feedStore.isRefreshing }"
           />
           Refresh
         </Button>
@@ -71,7 +71,10 @@
       class="flex flex-wrap items-center justify-between gap-4 p-4 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50"
     >
       <div class="flex flex-wrap items-center gap-3">
-        <Select v-model="selectedSource" @update:model-value="handleSourceFilter">
+        <Select 
+          v-model="feedStore.filters.sourceId" 
+          @update:model-value="handleSourceFilter"
+        >
           <SelectTrigger class="w-[180px] border-border/50 bg-background/50">
             <div class="flex items-center gap-2">
               <Icon name="lucide:layers" class="h-4 w-4 text-muted-foreground" />
@@ -80,12 +83,19 @@
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Sources</SelectItem>
-            <SelectItem v-for="source in sources" :key="source.id" :value="source.id">
+            <SelectItem 
+              v-for="source in feedStore.userSources" 
+              :key="source.id" 
+              :value="source.id"
+            >
               {{ source.name }}
             </SelectItem>
           </SelectContent>
         </Select>
-        <Select v-model="sortBy" @update:model-value="handleSort">
+        <Select 
+          v-model="feedStore.filters.sortBy" 
+          @update:model-value="handleSort"
+        >
           <SelectTrigger class="w-[160px] border-border/50 bg-background/50">
             <div class="flex items-center gap-2">
               <Icon name="lucide:arrow-up-down" class="h-4 w-4 text-muted-foreground" />
@@ -95,7 +105,6 @@
           <SelectContent>
             <SelectItem value="newest">Newest First</SelectItem>
             <SelectItem value="oldest">Oldest First</SelectItem>
-            <SelectItem value="source">By Source</SelectItem>
           </SelectContent>
         </Select>
         <div class="relative">
@@ -104,27 +113,28 @@
             class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
           />
           <Input
-            v-model="searchQuery"
+            v-model="feedStore.filters.search"
             placeholder="Search posts..."
             class="pl-9 w-[200px] md:w-[280px] border-border/50 bg-background/50"
+            @keyup.enter="handleSearch"
           />
         </div>
       </div>
       <!-- Pagination in Filters Block -->
-      <div v-if="totalPages > 1 && !isLoading && posts.length > 0" class="flex items-center">
+      <div v-if="feedStore.totalPages > 1 && !feedStore.isLoading && feedStore.posts.length > 0" class="flex items-center">
         <Pagination
-          :total="total"
-          :items-per-page="limit"
-          :page="currentPage"
-          @update:page="handlePageChange"
+          :total="feedStore.pagination.total"
+          :items-per-page="feedStore.pagination.limit"
+          :page="feedStore.currentPage"
+          @update:page="feedStore.goToPage"
         >
           <PaginationContent>
             <PaginationPrevious />
             <PaginationItem
-              v-for="page in visiblePages"
+              v-for="page in feedStore.visiblePages"
               :key="page"
               :value="page"
-              :is-active="page === currentPage"
+              :is-active="page === feedStore.currentPage"
             >
               {{ page }}
             </PaginationItem>
@@ -136,7 +146,7 @@
 
     <!-- Loading State -->
     <div
-      v-if="isLoading && posts.length === 0"
+      v-if="feedStore.isLoading && feedStore.posts.length === 0"
       :class="viewMode === 'grid' ? 'grid gap-5 md:grid-cols-2 lg:grid-cols-3' : 'grid gap-5 grid-cols-1 lg:grid-cols-2'"
     >
       <PostCardSkeleton v-for="i in 6" :key="i" />
@@ -144,7 +154,7 @@
 
     <!-- Empty State -->
     <div
-      v-else-if="!isLoading && filteredPosts.length === 0"
+      v-else-if="!feedStore.isLoading && feedStore.posts.length === 0"
       class="text-center py-16 px-4"
     >
       <div
@@ -155,21 +165,21 @@
       <h3 class="text-xl font-semibold text-foreground mb-2">No posts yet</h3>
       <p class="text-muted-foreground mb-8 max-w-md mx-auto">
         {{
-          searchQuery
+          feedStore.filters.search
             ? 'No posts match your search. Try different keywords.'
-            : selectedSource !== 'all'
+            : feedStore.filters.sourceId !== 'all'
               ? 'No posts found for the selected source.'
-              : sources.length === 0
+              : feedStore.userSources.length === 0
                 ? 'Add sources to start seeing posts in your feed. Posts will appear here once your sources are fetched.'
                 : 'Your sources have been added, but no posts have been fetched yet. Posts will appear here once they are available.'
         }}
       </p>
       <div class="flex gap-3 justify-center">
-        <Button v-if="!searchQuery" class="gap-2" @click="navigateTo('/sources/add')">
+        <Button v-if="!feedStore.filters.search" class="gap-2" @click="navigateTo('/sources/add')">
           <Icon name="lucide:plus-circle" class="h-4 w-4" />
-          {{ sources.length === 0 ? 'Add Your First Source' : 'Add More Sources' }}
+          {{ feedStore.userSources.length === 0 ? 'Add Your First Source' : 'Add More Sources' }}
         </Button>
-        <Button v-if="sources.length > 0" variant="outline" class="gap-2" @click="refreshFeed">
+        <Button v-if="feedStore.userSources.length > 0" variant="outline" class="gap-2" @click="feedStore.refreshPosts">
           <Icon name="lucide:refresh-cw" class="h-4 w-4" />
           Refresh Feed
         </Button>
@@ -182,11 +192,11 @@
       :class="viewMode === 'grid' ? 'grid gap-5 md:grid-cols-2 lg:grid-cols-3' : 'grid gap-5 grid-cols-1 lg:grid-cols-2'"
     >
       <PostPreviewCard
-        v-for="post in filteredPosts"
+        v-for="post in feedStore.posts"
         :key="post.id"
         :post="post"
-        :selectable="isSelectionMode"
-        :is-selected="selectedPostIds.has(post.id)"
+        :selectable="feedStore.isSelectionMode"
+        :is-selected="feedStore.selectedPostIds.has(post.id)"
         @click="handlePostClick"
         @toggle-select="handleToggleSelect"
       />
@@ -194,15 +204,15 @@
 
     <!-- Selection Footer -->
     <div
-      v-if="isSelectionMode && selectedPostIds.size > 0"
+      v-if="feedStore.isSelectionMode && feedStore.selectedPostIds.size > 0"
       class="fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur-sm border-t border-border p-4 z-50"
     >
       <div class="container mx-auto flex items-center justify-between max-w-7xl">
         <div class="flex items-center gap-3">
           <Badge variant="secondary" class="text-sm">
-            {{ selectedPostIds.size }} selected
+            {{ feedStore.selectedPostIds.size }} selected
           </Badge>
-          <Button variant="ghost" size="sm" @click="clearSelection">
+          <Button variant="ghost" size="sm" @click="feedStore.clearSelection">
             Clear
           </Button>
         </div>
@@ -214,20 +224,20 @@
     </div>
 
     <!-- Pagination -->
-    <div v-if="totalPages > 1 && !isLoading" class="flex justify-center">
+    <div v-if="feedStore.totalPages > 1 && !feedStore.isLoading" class="flex justify-center">
       <Pagination
-        :total="total"
-        :items-per-page="limit"
-        :page="currentPage"
-        @update:page="handlePageChange"
+        :total="feedStore.pagination.total"
+        :items-per-page="feedStore.pagination.limit"
+        :page="feedStore.currentPage"
+        @update:page="feedStore.goToPage"
       >
         <PaginationContent>
           <PaginationPrevious />
           <PaginationItem
-            v-for="page in visiblePages"
+            v-for="page in feedStore.visiblePages"
             :key="page"
             :value="page"
-            :is-active="page === currentPage"
+            :is-active="page === feedStore.currentPage"
           >
             {{ page }}
           </PaginationItem>
@@ -258,9 +268,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
-import { useApi } from '~/composables/useApi'
-import { FeedService } from '~/lib/api'
-import type { FeedPost, SourceDto, GetFeedQuery } from '~/types/posts.types'
+import { useFeedStore } from '~/stores/feed.store'
+import type { FeedPost } from '~/types/posts.types'
 import { useDebounce } from '~/composables/useDebounce'
 import { toast } from 'vue-sonner'
 
@@ -268,231 +277,59 @@ definePageMeta({
   layout: 'default',
 })
 
-const api = useApi()
-const feedService = new FeedService(api)
+const feedStore = useFeedStore()
 
 const viewMode = ref<'list' | 'grid'>('list')
-const selectedSource = ref('all')
-const sortBy = ref('newest')
-const searchQuery = ref('')
-const isLoading = ref(false)
-const isRefreshing = ref(false)
-const posts = ref<FeedPost[]>([])
-const sources = ref<SourceDto[]>([])
-const total = ref(0)
-const currentPage = ref(1)
-const limit = 20
-
-// Selection mode
-const isSelectionMode = ref(false)
-const selectedPostIds = ref<Set<string>>(new Set())
 
 // Debounce search query
-const debouncedSearchQuery = useDebounce(searchQuery, 500)
+const debouncedSearch = useDebounce(toRef(feedStore.filters, 'search'), 500)
 
-
-// Extract unique sources from posts
-const extractSources = (posts: FeedPost[]) => {
-  const sourceMap = new Map<string, SourceDto>()
-  posts.forEach((post) => {
-    if (post.source && !sourceMap.has(post.source.id)) {
-      sourceMap.set(post.source.id, post.source)
-    }
-  })
-  return Array.from(sourceMap.values())
+const handleSourceFilter = async () => {
+  await feedStore.applyFilters()
 }
 
-// Calculate total pages
-const totalPages = computed(() => {
-  return Math.ceil(total.value / limit)
-})
-
-// Calculate visible pages for pagination
-const visiblePages = computed(() => {
-  const pages: (number | string)[] = []
-  const total = totalPages.value
-  const current = currentPage.value
-
-  if (total <= 7) {
-    // Show all pages if 7 or fewer
-    for (let i = 1; i <= total; i++) {
-      pages.push(i)
-    }
-  } else {
-    // Always show first page
-    pages.push(1)
-
-    if (current > 3) {
-      pages.push('ellipsis-start')
-    }
-
-    // Show pages around current
-    const start = Math.max(2, current - 1)
-    const end = Math.min(total - 1, current + 1)
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i)
-    }
-
-    if (current < total - 2) {
-      pages.push('ellipsis-end')
-    }
-
-    // Always show last page
-    pages.push(total)
-  }
-
-  return pages.filter((p) => typeof p === 'number') as number[]
-})
-
-// Build query params
-const buildQuery = (page: number): GetFeedQuery => {
-  const query: GetFeedQuery = {
-    offset: (page - 1) * limit,
-    limit,
-  }
-
-  if (sortBy.value === 'newest') {
-    query.sortField = 'createdAt'
-    query.sortOrder = 'desc'
-  } else if (sortBy.value === 'oldest') {
-    query.sortField = 'createdAt'
-    query.sortOrder = 'asc'
-  }
-
-  if (debouncedSearchQuery.value) {
-    query.search = debouncedSearchQuery.value
-  }
-
-  return query
+const handleSort = async () => {
+  await feedStore.applyFilters()
 }
 
-// Filter posts by source client-side (since backend doesn't support sourceIds filter)
-const filteredPosts = computed(() => {
-  if (selectedSource.value === 'all') {
-    return posts.value
-  }
-  return posts.value.filter((post) => post.sourceId === selectedSource.value)
-})
-
-// Fetch feed posts
-const fetchFeed = async (page: number) => {
-  try {
-    const query = buildQuery(page)
-    console.log('Fetching feed with query:', query)
-
-    isLoading.value = true
-    const response = await feedService.getFeed(query)
-    console.log('Feed response:', response)
-
-    posts.value = response.data
-    total.value = response.total
-    currentPage.value = page
-
-    // Extract sources from posts
-    const extractedSources = extractSources(response.data)
-    extractedSources.forEach((source) => {
-      if (!sources.value.find((s) => s.id === source.id)) {
-        sources.value.push(source)
-      }
-    })
-
-    // Log if no posts found
-    if (response.data.length === 0) {
-      console.log('No posts found in feed. Total:', response.total)
-    }
-
-    return response
-  } catch (error) {
-    console.error('Failed to fetch feed:', error)
-
-    // More detailed error logging
-    if (error instanceof Error) {
-      console.error('Error message:', error.message)
-      console.error('Error stack:', error.stack)
-    }
-
-    toast.error('Error', {
-      description:
-        error instanceof Error ? error.message : 'Failed to load feed. Please try again.',
-    })
-    throw error
-  } finally {
-    isLoading.value = false
-  }
-}
-
-const refreshFeed = async () => {
-  isRefreshing.value = true
-  try {
-    currentPage.value = 1
-    await fetchFeed(1)
-  } finally {
-    isRefreshing.value = false
-  }
-}
-
-const handleSourceFilter = () => {
-  currentPage.value = 1
-  fetchFeed(1)
-}
-
-const handleSort = () => {
-  currentPage.value = 1
-  fetchFeed(1)
+const handleSearch = async () => {
+  await feedStore.applyFilters()
 }
 
 // Watch debounced search query
-watch(debouncedSearchQuery, () => {
-  currentPage.value = 1
-  fetchFeed(1)
+watch(debouncedSearch, async () => {
+  await feedStore.applyFilters()
 })
 
-const handlePageChange = (page: number) => {
-  currentPage.value = page
-  fetchFeed(page)
-  // Scroll to top of page
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
 const handlePostClick = (post: FeedPost) => {
-  if (!isSelectionMode.value) {
+  if (!feedStore.isSelectionMode) {
     navigateTo(`/posts/${post.id}`)
   }
 }
 
-const toggleSelectionMode = () => {
-  isSelectionMode.value = !isSelectionMode.value
-  if (!isSelectionMode.value) {
-    selectedPostIds.value.clear()
-  }
-}
-
 const handleToggleSelect = (post: FeedPost) => {
-  if (selectedPostIds.value.has(post.id)) {
-    selectedPostIds.value.delete(post.id)
-  } else {
-    selectedPostIds.value.add(post.id)
-  }
-  // Trigger reactivity
-  selectedPostIds.value = new Set(selectedPostIds.value)
-}
-
-const clearSelection = () => {
-  selectedPostIds.value.clear()
-  selectedPostIds.value = new Set()
+  feedStore.togglePostSelection(post.id)
 }
 
 const createArticleFromSelection = () => {
-  const ids = Array.from(selectedPostIds.value)
+  const ids = Array.from(feedStore.selectedPostIds)
   navigateTo({
     path: '/articles/create',
     query: { sourcePostIds: ids },
   })
 }
 
-// Fetch posts on mount
+// Fetch posts and user sources on mount
 onMounted(async () => {
-  await fetchFeed(1)
+  try {
+    await Promise.all([
+      feedStore.fetchPosts(1),
+      feedStore.fetchUserSources(),
+    ])
+  } catch (error) {
+    toast.error('Error', {
+      description: error instanceof Error ? error.message : 'Failed to load feed. Please try again.',
+    })
+  }
 })
 </script>

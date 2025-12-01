@@ -4,6 +4,8 @@
 
 import type { ApiClient } from './api-client'
 
+export type SourceType = 'telegram' | 'instagram' | 'rss' | 'twitter'
+
 export interface ValidateSourceRequest {
   url: string
 }
@@ -11,7 +13,7 @@ export interface ValidateSourceRequest {
 export interface ValidateSourceResponse {
   url: string
   name: string
-  source: 'telegram' | 'instagram' | 'rss'
+  source: SourceType
 }
 
 export interface AddSourceRequest {
@@ -23,7 +25,7 @@ export interface AddSourceResponse {
     id: string
     name: string
     url: string
-    source: 'telegram' | 'instagram' | 'rss'
+    source: SourceType
   }
   userSource: {
     id: string
@@ -42,7 +44,7 @@ export interface UserSourceResponse {
     id: string
     name: string
     url: string
-    source: 'telegram' | 'instagram' | 'rss'
+    source: SourceType
     addedBy?: string
     createdAt?: string
     updatedAt?: string
@@ -54,6 +56,8 @@ export interface UserSourceResponse {
 export interface GetUserSourcesParams {
   offset?: number
   limit?: number
+  search?: string
+  sourceType?: SourceType
 }
 
 export interface GetUserSourcesResponse {
@@ -67,6 +71,8 @@ export interface GetUserSourcesResponse {
 export interface GetAllSourcesParams {
   offset?: number
   limit?: number
+  search?: string
+  sourceType?: SourceType
 }
 
 export interface SourceWithSubscriptionStatusResponse {
@@ -74,7 +80,7 @@ export interface SourceWithSubscriptionStatusResponse {
     id: string
     name: string
     url: string
-    source: 'telegram' | 'instagram' | 'rss'
+    source: SourceType
     addedBy?: string
     createdAt?: string
     updatedAt?: string
@@ -118,6 +124,12 @@ export class SourcesService {
     if (params?.limit !== undefined) {
       queryParams.limit = params.limit
     }
+    if (params?.search) {
+      queryParams.search = params.search
+    }
+    if (params?.sourceType) {
+      queryParams.sourceType = params.sourceType
+    }
     return this.apiClient.get<GetUserSourcesResponse>('/sources/user', queryParams)
   }
 
@@ -132,7 +144,19 @@ export class SourcesService {
     if (params?.limit !== undefined) {
       queryParams.limit = params.limit
     }
+    if (params?.search) {
+      queryParams.search = params.search
+    }
+    if (params?.sourceType) {
+      queryParams.sourceType = params.sourceType
+    }
     return this.apiClient.get<GetAllSourcesResponse>('/sources', queryParams)
   }
-}
 
+  /**
+   * Get distinct source types from user's subscribed sources
+   */
+  async getUserSourceTypes(): Promise<SourceType[]> {
+    return this.apiClient.get<SourceType[]>('/sources/user/types')
+  }
+}

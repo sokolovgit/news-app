@@ -4,7 +4,7 @@ import { LoadState, PaginatedResult, PaginationParams } from '@/commons/types';
 import { uuid } from '@/commons/utils';
 
 import { LoggerService } from '@/logger';
-import { SourcesRepository } from '../abstracts';
+import { SourcesRepository, SourcesFilterParams } from '../abstracts';
 import { SourceId } from '@/sources/domain/schemas';
 import { Source, SourceLoadOptions } from '@/sources/domain/entities';
 import { SourceStatus } from '@/sources/domain/enums';
@@ -109,6 +109,21 @@ export class SourcesService {
       `Getting sources paginated: offset=${params.offset}, limit=${params.limit}`,
     );
     return this.sourcesRepository.findAllPaginated(params, loadOptions);
+  }
+
+  async findAllPaginatedFiltered(
+    params: PaginationParams,
+    filters?: SourcesFilterParams,
+    loadOptions: SourceLoadOptions = {},
+  ): Promise<PaginatedResult<Source>> {
+    this.logger.debug(
+      `Getting sources paginated with filters: offset=${params.offset}, limit=${params.limit}, search=${filters?.search}, sourceType=${filters?.sourceType}`,
+    );
+    return this.sourcesRepository.findAllPaginatedFiltered(
+      params,
+      filters,
+      loadOptions,
+    );
   }
 
   async updateMetadata(

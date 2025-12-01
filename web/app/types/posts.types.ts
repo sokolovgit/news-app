@@ -73,5 +73,5 @@ export interface GetFeedQuery {
   dateTo?: string
   offset?: number
   limit?: number
+  sourceIds?: string[]
 }
-

@@ -20,6 +20,7 @@ export type GetRawPostsParams = {
   dateTo?: Date;
   offset: number;
   limit: number;
+  sourceIds?: SourceId[];
 };
 
 export abstract class RawPostsRepository {

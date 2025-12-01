@@ -4,7 +4,10 @@ import { uuid } from '@/commons/utils';
 import { LoadState, PaginatedResult, PaginationParams } from '@/commons/types';
 
 import { LoggerService } from '@/logger';
-import { UserSourcesRepository } from '../abstracts';
+import {
+  UserSourcesRepository,
+  UserSourcesFilterParams,
+} from '../abstracts';
 
 import {
   UserSource,
@@ -14,6 +17,7 @@ import { UserId } from '@/users/domain/schemas';
 import { SourceId } from '@/sources/domain/schemas';
 import { UserSourceId } from '@/user-sources/domain/schemas';
 import { UserSourceCreationFailedError } from '@/user-sources/domain/errors';
+import { PublicSource } from '@/sources/domain/enums';
 
 import { LinkResult } from './types/link-result.type';
 
@@ -107,5 +111,27 @@ export class UserSourcesService {
       params,
       loadOptions,
     );
+  }
+
+  async getAllByUserPaginatedFiltered(
+    userId: UserId,
+    params: PaginationParams,
+    loadOptions?: UserSourceLoadOptions,
+    filters?: UserSourcesFilterParams,
+  ): Promise<PaginatedResult<UserSource>> {
+    this.logger.debug(
+      `Getting paginated filtered user sources for user ${userId}: offset=${params.offset}, limit=${params.limit}, search=${filters?.search}, sourceType=${filters?.sourceType}`,
+    );
+    return await this.userSourcesRepository.findAllByUserPaginatedFiltered(
+      userId,
+      params,
+      loadOptions,
+      filters,
+    );
+  }
+
+  async getDistinctSourceTypes(userId: UserId): Promise<PublicSource[]> {
+    this.logger.debug(`Getting distinct source types for user ${userId}`);
+    return this.userSourcesRepository.getDistinctSourceTypesByUser(userId);
   }
 }

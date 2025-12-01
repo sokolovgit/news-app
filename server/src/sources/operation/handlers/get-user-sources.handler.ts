@@ -22,13 +22,21 @@ export class GetUserSourcesHandler {
       `Handling get user sources request for user ${request.userId}, offset=${request.pagination.offset}, limit=${request.pagination.limit}`,
     );
 
-    const paginatedResult = await this.userSourcesService.getAllByUserPaginated(
-      request.userId,
-      request.pagination,
-      {
-        withSource: true,
-      },
-    );
+    if (request.filters) {
+      this.logger.log(
+        `Filters: search=${request.filters.search}, sourceType=${request.filters.sourceType}`,
+      );
+    }
+
+    const paginatedResult =
+      await this.userSourcesService.getAllByUserPaginatedFiltered(
+        request.userId,
+        request.pagination,
+        {
+          withSource: true,
+        },
+        request.filters,
+      );
 
     return createPaginatedResult(
       paginatedResult.data,

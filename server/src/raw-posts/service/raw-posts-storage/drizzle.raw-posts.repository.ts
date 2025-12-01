@@ -146,6 +146,11 @@ export class DrizzleRawPostsRepository extends RawPostsRepository {
       conditions.push(lte(rawPosts.createdAt, params.dateTo));
     }
 
+    // Filter by source IDs if provided
+    if (params.sourceIds && params.sourceIds.length > 0) {
+      conditions.push(inArray(rawPosts.sourceId, params.sourceIds));
+    }
+
     // Always filter out banned posts
     conditions.push(eq(rawPosts.isBanned, false));
 

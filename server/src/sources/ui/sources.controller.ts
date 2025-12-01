@@ -1,9 +1,10 @@
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 import { Auth } from '@/auth/decorators/auth.decorator';
 import { CurrentUser } from '@/users/decorators';
 import { User } from '@/users/domain/entities';
+import { PublicSource } from '@/sources/domain/enums';
 
 import {
   AddSourceDto,
@@ -19,6 +20,7 @@ import {
   ValidateSourceHandler,
   GetUserSourcesHandler,
   GetAllSourcesHandler,
+  GetUserSourceTypesHandler,
 } from '../operation/handlers';
 
 @Controller('sources')
@@ -28,6 +30,7 @@ export class SourcesController {
     private readonly validateSourceHandler: ValidateSourceHandler,
     private readonly getUserSourcesHandler: GetUserSourcesHandler,
     private readonly getAllSourcesHandler: GetAllSourcesHandler,
+    private readonly getUserSourceTypesHandler: GetUserSourceTypesHandler,
   ) {}
 
   @Post()
@@ -73,6 +76,23 @@ export class SourcesController {
     );
 
     return GetUserSourcesResponseDto.fromResponse(response);
+  }
+
+  @Get('user/types')
+  @Auth()
+  @ApiOperation({
+    summary: 'Get user source types',
+    description: 'Get distinct source types from user subscribed sources',
+  })
+  @ApiOkResponse({
+    description: 'List of source types',
+    type: [String],
+    isArray: true,
+  })
+  public async getUserSourceTypes(
+    @CurrentUser() user: User,
+  ): Promise<PublicSource[]> {
+    return this.getUserSourceTypesHandler.handle(user.getId());
   }
 
   @Get()

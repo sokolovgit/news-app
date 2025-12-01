@@ -24,9 +24,16 @@ export class GetAllSourcesHandler {
       `Handling get all sources request for user ${request.userId}, offset=${request.pagination.offset}, limit=${request.pagination.limit}`,
     );
 
-    // Get all sources paginated
-    const paginatedSources = await this.sourcesService.findAllPaginated(
+    if (request.filters) {
+      this.logger.log(
+        `Filters: search=${request.filters.search}, sourceType=${request.filters.sourceType}`,
+      );
+    }
+
+    // Get all sources paginated with filters
+    const paginatedSources = await this.sourcesService.findAllPaginatedFiltered(
       request.pagination,
+      request.filters,
     );
 
     // Get all source IDs that the user is subscribed to

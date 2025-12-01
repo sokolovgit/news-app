@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { eq, sql, and } from 'drizzle-orm';
+import { eq, sql, and, ilike } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 
@@ -10,7 +10,7 @@ import {
   createPaginatedResult,
 } from '@/commons/types';
 
-import { SourcesRepository } from '../abstracts';
+import { SourcesRepository, SourcesFilterParams } from '../abstracts';
 import { DrizzleSourcesEntityMapper } from './mappers';
 
 import { SourceId, sources } from '@/sources/domain/schemas';
@@ -83,6 +83,43 @@ export class DrizzleSourcesRepository extends SourcesRepository {
   ): Promise<PaginatedResult<Source>> {
     const result = await this.db.query.sources.findMany({
       where: eq(sources.isBanned, false),
+      offset: params.offset,
+      limit: params.limit,
+      with: this.buildRelations(loadOptions),
+      extras: {
+        total: sql<number>`count(*) over()`.as('total'),
+      },
+    });
+
+    const total = result[0]?.total ?? 0;
+
+    const data = result.map((source) =>
+      DrizzleSourcesEntityMapper.toEntity(source, loadOptions),
+    );
+
+    return createPaginatedResult(data, total, params);
+  }
+
+  async findAllPaginatedFiltered(
+    params: PaginationParams,
+    filters?: SourcesFilterParams,
+    loadOptions: SourceLoadOptions = {},
+  ): Promise<PaginatedResult<Source>> {
+    const conditions = [eq(sources.isBanned, false)];
+
+    if (filters?.search) {
+      const searchPattern = `%${filters.search}%`;
+      conditions.push(ilike(sources.name, searchPattern));
+    }
+
+    if (filters?.sourceType) {
+      conditions.push(eq(sources.source, filters.sourceType));
+    }
+
+    const whereClause = and(...conditions);
+
+    const result = await this.db.query.sources.findMany({
+      where: whereClause,
       offset: params.offset,
       limit: params.limit,
       with: this.buildRelations(loadOptions),

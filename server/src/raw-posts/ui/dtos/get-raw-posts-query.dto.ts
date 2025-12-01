@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsEnum } from 'class-validator';
+import { IsOptional, IsEnum, IsArray, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 import { BaseQueryDto, SortOrder } from '@/commons/types';
 import { GetRawPostsRequest } from '@/raw-posts/operation/requests';
@@ -8,6 +9,7 @@ import {
   RAW_POSTS_SORT_FIELDS,
 } from '@/raw-posts/service/abstracts';
 import { User } from '@/users/domain/entities';
+import { SourceId } from '@/sources/domain/schemas';
 
 export class GetRawPostsQueryDto extends BaseQueryDto {
   @IsOptional()
@@ -33,6 +35,23 @@ export class GetRawPostsQueryDto extends BaseQueryDto {
   })
   sortOrder?: SortOrder;
 
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.split(',').filter(Boolean);
+    }
+    return value;
+  })
+  @ApiProperty({
+    description: 'Filter by source IDs (comma-separated or array)',
+    required: false,
+    type: [String],
+    example: ['source-id-1', 'source-id-2'],
+  })
+  sourceIds?: SourceId[];
+
   toRequest(user: User): GetRawPostsRequest {
     const pagination = this.toPaginationParams();
     const dateRange = this.toDateRange();
@@ -50,6 +69,7 @@ export class GetRawPostsQueryDto extends BaseQueryDto {
           : undefined,
       dateFrom: dateRange?.from,
       dateTo: dateRange?.to,
+      sourceIds: this.sourceIds,
     } as GetRawPostsRequest;
   }
 }

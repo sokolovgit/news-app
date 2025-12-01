@@ -1,7 +1,12 @@
 import { SourceId } from '@/sources/domain/schemas';
 import { Source, SourceLoadOptions } from '@/sources/domain/entities';
-import { SourceStatus } from '@/sources/domain/enums';
+import { PublicSource, SourceStatus } from '@/sources/domain/enums';
 import { PaginatedResult, PaginationParams } from '@/commons/types';
+
+export interface SourcesFilterParams {
+  search?: string;
+  sourceType?: PublicSource;
+}
 
 export abstract class SourcesRepository {
   abstract getSourceById(
@@ -20,6 +25,12 @@ export abstract class SourcesRepository {
 
   abstract findAllPaginated(
     params: PaginationParams,
+    loadOptions?: SourceLoadOptions,
+  ): Promise<PaginatedResult<Source>>;
+
+  abstract findAllPaginatedFiltered(
+    params: PaginationParams,
+    filters?: SourcesFilterParams,
     loadOptions?: SourceLoadOptions,
   ): Promise<PaginatedResult<Source>>;
 

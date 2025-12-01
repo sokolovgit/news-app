@@ -24,6 +24,7 @@ export class GetRawPostsHandler {
     this.logger.logProcessProgress(processId, process, 'Fetching raw posts', {
       search: request.search,
       sort: request.sort,
+      sourceIds: request.sourceIds,
     });
 
     const result = await this.rawPostsService.getRawPosts(
@@ -34,6 +35,7 @@ export class GetRawPostsHandler {
         dateTo: request.dateTo,
         offset: request.offset,
         limit: request.limit,
+        sourceIds: request.sourceIds,
       },
       { withSource: true },
     );

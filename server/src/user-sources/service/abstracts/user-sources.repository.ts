@@ -5,6 +5,12 @@ import {
 import { SourceId } from '@/sources/domain/schemas';
 import { UserId } from '@/users/domain/schemas';
 import { PaginatedResult, PaginationParams } from '@/commons/types';
+import { PublicSource } from '@/sources/domain/enums';
+
+export interface UserSourcesFilterParams {
+  search?: string;
+  sourceType?: PublicSource;
+}
 
 export abstract class UserSourcesRepository {
   abstract findByUserAndSource(
@@ -27,4 +33,13 @@ export abstract class UserSourcesRepository {
     params: PaginationParams,
     loadOptions?: UserSourceLoadOptions,
   ): Promise<PaginatedResult<UserSource>>;
+
+  abstract findAllByUserPaginatedFiltered(
+    userId: UserId,
+    params: PaginationParams,
+    loadOptions?: UserSourceLoadOptions,
+    filters?: UserSourcesFilterParams,
+  ): Promise<PaginatedResult<UserSource>>;
+
+  abstract getDistinctSourceTypesByUser(userId: UserId): Promise<PublicSource[]>;
 }
