@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { LoggerService } from '@/logger';
 import { CacheService } from '@/commons/cache';
+import { stripHtmlTags, isHtmlTagOnly } from '@/commons/utils';
 import { SourcesService } from '@/sources/service/sources-service';
 import { RawPostsService } from '@/raw-posts/service/raw-posts-service';
 import { RawPostFactory } from '@/raw-posts/domain/factories';
@@ -139,6 +140,7 @@ export class SourcesResultService {
   /**
    * Parse text content into multiple content blocks
    * Splits by paragraphs (double newlines) and detects headers
+   * Strips HTML tags and filters out empty/HTML-only blocks
    */
   private parseTextContent(text: string): Content {
     const blocks: Content = [];
@@ -151,21 +153,27 @@ export class SourcesResultService {
       const trimmed = paragraph.trim();
       if (!trimmed) continue;
 
+      // Skip if it's just an HTML tag (like <li>, </ol>, etc.)
+      if (isHtmlTagOnly(trimmed)) continue;
+
       // Check if this paragraph contains multiple lines (could be a list or structured content)
       const lines = trimmed.split('\n');
 
       if (lines.length === 1) {
         // Single line - check if it's a header
         const block = this.parseLineAsBlock(trimmed);
-        blocks.push(block);
+        if (block) blocks.push(block);
       } else {
         // Multiple lines in same paragraph - process each line
         for (const line of lines) {
           const trimmedLine = line.trim();
           if (!trimmedLine) continue;
 
+          // Skip if it's just an HTML tag
+          if (isHtmlTagOnly(trimmedLine)) continue;
+
           const block = this.parseLineAsBlock(trimmedLine);
-          blocks.push(block);
+          if (block) blocks.push(block);
         }
       }
     }
@@ -175,15 +183,23 @@ export class SourcesResultService {
 
   /**
    * Parse a single line and determine if it's a header or paragraph
+   * Returns null if the line is empty after stripping HTML
    */
   private parseLineAsBlock(line: string):
     | {
         type: ContentBlockType.HEADER;
         data: { text: string; level: 1 | 2 | 3 };
       }
-    | { type: ContentBlockType.PARAGRAPH; data: { text: string } } {
+    | { type: ContentBlockType.PARAGRAPH; data: { text: string } }
+    | null {
+    // Strip HTML tags first
+    const cleanLine = stripHtmlTags(line);
+
+    // Skip empty lines
+    if (!cleanLine) return null;
+
     // Check for Markdown-style headers (# Header)
-    const headerMatch = line.match(/^(#{1,3})\s+(.+)$/);
+    const headerMatch = cleanLine.match(/^(#{1,3})\s+(.+)$/);
     if (headerMatch) {
       const level = Math.min(headerMatch[1].length, 3) as 1 | 2 | 3;
       return {
@@ -194,7 +210,7 @@ export class SourcesResultService {
 
     // Check for bold text that looks like a header (short line, all caps or title case)
     // Common patterns: **Title**, __Title__, TITLE IN CAPS
-    const boldMatch = line.match(/^(?:\*\*|__)(.+?)(?:\*\*|__)$/);
+    const boldMatch = cleanLine.match(/^(?:\*\*|__)(.+?)(?:\*\*|__)$/);
     if (boldMatch && boldMatch[1].length <= 100) {
       return {
         type: ContentBlockType.HEADER,
@@ -204,20 +220,20 @@ export class SourcesResultService {
 
     // Check for ALL CAPS short lines (likely headers in social media)
     if (
-      line.length <= 80 &&
-      line === line.toUpperCase() &&
-      /[A-ZА-ЯІЇЄҐ]/.test(line)
+      cleanLine.length <= 80 &&
+      cleanLine === cleanLine.toUpperCase() &&
+      /[A-ZА-ЯІЇЄҐ]/.test(cleanLine)
     ) {
       return {
         type: ContentBlockType.HEADER,
-        data: { text: line, level: 2 },
+        data: { text: cleanLine, level: 2 },
       };
     }
 
     // Default: regular paragraph
     return {
       type: ContentBlockType.PARAGRAPH,
-      data: { text: line },
+      data: { text: cleanLine },
     };
   }
 
@@ -252,16 +268,21 @@ export class SourcesResultService {
 
   /**
    * Extract title from post content (first line or first 100 chars)
+   * Strips HTML tags from the title
    */
   private extractTitle(content: string): string | undefined {
     if (!content) return undefined;
 
     const firstLine = content.split('\n')[0];
-    if (firstLine.length <= 100) {
-      return firstLine;
+    const cleanTitle = stripHtmlTags(firstLine);
+
+    if (!cleanTitle) return undefined;
+
+    if (cleanTitle.length <= 100) {
+      return cleanTitle;
     }
 
-    return firstLine.substring(0, 100) + '...';
+    return cleanTitle.substring(0, 100) + '...';
   }
 
   /**
