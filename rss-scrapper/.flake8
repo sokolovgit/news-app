@@ -1,0 +1,36 @@
+[flake8]
+# Maximum line length (match Black's setting)
+max-line-length = 100
+
+# Maximum cyclomatic complexity
+max-complexity = 10
+
+# Directories to exclude from linting
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    build,
+    dist,
+    *.egg-info,
+    .pytest_cache,
+    .mypy_cache,
+    .tox
+
+# Error codes to ignore
+# E203: whitespace before ':' (conflicts with black)
+# W503: line break before binary operator (conflicts with black)
+ignore = E203,W503
+
+# Per-file ignores
+per-file-ignores =
+
+# Count occurrences of each error
+count = True
+
+# Show source code for each error
+show-source = True
+
+# Print the total number of errors
+statistics = True

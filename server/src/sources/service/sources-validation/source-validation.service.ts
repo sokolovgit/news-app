@@ -20,6 +20,19 @@ const INSTAGRAM_HOSTS = new Set([
   'm.instagram.com',
 ]);
 
+// Common RSS feed file extensions and path patterns
+const RSS_PATH_PATTERNS = [
+  /\/feed\/?$/i,
+  /\/rss\/?$/i,
+  /\/atom\/?$/i,
+  /\.rss$/i,
+  /\.xml$/i,
+  /\/rss\.xml$/i,
+  /\/feed\.xml$/i,
+  /\/atom\.xml$/i,
+  /\/index\.xml$/i,
+];
+
 @Injectable()
 export class SourcesValidationService {
   constructor(
@@ -186,10 +199,52 @@ export class SourcesValidationService {
       };
     }
 
+    // Check for RSS feed patterns
+    if (this.isRssFeedUrl(url)) {
+      const feedName = this.extractRssFeedName(url);
+      return {
+        name: feedName,
+        source: PublicSource.RSS,
+      };
+    }
+
     throw new InvalidSourceUrlError(
       url.toString(),
-      'Unsupported source type. Only Telegram and Instagram are supported.',
+      'Unsupported source type. Only Telegram, Instagram, and RSS feeds are supported.',
     );
+  }
+
+  /**
+   * Check if URL is likely an RSS feed
+   */
+  private isRssFeedUrl(url: URL): boolean {
+    const pathname = url.pathname.toLowerCase();
+
+    // Check if path matches common RSS patterns
+    return RSS_PATH_PATTERNS.some((pattern) => pattern.test(pathname));
+  }
+
+  /**
+   * Extract a human-readable name from RSS feed URL
+   */
+  private extractRssFeedName(url: URL): string {
+    // Use hostname as base name
+    let name = url.hostname.replace(/^www\./, '');
+
+    // Try to add path context if meaningful
+    const segments = this.getPathSegments(url.pathname);
+    const meaningfulSegments = segments.filter(
+      (s) =>
+        !['feed', 'rss', 'atom', 'xml', 'index'].includes(s.toLowerCase()) &&
+        !s.endsWith('.xml') &&
+        !s.endsWith('.rss'),
+    );
+
+    if (meaningfulSegments.length > 0) {
+      name += '/' + meaningfulSegments.join('/');
+    }
+
+    return name;
   }
 
   private getPathSegments(pathname: string): string[] {

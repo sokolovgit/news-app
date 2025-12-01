@@ -1,0 +1,2 @@
+"""RSS Scrapper package."""
+

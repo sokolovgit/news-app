@@ -61,6 +61,9 @@ const queues = [
     name: SourceQueue.TELEGRAM_FETCHER,
   },
   {
+    name: SourceQueue.RSS_FETCHER,
+  },
+  {
     name: SourceQueue.FETCH_RESULTS,
   },
 ];

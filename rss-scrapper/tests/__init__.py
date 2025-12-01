@@ -1,0 +1,2 @@
+"""Tests for RSS Scrapper."""
+

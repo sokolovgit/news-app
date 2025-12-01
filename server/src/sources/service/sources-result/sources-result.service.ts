@@ -335,6 +335,10 @@ export class SourcesResultService {
       'PRIVATE_PROFILE_ERROR',
       'ACCOUNT_SUSPENDED_ERROR',
       'AUTH_ERROR',
+      // RSS-specific permanent errors
+      'FEED_NOT_FOUND_ERROR',
+      'FEED_ACCESS_DENIED_ERROR',
+      'PARSE_ERROR',
     ];
 
     return !error.retryable || permanentErrorCodes.includes(error.code);

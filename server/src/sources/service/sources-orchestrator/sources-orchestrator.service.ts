@@ -21,6 +21,8 @@ export class SourcesOrchestratorService {
     private readonly instagramQueue: Queue<CollectorJobData>,
     @InjectQueue(SourceQueue.TELEGRAM_FETCHER)
     private readonly telegramQueue: Queue<CollectorJobData>,
+    @InjectQueue(SourceQueue.RSS_FETCHER)
+    private readonly rssQueue: Queue<CollectorJobData>,
   ) {}
 
   /**
@@ -122,6 +124,10 @@ export class SourcesOrchestratorService {
         await this.telegramQueue.add('fetch-telegram', jobData, jobOptions);
         break;
 
+      case PublicSource.RSS:
+        await this.rssQueue.add('fetch-rss', jobData, jobOptions);
+        break;
+
       default: {
         this.logger.error(`Unknown source type ${String(sourceType)}`);
         throw new Error(`Unknown source type ${String(sourceType)}`);
@@ -133,6 +139,7 @@ export class SourcesOrchestratorService {
    * Extract externalId from URL based on source type
    * For Instagram: extract username from URL
    * For Telegram: extract channel/username from URL
+   * For RSS: use the full URL as externalId
    */
   private extractExternalId(url: string, sourceType: PublicSource): string {
     switch (sourceType) {
@@ -148,6 +155,11 @@ export class SourcesOrchestratorService {
         // Examples: https://t.me/channel -> channel
         const telegramMatch = url.match(/t\.me\/([^/?#]+)/);
         return telegramMatch ? telegramMatch[1] : url;
+      }
+
+      case PublicSource.RSS: {
+        // For RSS feeds, use the full URL as the externalId
+        return url;
       }
 
       default:
@@ -166,6 +178,9 @@ export class SourcesOrchestratorService {
 
       case PublicSource.TELEGRAM:
         return this.configService.bullmq[SourceQueue.TELEGRAM_FETCHER];
+
+      case PublicSource.RSS:
+        return this.configService.bullmq[SourceQueue.RSS_FETCHER];
 
       default:
         this.logger.error(`Unknown source type ${String(sourceType)}`);
