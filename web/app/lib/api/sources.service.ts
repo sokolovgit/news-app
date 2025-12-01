@@ -11,7 +11,7 @@ export interface ValidateSourceRequest {
 export interface ValidateSourceResponse {
   url: string
   name: string
-  source: 'telegram' | 'instagram'
+  source: 'telegram' | 'instagram' | 'rss'
 }
 
 export interface AddSourceRequest {
@@ -23,7 +23,7 @@ export interface AddSourceResponse {
     id: string
     name: string
     url: string
-    source: 'telegram' | 'instagram'
+    source: 'telegram' | 'instagram' | 'rss'
   }
   userSource: {
     id: string

@@ -104,6 +104,7 @@ const showComplaintDialog = ref(false)
 const sourceIcon = computed(() => {
   const sourceType = props.source.source.toLowerCase()
   if (sourceType === 'instagram') return 'lucide:instagram'
+  if (sourceType === 'telegram') return 'lucide:send'
   if (sourceType === 'rss') return 'lucide:rss'
   return 'lucide:link'
 })
@@ -115,6 +116,7 @@ const sourceTypeLabel = computed(() => {
 const sourceBadgeVariant = computed(() => {
   const sourceType = props.source.source.toLowerCase()
   if (sourceType === 'instagram') return 'secondary'
+  if (sourceType === 'telegram') return 'outline'
   if (sourceType === 'rss') return 'default'
   return 'outline'
 })

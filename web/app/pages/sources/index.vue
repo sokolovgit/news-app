@@ -41,8 +41,9 @@
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="rss">RSS</SelectItem>
+              <SelectItem value="telegram">Telegram</SelectItem>
               <SelectItem value="instagram">Instagram</SelectItem>
+              <SelectItem value="rss">RSS</SelectItem>
             </SelectContent>
           </Select>
           <div class="h-6 w-px bg-border shrink-0" />
@@ -172,8 +173,9 @@
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="rss">RSS</SelectItem>
+              <SelectItem value="telegram">Telegram</SelectItem>
               <SelectItem value="instagram">Instagram</SelectItem>
+              <SelectItem value="rss">RSS</SelectItem>
             </SelectContent>
           </Select>
           <Select

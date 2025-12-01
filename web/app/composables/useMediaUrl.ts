@@ -21,6 +21,7 @@ export function useMediaUrl() {
   const s3PathPrefixes = [
     'telegram/',
     'instagram/',
+    'rss/',
     'covers/',
     'articles/',
     'uploads/',

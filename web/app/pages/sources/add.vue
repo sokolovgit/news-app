@@ -8,7 +8,7 @@
       </Button>
       <h1 class="text-3xl font-bold text-foreground">Add Source</h1>
       <p class="text-muted-foreground mt-1">
-        Add Telegram channels or Instagram accounts to your feed
+        Add Telegram channels, Instagram accounts, or RSS feeds to your feed
       </p>
     </div>
 
@@ -20,9 +20,10 @@
       </CardHeader>
       <CardContent>
         <Tabs v-model="selectedType" class="w-full">
-          <TabsList class="grid w-full grid-cols-2">
+          <TabsList class="grid w-full grid-cols-3">
             <TabsTrigger value="telegram">Telegram</TabsTrigger>
             <TabsTrigger value="instagram">Instagram</TabsTrigger>
+            <TabsTrigger value="rss">RSS Feed</TabsTrigger>
           </TabsList>
           <TabsContent value="telegram" class="mt-4">
             <div class="flex items-start gap-3 p-4 bg-card rounded-lg border border-border">
@@ -46,6 +47,17 @@
               </div>
             </div>
           </TabsContent>
+          <TabsContent value="rss" class="mt-4">
+            <div class="flex items-start gap-3 p-4 bg-card rounded-lg border border-border">
+              <Icon name="lucide:rss" class="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p class="font-medium text-foreground">RSS / Atom Feed</p>
+                <p class="text-sm text-muted-foreground">
+                  Add any RSS or Atom feed to get articles in your feed.
+                </p>
+              </div>
+            </div>
+          </TabsContent>
         </Tabs>
       </CardContent>
     </Card>
@@ -62,15 +74,14 @@
           <Input
             id="url"
             v-model="formData.url"
-            :placeholder="
-              selectedType === 'instagram'
-                ? 'Instagram username (e.g., @username)'
-                : 'Telegram channel username (e.g., @channelname)'
-            "
+            :placeholder="urlPlaceholder"
             class="mt-1"
             @blur="validateUrl"
           />
           <p v-if="urlError" class="text-sm text-destructive mt-1">{{ urlError }}</p>
+          <p v-if="selectedType === 'rss'" class="text-sm text-muted-foreground mt-1">
+            Common patterns: /feed, /rss, /atom, .xml
+          </p>
         </div>
 
         <div>
@@ -138,7 +149,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useApi } from '~/composables/useApi'
 import { SourcesService } from '~/lib/api'
-import { buildSourceUrl } from '~/utils/source-url'
+import { buildSourceUrl, isValidUrl, type SourceType } from '~/utils/source-url'
 import { toast } from 'vue-sonner'
 
 definePageMeta({
@@ -148,7 +159,7 @@ definePageMeta({
 const api = useApi()
 const sourcesService = new SourcesService(api)
 
-const selectedType = ref<'telegram' | 'instagram'>('telegram')
+const selectedType = ref<SourceType>('telegram')
 const formData = ref({
   url: '',
   name: '',
@@ -170,7 +181,20 @@ const validationStatus = ref<{
 } | null>(null)
 
 const previewIcon = computed(() => {
-  return selectedType.value === 'instagram' ? 'lucide:instagram' : 'lucide:send'
+  if (selectedType.value === 'instagram') return 'lucide:instagram'
+  if (selectedType.value === 'rss') return 'lucide:rss'
+  return 'lucide:send'
+})
+
+const urlPlaceholder = computed(() => {
+  switch (selectedType.value) {
+    case 'instagram':
+      return 'Instagram username (e.g., @username)'
+    case 'rss':
+      return 'RSS feed URL (e.g., https://example.com/feed)'
+    default:
+      return 'Telegram channel username (e.g., @channelname)'
+  }
 })
 
 const validateUrl = () => {
@@ -189,6 +213,17 @@ const validateUrl = () => {
 
     if (!instagramPattern.test(trimmed.replace('@', '')) && !urlPattern.test(trimmed)) {
       urlError.value = 'Please enter a valid Instagram username (e.g., @username) or URL'
+    }
+  } else if (selectedType.value === 'rss') {
+    // RSS feed validation - must be a valid URL
+    // Try to parse as URL (with or without protocol)
+    let urlToCheck = trimmed
+    if (!urlToCheck.startsWith('http://') && !urlToCheck.startsWith('https://')) {
+      urlToCheck = `https://${urlToCheck}`
+    }
+
+    if (!isValidUrl(urlToCheck)) {
+      urlError.value = 'Please enter a valid RSS feed URL (e.g., https://example.com/feed)'
     }
   } else {
     // Telegram channel validation - allow @channelname or full URL
