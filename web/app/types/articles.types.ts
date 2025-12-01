@@ -67,6 +67,11 @@ export interface EmbedBlockData {
   caption?: string
 }
 
+export interface TableBlockData {
+  content: string[][]
+  withHeadings?: boolean
+}
+
 export interface DelimiterBlockData {
   // No data
 }
@@ -83,11 +88,14 @@ export type EditorJsBlockType =
   | 'header'
   | 'image'
   | 'list'
+  | 'nestedlist'
+  | 'checklist'
   | 'quote'
   | 'code'
   | 'embed'
   | 'delimiter'
   | 'warning'
+  | 'table'
 
 export interface EditorJsBlock<T = unknown> {
   id?: string
@@ -99,22 +107,28 @@ export type ParagraphBlock = EditorJsBlock<ParagraphBlockData> & { type: 'paragr
 export type HeaderBlock = EditorJsBlock<HeaderBlockData> & { type: 'header' }
 export type ImageBlock = EditorJsBlock<ImageBlockData> & { type: 'image' }
 export type ListBlock = EditorJsBlock<ListBlockData> & { type: 'list' }
+export type NestedListBlock = EditorJsBlock<ListBlockData> & { type: 'nestedlist' }
+export type ChecklistBlock = EditorJsBlock<ListBlockData> & { type: 'checklist' }
 export type QuoteBlock = EditorJsBlock<QuoteBlockData> & { type: 'quote' }
 export type CodeBlock = EditorJsBlock<CodeBlockData> & { type: 'code' }
 export type EmbedBlock = EditorJsBlock<EmbedBlockData> & { type: 'embed' }
 export type DelimiterBlock = EditorJsBlock<DelimiterBlockData> & { type: 'delimiter' }
 export type WarningBlock = EditorJsBlock<WarningBlockData> & { type: 'warning' }
+export type TableBlock = EditorJsBlock<TableBlockData> & { type: 'table' }
 
 export type ContentBlock =
   | ParagraphBlock
   | HeaderBlock
   | ImageBlock
   | ListBlock
+  | NestedListBlock
+  | ChecklistBlock
   | QuoteBlock
   | CodeBlock
   | EmbedBlock
   | DelimiterBlock
   | WarningBlock
+  | TableBlock
 
 // === Main Content Type ===
 

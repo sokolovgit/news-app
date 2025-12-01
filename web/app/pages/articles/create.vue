@@ -85,9 +85,10 @@ import { Button } from '@/components/ui/button'
 import ArticleEditor from '~/components/articles/ArticleEditor.vue'
 import SourcePostsPanel from '~/components/articles/SourcePostsPanel.vue'
 import { useApi } from '~/composables/useApi'
+import { useMediaUrl } from '~/composables/useMediaUrl'
 import { ArticlesService, FeedService } from '~/lib/api'
-import type { EditorJsContent } from '~/types/articles.types'
-import type { FeedPost } from '~/types/posts.types'
+import type { EditorJsContent, ContentBlock } from '~/types/articles.types'
+import type { FeedPost, ContentBlock as PostContentBlock } from '~/types/posts.types'
 import { toast } from 'vue-sonner'
 
 definePageMeta({
@@ -99,6 +100,7 @@ const route = useRoute()
 const api = useApi()
 const articlesService = new ArticlesService(api)
 const feedService = new FeedService(api)
+const { getMediaUrl } = useMediaUrl()
 
 const editorRef = ref<InstanceType<typeof ArticleEditor> | null>(null)
 
@@ -175,17 +177,151 @@ const handleEditorUpdate = (data: {
   coverImageUrl.value = data.coverImageUrl
 }
 
-const copyPostContent = (post: FeedPost) => {
-  // Copy post content to clipboard or insert into editor
-  const textContent = post.content
-    ?.filter((block) => block.type === 'paragraph')
-    .map((block) => block.type === 'paragraph' ? block.data.text : '')
-    .join('\n\n')
+/**
+ * Convert post content blocks to Editor.js blocks
+ */
+const convertPostContentToEditorBlocks = (post: FeedPost): ContentBlock[] => {
+  if (!post.content || post.content.length === 0) return []
 
-  if (textContent) {
-    navigator.clipboard.writeText(textContent)
-    toast.success('Copied', {
-      description: 'Post content copied to clipboard',
+  const blocks: ContentBlock[] = []
+
+  for (const postBlock of post.content) {
+    switch (postBlock.type) {
+      case 'paragraph': {
+        blocks.push({
+          type: 'paragraph',
+          data: {
+            text: postBlock.data.text || '',
+          },
+        })
+        break
+      }
+      case 'header': {
+        blocks.push({
+          type: 'header',
+          data: {
+            text: postBlock.data.text || '',
+            level: (postBlock.data.level || 2) as 1 | 2 | 3 | 4 | 5 | 6,
+          },
+        })
+        break
+      }
+      case 'image': {
+        const imageUrl = postBlock.data.url
+        if (imageUrl) {
+          // Convert to Editor.js image format
+          // If it's already a full URL, use it; otherwise, get media URL
+          const fullUrl = imageUrl.startsWith('http') ? imageUrl : getMediaUrl(imageUrl)
+          
+          blocks.push({
+            type: 'image',
+            data: {
+              file: {
+                url: fullUrl,
+              },
+              caption: postBlock.data.caption || '',
+            },
+          })
+        }
+        break
+      }
+      case 'video': {
+        const videoUrl = postBlock.data.url
+        if (videoUrl) {
+          // Check if it's a YouTube, Vimeo, or other embeddable URL
+          const youtubeMatch = videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/)
+          const vimeoMatch = videoUrl.match(/vimeo\.com\/(\d+)/)
+          
+          if (youtubeMatch) {
+            blocks.push({
+              type: 'embed',
+              data: {
+                service: 'youtube',
+                source: videoUrl,
+                embed: `https://www.youtube.com/embed/${youtubeMatch[1]}`,
+                caption: postBlock.data.caption || '',
+              },
+            })
+          } else if (vimeoMatch) {
+            blocks.push({
+              type: 'embed',
+              data: {
+                service: 'vimeo',
+                source: videoUrl,
+                embed: `https://player.vimeo.com/video/${vimeoMatch[1]}`,
+                caption: postBlock.data.caption || '',
+              },
+            })
+          } else {
+            // For internal video files, we'll create an image block as a placeholder
+            // with a link to the video, or use embed with HTML5 video
+            // Note: Editor.js embed might not support HTML5 video directly,
+            // so we'll create an image placeholder that links to the video
+            const fullUrl = videoUrl.startsWith('http') ? videoUrl : getMediaUrl(videoUrl)
+            
+            // Create a paragraph with a link to the video as a fallback
+            // Users can manually convert this to an embed or image block
+            blocks.push({
+              type: 'paragraph',
+              data: {
+                text: `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer">📹 Video: ${postBlock.data.caption || 'Click to view video'}</a>`,
+              },
+            })
+          }
+        }
+        break
+      }
+      case 'audio': {
+        const audioUrl = postBlock.data.url
+        if (audioUrl) {
+          const fullUrl = audioUrl.startsWith('http') ? audioUrl : getMediaUrl(audioUrl)
+          
+          // For audio, create a paragraph with a link
+          // Users can manually convert this to an embed block if needed
+          blocks.push({
+            type: 'paragraph',
+            data: {
+              text: `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer">🎵 Audio: ${postBlock.data.caption || 'Click to listen'}</a>`,
+            },
+          })
+        }
+        break
+      }
+    }
+  }
+
+  return blocks
+}
+
+const copyPostContent = async (post: FeedPost) => {
+  if (!editorRef.value) {
+    toast.error('Editor not ready', {
+      description: 'Please wait for the editor to load.',
+    })
+    return
+  }
+
+  try {
+    // Convert post content to Editor.js blocks
+    const blocks = convertPostContentToEditorBlocks(post)
+
+    if (blocks.length === 0) {
+      toast.warning('No content', {
+        description: 'This post has no content to copy.',
+      })
+      return
+    }
+
+    // Insert blocks into editor
+    await editorRef.value.insertBlocks(blocks)
+
+    toast.success('Content added', {
+      description: `Added ${blocks.length} block${blocks.length > 1 ? 's' : ''} from post to article.`,
+    })
+  } catch (error) {
+    console.error('Failed to copy post content:', error)
+    toast.error('Failed to copy content', {
+      description: 'Could not add post content to article.',
     })
   }
 }

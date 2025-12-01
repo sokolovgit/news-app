@@ -25,7 +25,7 @@
         <!-- Overlay for existing cover -->
         <div
           v-if="coverImageUrl"
-          class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         />
 
         <!-- Upload placeholder -->
@@ -399,33 +399,88 @@ const formatTimeAgo = (date: Date): string => {
   return `${hours}h ago`
 }
 
+// Insert blocks into editor at current position
+const insertBlocks = async (blocks: EditorJsContent['blocks']) => {
+  if (!editor || !blocks || blocks.length === 0) return
+
+  try {
+    // Get current blocks count
+    const currentContent = await editor.save()
+    const currentBlocksCount = currentContent.blocks?.length || 0
+
+    // Get the current block index (or use end if no block is focused)
+    let insertIndex: number
+    try {
+      const currentIndex = editor.blocks.getCurrentBlockIndex()
+      if (currentIndex >= 0) {
+        insertIndex = currentIndex + 1
+      } else {
+        insertIndex = currentBlocksCount
+      }
+    } catch {
+      // If we can't get current index, insert at the end
+      insertIndex = currentBlocksCount
+    }
+
+    // Transform blocks for editor (convert S3 paths to full URLs)
+    const transformedBlocks = blocks.map((block) => {
+      if (block.type === 'image' && block.data?.file?.url) {
+        const url = block.data.file.url
+        if (!isFullUrl(url)) {
+          return {
+            ...block,
+            data: {
+              ...block.data,
+              file: {
+                ...block.data.file,
+                url: getMediaUrl(url),
+              },
+            },
+          }
+        }
+      }
+      return block
+    })
+
+    // Insert blocks one by one (Editor.js doesn't support batch insert)
+    for (let i = 0; i < transformedBlocks.length; i++) {
+      const block = transformedBlocks[i]
+      try {
+        // Insert at the calculated index, adjusting for previously inserted blocks
+        await editor.blocks.insert(block.type, block.data, {}, insertIndex + i, true)
+      } catch (blockError) {
+        console.warn(`Failed to insert block ${i}:`, blockError)
+        // Continue with next block
+      }
+    }
+
+    // Trigger update
+    debouncedEmitUpdate()
+  } catch (error) {
+    console.error('Failed to insert blocks:', error)
+    toast.error('Failed to insert content')
+  }
+}
+
 // Expose methods for parent component
 defineExpose({
   getContent,
   getTitle: () => title.value,
   getDescription: () => description.value,
   getCoverImageUrl: () => coverImageUrl.value,
+  insertBlocks,
 })
 
 onMounted(async () => {
   if (typeof window === 'undefined' || !editorContainer.value) return
 
   try {
-    // Dynamically import Editor.js and plugins
-    const [
-      { default: EditorJS },
-      { default: Header },
-      { default: List },
-      { default: ImageTool },
-      { default: Quote },
-      { default: Delimiter },
-      { default: InlineCode },
-      { default: Marker },
-      { default: DragDrop },
-    ] = await Promise.all([
+    // Dynamically import Editor.js and plugins with error handling
+    const imports = await Promise.allSettled([
       import('@editorjs/editorjs'),
       import('@editorjs/header'),
       import('@editorjs/list'),
+      import('@editorjs/checklist'),
       import('@editorjs/image'),
       import('@editorjs/quote'),
       import('@editorjs/delimiter'),
@@ -433,87 +488,246 @@ onMounted(async () => {
       // @ts-expect-error - no types available
       import('@editorjs/marker'),
       // @ts-expect-error - no types available
+      import('@editorjs/underline'),
+      import('@editorjs/code'),
+      import('@editorjs/warning'),
+      import('@editorjs/table'),
+      import('@editorjs/embed'),
+      // @ts-expect-error - no types available
       import('editorjs-drag-drop'),
+      // @ts-expect-error - no types available
+      import('editorjs-undo'),
     ])
+
+    // Check for failed imports
+    const failedImports = imports
+      .map((result, index) => ({ result, index }))
+      .filter(({ result }) => result.status === 'rejected')
+
+    if (failedImports.length > 0) {
+      console.error('Failed to import some Editor.js tools:', failedImports)
+      failedImports.forEach(({ index }) => {
+        const toolNames = [
+          'EditorJS',
+          'Header',
+          'List',
+          'Checklist',
+          'ImageTool',
+          'Quote',
+          'Delimiter',
+          'InlineCode',
+          'Marker',
+          'Underline',
+          'Code',
+          'Warning',
+          'Table',
+          'Embed',
+          'DragDrop',
+          'Undo',
+        ]
+        console.error(`Failed to import: ${toolNames[index]}`)
+      })
+    }
+
+    // Extract successful imports
+    const getImport = (index: number) => {
+      const result = imports[index]
+      return result.status === 'fulfilled' ? result.value : null
+    }
+
+    const EditorJS = getImport(0)?.default
+    const Header = getImport(1)?.default
+    const List = getImport(2)?.default
+    const Checklist = getImport(3)?.default
+    const ImageTool = getImport(4)?.default
+    const Quote = getImport(5)?.default
+    const Delimiter = getImport(6)?.default
+    const InlineCode = getImport(7)?.default
+    const Marker = getImport(8)?.default
+    const Underline = getImport(9)?.default
+    const Code = getImport(10)?.default
+    const Warning = getImport(11)?.default
+    const Table = getImport(12)?.default
+    const Embed = getImport(13)?.default
+    const DragDrop = getImport(14)?.default
+    const Undo = getImport(15)?.default
+
+    // Verify critical tools loaded
+    if (!EditorJS || !Header || !List) {
+      throw new Error('Failed to load critical Editor.js tools')
+    }
 
     // Transform S3 paths to full URLs for Editor.js display
     const editorContent = transformContentForEditor(props.initialContent)
+
+    // Build tools object conditionally
+    const toolsConfig: Record<string, any> = {
+      header: {
+        class: Header as any,
+        config: {
+          levels: [1, 2, 3, 4, 5, 6],
+          defaultLevel: 2,
+        },
+        shortcut: 'CMD+SHIFT+H',
+      },
+      list: {
+        class: List as any,
+        inlineToolbar: true,
+        config: {
+          defaultStyle: 'unordered',
+        },
+      },
+      ...(Checklist
+        ? {
+            checklist: {
+              class: Checklist as any,
+              inlineToolbar: true,
+              shortcut: 'CMD+SHIFT+X',
+            },
+          }
+        : {}),
+      image: {
+        class: ImageTool as any,
+        config: {
+          uploader: {
+            uploadByFile: async (file: File) => {
+              try {
+                const response = await mediaService.uploadImage(file, 'articles')
+                // Return full URL for Editor.js display; will be converted to S3 path on save
+                return {
+                  success: 1,
+                  file: { url: getMediaUrl(response.key) },
+                }
+              } catch (error) {
+                console.error('Image upload failed:', error)
+                toast.error('Failed to upload image')
+                return { success: 0 }
+              }
+            },
+            uploadByUrl: async (url: string) => {
+              try {
+                const response = await mediaService.uploadFromUrl(url, 'articles')
+                // Return full URL for Editor.js display; will be converted to S3 path on save
+                return {
+                  success: 1,
+                  file: { url: getMediaUrl(response.key) },
+                }
+              } catch (error) {
+                console.error('Image upload from URL failed:', error)
+                toast.error('Failed to upload image from URL')
+                return { success: 0 }
+              }
+            },
+          },
+        },
+      },
+      quote: {
+        class: Quote as any,
+        inlineToolbar: true,
+        shortcut: 'CMD+SHIFT+O',
+        config: {
+          quotePlaceholder: 'Enter a quote',
+          captionPlaceholder: 'Quote author',
+        },
+      },
+      ...(Code
+        ? {
+            code: {
+              class: Code as any,
+              config: {
+                placeholder: 'Enter code',
+              },
+              shortcut: 'CMD+SHIFT+C',
+            },
+          }
+        : {}),
+      ...(Warning
+        ? {
+            warning: {
+              class: Warning as any,
+              inlineToolbar: true,
+              shortcut: 'CMD+SHIFT+W',
+              config: {
+                titlePlaceholder: 'Title',
+                messagePlaceholder: 'Message',
+              },
+            },
+          }
+        : {}),
+      ...(Table
+        ? {
+            table: {
+              class: Table as any,
+              inlineToolbar: true,
+              config: {
+                rows: 2,
+                cols: 2,
+                withHeadings: false,
+              },
+            },
+          }
+        : {}),
+      ...(Embed
+        ? {
+            embed: {
+              class: Embed as any,
+              config: {
+                services: {
+                  youtube: true,
+                  coub: true,
+                  codepen: true,
+                  imgur: true,
+                  vimeo: true,
+                },
+              },
+            },
+          }
+        : {}),
+      delimiter: Delimiter as any,
+      inlineCode: InlineCode as any,
+      marker: Marker as any,
+    }
+
+    // Add optional tools only if they loaded successfully
+    if (Underline) {
+      toolsConfig.underline = Underline as any
+    }
 
     editor = new EditorJS({
       holder: editorContainer.value,
       data: editorContent,
       placeholder: 'Press "/" for commands or just start writing...',
-      inlineToolbar: ['bold', 'italic', 'link', 'marker', 'inlineCode'],
-      tools: {
-        header: {
-          class: Header as any,
-          config: {
-            levels: [1, 2, 3, 4],
-            defaultLevel: 2,
-          },
-          shortcut: 'CMD+SHIFT+H',
-        },
-        list: {
-          class: List as any,
-          inlineToolbar: true,
-          config: {
-            defaultStyle: 'unordered',
-          },
-        },
-        image: {
-          class: ImageTool as any,
-          config: {
-            uploader: {
-              uploadByFile: async (file: File) => {
-                try {
-                  const response = await mediaService.uploadImage(file, 'articles')
-                  // Return full URL for Editor.js display; will be converted to S3 path on save
-                  return {
-                    success: 1,
-                    file: { url: getMediaUrl(response.key) },
-                  }
-                } catch (error) {
-                  console.error('Image upload failed:', error)
-                  toast.error('Failed to upload image')
-                  return { success: 0 }
-                }
-              },
-              uploadByUrl: async (url: string) => {
-                try {
-                  const response = await mediaService.uploadFromUrl(url, 'articles')
-                  // Return full URL for Editor.js display; will be converted to S3 path on save
-                  return {
-                    success: 1,
-                    file: { url: getMediaUrl(response.key) },
-                  }
-                } catch (error) {
-                  console.error('Image upload from URL failed:', error)
-                  toast.error('Failed to upload image from URL')
-                  return { success: 0 }
-                }
-              },
-            },
-          },
-        },
-        quote: {
-          class: Quote as any,
-          inlineToolbar: true,
-          shortcut: 'CMD+SHIFT+O',
-          config: {
-            quotePlaceholder: 'Enter a quote',
-            captionPlaceholder: 'Quote author',
-          },
-        },
-        delimiter: Delimiter as any,
-        inlineCode: InlineCode as any,
-        marker: Marker as any,
-      },
+      inlineToolbar: [
+        'bold',
+        'italic',
+        ...(Underline ? ['underline'] : []),
+        'link',
+        'marker',
+        'inlineCode',
+      ],
+      tools: toolsConfig,
+      holder: editorContainer.value,
+      data: editorContent,
+      placeholder: 'Press "/" for commands or just start writing...',
+      inlineToolbar: [
+        'bold',
+        'italic',
+        ...(Underline ? ['underline'] : []),
+        'link',
+        'marker',
+        'inlineCode',
+      ],
+      tools: toolsConfig,
       onChange: () => {
         debouncedEmitUpdate()
       },
       onReady: () => {
         // Enable drag and drop for block reordering
-        new DragDrop(editor)
+        try {
+          new DragDrop(editor)
+        } catch (error) {
+          console.warn('Failed to initialize drag-drop:', error)
+        }
 
         // Focus the editor
         const contentEditable = editorContainer.value?.querySelector(
@@ -524,6 +738,15 @@ onMounted(async () => {
     })
 
     await editor.isReady
+
+    // Initialize undo/redo after editor is ready
+    if (Undo) {
+      try {
+        new Undo({ editor })
+      } catch (error) {
+        console.warn('Failed to initialize undo:', error)
+      }
+    }
   } catch (error) {
     console.error('Failed to initialize Editor.js:', error)
     toast.error('Failed to load editor')
@@ -749,6 +972,108 @@ watch(
   border-radius: 0.25rem;
   font-family: ui-monospace, monospace;
   font-size: 0.875em;
+}
+
+.article-content :deep(.cdx-code) {
+  background: hsl(var(--muted));
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1.25rem 0;
+  font-family: ui-monospace, monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+.article-content :deep(.cdx-code__textarea) {
+  background: transparent;
+  border: none;
+  color: hsl(var(--foreground));
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  resize: none;
+  outline: none;
+}
+
+.article-content :deep(.cdx-warning) {
+  border-left: 4px solid hsl(var(--warning));
+  background: hsl(var(--warning) / 0.1);
+  padding: 1rem;
+  margin: 1.25rem 0;
+  border-radius: 0.5rem;
+}
+
+.article-content :deep(.cdx-warning__title) {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: hsl(var(--foreground));
+}
+
+.article-content :deep(.cdx-warning__message) {
+  color: hsl(var(--muted-foreground));
+  line-height: 1.6;
+}
+
+.article-content :deep(.cdx-checklist) {
+  margin: 1.25rem 0;
+}
+
+.article-content :deep(.cdx-checklist__item) {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.article-content :deep(.cdx-checklist__item-checkbox) {
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+.article-content :deep(.cdx-checklist__item-text) {
+  flex: 1;
+}
+
+.article-content :deep(.ce-table) {
+  margin: 1.25rem 0;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.article-content :deep(.ce-table td),
+.article-content :deep(.ce-table th) {
+  border: 1px solid hsl(var(--border));
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.article-content :deep(.ce-table th) {
+  background: hsl(var(--muted) / 0.5);
+  font-weight: 600;
+}
+
+.article-content :deep(.ce-embed-tool) {
+  margin: 1.25rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.article-content :deep(.ce-embed-tool__content) {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.article-content :deep(.ce-embed-tool__content iframe) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 
 /* Toolbar button styling */

@@ -3,4 +3,3 @@ export interface GetDashboardStatsResponse {
   postsToday: number;
   lastUpdated: string | null;
 }
-

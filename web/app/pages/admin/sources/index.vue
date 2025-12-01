@@ -90,7 +90,6 @@
       <AlertDescription>{{ error }}</AlertDescription>
     </Alert>
 
-
     <!-- Data Table -->
     <Card v-else class="overflow-hidden">
       <CardContent class="p-0">
@@ -109,101 +108,102 @@
                       v-if="!header.isPlaceholder"
                       class="flex items-center gap-2 transition-colors"
                       :class="{
-                        'cursor-pointer select-none hover:text-foreground': header.column.getCanSort(),
+                        'cursor-pointer select-none hover:text-foreground':
+                          header.column.getCanSort(),
                       }"
                       @click="header.column.getToggleSortingHandler()?.($event)"
                     >
-                  {{
-                    typeof header.column.columnDef.header === 'string'
-                      ? header.column.columnDef.header
-                      : ''
-                  }}
-                  <Icon
-                    v-if="header.column.getCanSort()"
-                    :name="
-                      header.column.getIsSorted() === 'asc'
-                        ? 'lucide:arrow-up'
-                        : header.column.getIsSorted() === 'desc'
-                          ? 'lucide:arrow-down'
-                          : 'lucide:arrow-up-down'
-                    "
-                    class="h-4 w-4 transition-colors"
-                    :class="{
-                      'text-foreground': header.column.getIsSorted(),
-                      'text-muted-foreground': !header.column.getIsSorted(),
-                    }"
-                  />
-                </div>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-if="sources.length === 0" class="hover:bg-transparent">
-              <TableCell :colspan="6" class="h-32 text-center">
-                <div class="flex flex-col items-center justify-center gap-2">
-                  <Icon name="lucide:book-open" class="h-12 w-12 text-muted-foreground" />
-                  <p class="text-sm text-muted-foreground">
-                    {{
-                      searchQuery || sourceTypeFilter !== 'all'
-                        ? 'No sources found matching your filters.'
-                        : 'No sources found.'
-                    }}
-                  </p>
-                </div>
-              </TableCell>
-            </TableRow>
-            <TableRow
-              v-for="(row, index) in table.getRowModel().rows"
-              :key="row.id"
-              class="transition-colors hover:bg-muted/50"
-            >
-              <TableCell class="text-muted-foreground font-medium">
-                {{ offset + index + 1 }}
-              </TableCell>
-              <TableCell>
-                <div class="flex flex-col gap-1">
-                  <span class="font-medium">{{ row.original.source.name }}</span>
-                  <span class="text-xs text-muted-foreground break-all">
-                    {{ row.original.source.url }}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge :variant="getSourceTypeVariant(row.original.source.source)">
-                  {{ formatSourceType(row.original.source.source) }}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <span class="text-sm text-muted-foreground font-mono">
-                  {{ row.original.source.id }}
-                </span>
-              </TableCell>
-              <TableCell>
-                <span class="text-sm text-muted-foreground">
-                  {{ formatDate(row.original.source.createdAt) }}
-                </span>
-              </TableCell>
-              <TableCell>
-                <div class="flex items-center gap-2">
-                  <Button variant="outline" size="sm" @click="viewSource(row.original)">
-                    <Icon name="lucide:eye" class="h-4 w-4 mr-2" />
-                    View
-                  </Button>
-                  <Button variant="outline" size="sm" as-child>
-                    <a
-                      :href="row.original.source.url"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Icon name="lucide:external-link" class="h-4 w-4 mr-2" />
-                      Open
-                    </a>
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+                      {{
+                        typeof header.column.columnDef.header === 'string'
+                          ? header.column.columnDef.header
+                          : ''
+                      }}
+                      <Icon
+                        v-if="header.column.getCanSort()"
+                        :name="
+                          header.column.getIsSorted() === 'asc'
+                            ? 'lucide:arrow-up'
+                            : header.column.getIsSorted() === 'desc'
+                              ? 'lucide:arrow-down'
+                              : 'lucide:arrow-up-down'
+                        "
+                        class="h-4 w-4 transition-colors"
+                        :class="{
+                          'text-foreground': header.column.getIsSorted(),
+                          'text-muted-foreground': !header.column.getIsSorted(),
+                        }"
+                      />
+                    </div>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow v-if="sources.length === 0" class="hover:bg-transparent">
+                  <TableCell :colspan="6" class="h-32 text-center">
+                    <div class="flex flex-col items-center justify-center gap-2">
+                      <Icon name="lucide:book-open" class="h-12 w-12 text-muted-foreground" />
+                      <p class="text-sm text-muted-foreground">
+                        {{
+                          searchQuery || sourceTypeFilter !== 'all'
+                            ? 'No sources found matching your filters.'
+                            : 'No sources found.'
+                        }}
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+                <TableRow
+                  v-for="(row, index) in table.getRowModel().rows"
+                  :key="row.id"
+                  class="transition-colors hover:bg-muted/50"
+                >
+                  <TableCell class="text-muted-foreground font-medium">
+                    {{ offset + index + 1 }}
+                  </TableCell>
+                  <TableCell>
+                    <div class="flex flex-col gap-1">
+                      <span class="font-medium">{{ row.original.source.name }}</span>
+                      <span class="text-xs text-muted-foreground break-all">
+                        {{ row.original.source.url }}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge :variant="getSourceTypeVariant(row.original.source.source)">
+                      {{ formatSourceType(row.original.source.source) }}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span class="text-sm text-muted-foreground font-mono">
+                      {{ row.original.source.id }}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span class="text-sm text-muted-foreground">
+                      {{ formatDate(row.original.source.createdAt) }}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div class="flex items-center gap-2">
+                      <Button variant="outline" size="sm" @click="viewSource(row.original)">
+                        <Icon name="lucide:eye" class="h-4 w-4 mr-2" />
+                        View
+                      </Button>
+                      <Button variant="outline" size="sm" as-child>
+                        <a
+                          :href="row.original.source.url"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Icon name="lucide:external-link" class="h-4 w-4 mr-2" />
+                          Open
+                        </a>
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
         </div>
       </CardContent>
