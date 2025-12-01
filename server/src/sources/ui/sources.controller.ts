@@ -14,6 +14,7 @@ import {
   GetUserSourcesResponseDto,
   GetAllSourcesQueryDto,
   GetAllSourcesResponseDto,
+  GetDashboardStatsResponseDto,
 } from './dtos';
 import {
   AddSourceHandler,
@@ -21,7 +22,9 @@ import {
   GetUserSourcesHandler,
   GetAllSourcesHandler,
   GetUserSourceTypesHandler,
+  GetDashboardStatsHandler,
 } from '../operation/handlers';
+import { GetDashboardStatsRequest } from '../operation/requests';
 
 @Controller('sources')
 export class SourcesController {
@@ -31,6 +34,7 @@ export class SourcesController {
     private readonly getUserSourcesHandler: GetUserSourcesHandler,
     private readonly getAllSourcesHandler: GetAllSourcesHandler,
     private readonly getUserSourceTypesHandler: GetUserSourceTypesHandler,
+    private readonly getDashboardStatsHandler: GetDashboardStatsHandler,
   ) {}
 
   @Post()
@@ -93,6 +97,27 @@ export class SourcesController {
     @CurrentUser() user: User,
   ): Promise<PublicSource[]> {
     return this.getUserSourceTypesHandler.handle(user.getId());
+  }
+
+  @Get('dashboard/stats')
+  @Auth()
+  @ApiOperation({
+    summary: 'Get dashboard statistics',
+    description:
+      'Get dashboard statistics including total sources, posts today, and last updated time',
+  })
+  @ApiOkResponse({
+    description: 'Dashboard statistics retrieved successfully',
+    type: GetDashboardStatsResponseDto,
+  })
+  public async getDashboardStats(
+    @CurrentUser() user: User,
+  ): Promise<GetDashboardStatsResponseDto> {
+    const response = await this.getDashboardStatsHandler.handle(
+      new GetDashboardStatsRequest(user.getId()),
+    );
+
+    return GetDashboardStatsResponseDto.fromResponse(response);
   }
 
   @Get()

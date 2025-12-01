@@ -96,6 +96,12 @@ export interface GetAllSourcesResponse {
   hasMore: boolean
 }
 
+export interface DashboardStatsResponse {
+  totalSources: number
+  postsToday: number
+  lastUpdated: string | null
+}
+
 export class SourcesService {
   constructor(private apiClient: ApiClient) {}
 
@@ -158,5 +164,12 @@ export class SourcesService {
    */
   async getUserSourceTypes(): Promise<SourceType[]> {
     return this.apiClient.get<SourceType[]>('/sources/user/types')
+  }
+
+  /**
+   * Get dashboard statistics
+   */
+  async getDashboardStats(): Promise<DashboardStatsResponse> {
+    return this.apiClient.get<DashboardStatsResponse>('/sources/dashboard/stats')
   }
 }

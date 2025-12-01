@@ -45,4 +45,9 @@ export abstract class SourcesRepository {
       isBanned?: boolean;
     },
   ): Promise<void>;
+
+  /**
+   * Get the maximum updatedAt date for given source IDs
+   */
+  abstract getMaxUpdatedAt(sourceIds: SourceId[]): Promise<Date | null>;
 }

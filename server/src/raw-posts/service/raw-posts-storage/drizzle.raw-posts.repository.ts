@@ -200,6 +200,26 @@ export class DrizzleRawPostsRepository extends RawPostsRepository {
       .where(eq(rawPosts.id, postId));
   }
 
+  async getMostRecentPostDate(sourceIds: SourceId[]): Promise<Date | null> {
+    if (sourceIds.length === 0) {
+      return null;
+    }
+
+    const [result] = await this.db
+      .select({
+        maxDate: sql<Date>`GREATEST(MAX(${rawPosts.createdAt}), MAX(${rawPosts.updatedAt}))`,
+      })
+      .from(rawPosts)
+      .where(
+        and(
+          inArray(rawPosts.sourceId, sourceIds),
+          eq(rawPosts.isBanned, false),
+        ),
+      );
+
+    return result?.maxDate ? new Date(result.maxDate) : null;
+  }
+
   private buildRelations(relations?: RawPostLoadOptions) {
     return {
       ...(relations?.withSource && { source: true }),

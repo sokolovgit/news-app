@@ -145,4 +145,10 @@ export class SourcesService {
 
     this.logger.debug(`Successfully updated metadata for source ${sourceId}`);
   }
+
+  async getMaxUpdatedAt(sourceIds: SourceId[]): Promise<Date | null> {
+    this.logger.debug(`Getting max updatedAt for ${sourceIds.length} sources`);
+
+    return await this.sourcesRepository.getMaxUpdatedAt(sourceIds);
+  }
 }

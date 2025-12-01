@@ -124,4 +124,12 @@ export class RawPostsService {
 
     this.logger.log(`Post ${postId} banned successfully`);
   }
+
+  async getMostRecentPostDate(sourceIds: SourceId[]): Promise<Date | null> {
+    this.logger.debug(
+      `Getting most recent post date for ${sourceIds.length} sources`,
+    );
+
+    return await this.rawPostsRepository.getMostRecentPostDate(sourceIds);
+  }
 }

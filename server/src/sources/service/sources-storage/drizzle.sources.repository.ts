@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { eq, sql, and, ilike } from 'drizzle-orm';
+import { eq, sql, and, ilike, inArray, max } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_CONNECTION, drizzle } from '@/database';
 
@@ -180,6 +180,21 @@ export class DrizzleSourcesRepository extends SourcesRepository {
       .update(sources)
       .set(updateData)
       .where(eq(sources.id, sourceId));
+  }
+
+  async getMaxUpdatedAt(sourceIds: SourceId[]): Promise<Date | null> {
+    if (sourceIds.length === 0) {
+      return null;
+    }
+
+    const [result] = await this.db
+      .select({
+        maxUpdatedAt: max(sources.updatedAt),
+      })
+      .from(sources)
+      .where(inArray(sources.id, sourceIds));
+
+    return result?.maxUpdatedAt ? new Date(result.maxUpdatedAt) : null;
   }
 
   private buildRelations(relations?: SourceLoadOptions) {

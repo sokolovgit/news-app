@@ -3,3 +3,4 @@ export * from './add-source.handler';
 export * from './get-user-sources.handler';
 export * from './get-all-sources.handler';
 export * from './get-user-source-types.handler';
+export * from './get-dashboard-stats.handler';

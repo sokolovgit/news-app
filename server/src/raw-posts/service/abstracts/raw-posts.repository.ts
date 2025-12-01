@@ -44,4 +44,9 @@ export abstract class RawPostsRepository {
   ): Promise<PaginatedResult<RawPost>>;
 
   abstract banPost(postId: RawPostId): Promise<void>;
+
+  /**
+   * Get the most recent post date (max of createdAt and updatedAt) for given source IDs
+   */
+  abstract getMostRecentPostDate(sourceIds: SourceId[]): Promise<Date | null>;
 }
