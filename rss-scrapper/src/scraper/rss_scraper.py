@@ -1,6 +1,8 @@
 """RSS feed scraper using feedparser."""
 
+import html
 import logging
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Optional
@@ -11,6 +13,31 @@ import httpx
 from src.config import Settings
 
 logger = logging.getLogger(__name__)
+
+
+def strip_html_tags(text: str) -> str:
+    """
+    Remove HTML tags from text and decode HTML entities.
+
+    Args:
+        text: Text potentially containing HTML
+
+    Returns:
+        Clean text without HTML tags
+    """
+    if not text:
+        return ""
+
+    # Remove HTML tags
+    clean = re.sub(r"<[^>]+>", "", text)
+
+    # Decode HTML entities (e.g., &amp; -> &, &lt; -> <)
+    clean = html.unescape(clean)
+
+    # Normalize whitespace
+    clean = re.sub(r"\s+", " ", clean).strip()
+
+    return clean
 
 
 @dataclass
@@ -168,10 +195,18 @@ class RssScraper:
 
     def _extract_feed_info(self, feed: Any, feed_url: str) -> RssFeedInfo:
         """Extract feed metadata."""
+        # Get and clean title
+        raw_title = getattr(feed, "title", "") or feed_url
+        clean_title = strip_html_tags(raw_title)
+
+        # Get and clean description
+        raw_description = getattr(feed, "description", "") or getattr(feed, "subtitle", "") or ""
+        clean_description = strip_html_tags(raw_description)
+
         return RssFeedInfo(
-            title=getattr(feed, "title", "") or feed_url,
+            title=clean_title,
             link=getattr(feed, "link", "") or feed_url,
-            description=getattr(feed, "description", "") or getattr(feed, "subtitle", "") or "",
+            description=clean_description,
             author=self._get_feed_author(feed),
             image_url=self._get_feed_image(feed),
         )
@@ -218,9 +253,13 @@ class RssScraper:
 
     def _parse_entry(self, entry: Any) -> RssFeedEntry:
         """Parse a feed entry into RssFeedEntry."""
+        # Get and clean title (strip HTML tags)
+        raw_title = getattr(entry, "title", "") or ""
+        clean_title = strip_html_tags(raw_title)
+
         return RssFeedEntry(
             id=self._get_entry_id(entry),
-            title=getattr(entry, "title", "") or "",
+            title=clean_title,
             content=self._get_entry_content(entry),
             link=getattr(entry, "link", "") or "",
             published=self._parse_published_date(entry),
@@ -350,4 +389,3 @@ class RssScraper:
     def close(self) -> None:
         """Close the HTTP client."""
         self.http_client.close()
-

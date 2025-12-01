@@ -1,5 +1,6 @@
 """Mappers to transform RSS feed data to FetchedPost format."""
 
+import html
 import logging
 import re
 from datetime import datetime, timezone
@@ -10,6 +11,37 @@ from src.models import FetchedPost, MediaUploadJobData, PostAuthor, PostMetrics
 from src.scraper.rss_scraper import RssFeedEntry, RssFeedInfo
 
 logger = logging.getLogger(__name__)
+
+
+def strip_html_tags(text: str) -> str:
+    """
+    Remove HTML tags from text and decode HTML entities.
+
+    Args:
+        text: Text potentially containing HTML
+
+    Returns:
+        Clean text without HTML tags
+    """
+    if not text:
+        return ""
+
+    # Remove HTML tags
+    clean = re.sub(r"<[^>]+>", "", text)
+
+    # Decode HTML entities (e.g., &amp; -> &, &lt; -> <)
+    clean = html.unescape(clean)
+
+    # Normalize whitespace (but preserve paragraph breaks)
+    # First, normalize multiple spaces to single space
+    clean = re.sub(r"[ \t]+", " ", clean)
+    # Normalize multiple newlines to double newline (paragraph break)
+    clean = re.sub(r"\n\s*\n", "\n\n", clean)
+    # Trim each line
+    lines = [line.strip() for line in clean.split("\n")]
+    clean = "\n".join(lines)
+
+    return clean.strip()
 
 
 def generate_media_key(
@@ -263,20 +295,23 @@ class RssEntryMapper:
 
     @staticmethod
     def _build_content(entry: RssFeedEntry) -> str:
-        """Build content from entry, combining title and content if needed."""
+        """Build content from entry, stripping HTML and cleaning up text."""
         content_parts = []
 
-        # Include title if different from content
-        if entry.title and entry.title not in (entry.content or ""):
-            content_parts.append(f"**{entry.title}**")
-
+        # Clean the content (strip HTML tags)
         if entry.content:
-            content_parts.append(entry.content)
+            clean_content = strip_html_tags(entry.content)
+            if clean_content:
+                content_parts.append(clean_content)
 
         # If we have tags, add them
         if entry.tags:
             tags_str = " ".join(f"#{tag.replace(' ', '_')}" for tag in entry.tags[:10])
             content_parts.append(f"\n\n{tags_str}")
 
-        return "\n\n".join(content_parts) if content_parts else entry.title or ""
+        # If no content, use title as fallback
+        if not content_parts:
+            return entry.title or ""
+
+        return "\n\n".join(content_parts)
 
