@@ -28,6 +28,12 @@ export const envValidationSchema = z.object({
     .default(true),
   BULLBOARD_PATH: z.string().default('bullboard'),
 
+  SPELUNKER_ENABLED: z
+    .string()
+    .transform((val) => val === 'true')
+    .or(z.boolean())
+    .default(true),
+
   DATABASE_URL: z.url(),
 
   REDIS_URL: z.url(),

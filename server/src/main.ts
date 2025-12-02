@@ -10,7 +10,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from './config';
 import { AllExceptionsFilter } from './errors';
 import { LoggerService } from './logger';
-import { setupSwagger, setupBullBoard } from './plugins';
+import { setupSwagger, setupBullBoard, setupSpelunker } from './plugins';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -48,6 +48,12 @@ async function bootstrap() {
 
   if (isBullboardEnabled) {
     setupBullBoard(app);
+  }
+
+  const isSpelunkerEnabled = config.spelunker.enabled;
+
+  if (isSpelunkerEnabled) {
+    setupSpelunker(app);
   }
 
   const { host, port } = config.server;

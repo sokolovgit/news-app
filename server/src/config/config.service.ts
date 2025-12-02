@@ -47,6 +47,10 @@ export class ConfigService extends BaseConfigService<EnvType> {
     path: this.env.BULLBOARD_PATH,
   };
 
+  spelunker = {
+    enabled: this.env.SPELUNKER_ENABLED,
+  };
+
   database = {
     url: this.env.DATABASE_URL,
   };
