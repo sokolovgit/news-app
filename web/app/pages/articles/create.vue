@@ -43,8 +43,8 @@
     />
 
     <!-- Floating action bar -->
-    <div class="fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur-sm border-t border-border p-4 z-50">
-      <div class="max-w-4xl mx-auto flex items-center justify-between">
+    <div class="fixed bottom-0 inset-x-0 bg-background/90 dark:bg-background/95 backdrop-blur-xl backdrop-saturate-150 border-t border-border/50 p-4 z-50 before:absolute before:inset-0 before:bg-linear-to-t before:from-background/40 before:to-transparent before:pointer-events-none">
+      <div class="relative max-w-4xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-4">
           <div class="text-sm text-muted-foreground">
             <span v-if="wordCount > 0">{{ wordCount }} words</span>

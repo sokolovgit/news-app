@@ -2,7 +2,7 @@
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
       <button
-        class="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        class="flex items-center gap-2 px-2 py-1.5 rounded-full bg-card/80 dark:bg-background/60 hover:bg-card dark:hover:bg-background/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
       >
         <Avatar class="h-8 w-8">
           <AvatarImage v-if="avatarUrl" :src="avatarUrl" :alt="userEmail || 'User'" />
@@ -11,7 +11,7 @@
           </AvatarFallback>
         </Avatar>
         <span class="hidden md:block text-sm font-medium text-foreground">{{ userEmail }}</span>
-        <Icon name="lucide:chevron-down" class="hidden md:block h-4 w-4 text-muted-foreground" />
+        <Icon name="lucide:chevron-down" class="hidden md:block h-4 w-4 text-foreground" />
       </button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" class="w-56">

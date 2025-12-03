@@ -68,14 +68,14 @@
 
     <!-- Filters -->
     <div
-      class="flex flex-wrap items-center justify-between gap-4 p-4 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50"
+      class="flex flex-wrap items-center justify-between gap-4 p-4 bg-card rounded-xl border border-border shadow-sm"
     >
       <div class="flex flex-wrap items-center gap-3">
         <Select 
           v-model="feedStore.filters.sourceId" 
           @update:model-value="handleSourceFilter"
         >
-          <SelectTrigger class="w-[180px] border-border/50 bg-background/50">
+          <SelectTrigger class="w-[180px] border-border bg-background">
             <div class="flex items-center gap-2">
               <Icon name="lucide:layers" class="h-4 w-4 text-muted-foreground" />
               <SelectValue placeholder="All Sources" />
@@ -96,7 +96,7 @@
           v-model="feedStore.filters.sortBy" 
           @update:model-value="handleSort"
         >
-          <SelectTrigger class="w-[160px] border-border/50 bg-background/50">
+          <SelectTrigger class="w-[160px] border-border bg-background">
             <div class="flex items-center gap-2">
               <Icon name="lucide:arrow-up-down" class="h-4 w-4 text-muted-foreground" />
               <SelectValue placeholder="Sort by" />
@@ -115,7 +115,7 @@
           <Input
             v-model="feedStore.filters.search"
             placeholder="Search posts..."
-            class="pl-9 w-[200px] md:w-[280px] border-border/50 bg-background/50"
+            class="pl-9 w-[200px] md:w-[280px] border-border bg-background"
             @keyup.enter="handleSearch"
           />
         </div>
@@ -205,9 +205,9 @@
     <!-- Selection Footer -->
     <div
       v-if="feedStore.isSelectionMode && feedStore.selectedPostIds.size > 0"
-      class="fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur-sm border-t border-border p-4 z-50"
+      class="fixed bottom-0 inset-x-0 bg-background/90 dark:bg-background/95 backdrop-blur-xl backdrop-saturate-150 border-t border-border/50 p-4 z-50 before:absolute before:inset-0 before:bg-linear-to-t before:from-background/40 before:to-transparent before:pointer-events-none"
     >
-      <div class="container mx-auto flex items-center justify-between max-w-7xl">
+      <div class="relative container mx-auto flex items-center justify-between max-w-7xl">
         <div class="flex items-center gap-3">
           <Badge variant="secondary" class="text-sm">
             {{ feedStore.selectedPostIds.size }} selected

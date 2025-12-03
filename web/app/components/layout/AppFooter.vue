@@ -1,6 +1,8 @@
 <template>
-  <footer class="border-t border-border bg-card/50 backdrop-blur-sm mt-auto">
-    <div class="container mx-auto px-4 py-8">
+  <footer
+    class="border-t border-border/50 bg-background/90 dark:bg-background/95 backdrop-blur-xl backdrop-saturate-150 shadow-sm mt-auto before:absolute before:inset-0 before:bg-linear-to-t before:from-background/40 before:to-transparent before:pointer-events-none relative"
+  >
+    <div class="relative container mx-auto px-4 py-8">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <!-- Brand Section -->
         <div class="col-span-1 md:col-span-2">

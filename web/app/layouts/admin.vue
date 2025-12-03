@@ -2,9 +2,9 @@
   <div class="min-h-screen bg-background">
     <!-- Admin Top Bar -->
     <header
-      class="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60"
+      class="sticky top-0 z-50 w-full border-b border-border/50 bg-background/90 dark:bg-background/95 backdrop-blur-xl backdrop-saturate-150 shadow-sm before:absolute before:inset-0 before:bg-linear-to-b before:from-background/40 before:to-transparent before:pointer-events-none"
     >
-      <div class="flex h-14 items-center px-4 gap-4">
+      <div class="relative flex h-14 items-center px-4 gap-4">
         <!-- Mobile Menu Toggle -->
         <button
           class="lg:hidden p-2 rounded-md text-foreground hover:bg-accent transition-colors"

@@ -149,7 +149,7 @@
     <!-- Autosave indicator -->
     <div
       v-if="lastSaved"
-      class="fixed bottom-24 left-6 flex items-center gap-2 px-3 py-1.5 bg-card/90 backdrop-blur-sm border border-border/50 rounded-full text-xs text-muted-foreground shadow-lg"
+      class="fixed bottom-24 left-6 flex items-center gap-2 px-3 py-1.5 bg-card/80 dark:bg-background/95 backdrop-blur-md backdrop-saturate-150 border border-border/50 rounded-full text-xs text-muted-foreground shadow-lg"
     >
       <Icon name="lucide:check-circle" class="h-3.5 w-3.5 text-green-500" />
       <span>Saved {{ formatTimeAgo(lastSaved) }}</span>

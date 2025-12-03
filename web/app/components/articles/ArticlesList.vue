@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- Filters -->
     <div
-      class="flex flex-wrap items-center justify-between gap-4 p-4 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50"
+      class="flex flex-wrap items-center justify-between gap-4 p-4 bg-card rounded-xl border border-border shadow-sm"
     >
       <div class="flex flex-wrap items-center gap-3">
         <!-- Status Filter (only for my articles) -->
@@ -11,7 +11,7 @@
           v-model="articlesStore.filters.status" 
           @update:model-value="handleStatusFilter"
         >
-          <SelectTrigger class="w-[140px] border-border/50 bg-background/50">
+          <SelectTrigger class="w-[140px] border-border bg-background">
             <div class="flex items-center gap-2">
               <Icon name="lucide:filter" class="h-4 w-4 text-muted-foreground" />
               <SelectValue placeholder="All" />
@@ -35,14 +35,14 @@
             v-if="isMyArticles"
             v-model="articlesStore.filters.search"
             placeholder="Search articles..."
-            class="pl-9 w-[200px] md:w-[280px] border-border/50 bg-background/50"
+            class="pl-9 w-[200px] md:w-[280px] border-border bg-background"
             @keyup.enter="handleSearch"
           />
           <Input
             v-else
             v-model="articlesStore.publicFilters.search"
             placeholder="Search articles..."
-            class="pl-9 w-[200px] md:w-[280px] border-border/50 bg-background/50"
+            class="pl-9 w-[200px] md:w-[280px] border-border bg-background"
             @keyup.enter="handleSearch"
           />
         </div>
