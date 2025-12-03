@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ServiceModule as PostsServiceModule } from '../service/service.module';
+import { UserSourcesModule } from '@/user-sources';
 
 import { GetRawPostsHandler, GetRawPostByIdHandler } from './handlers';
 
 const handlers = [GetRawPostsHandler, GetRawPostByIdHandler];
 
 @Module({
-  imports: [PostsServiceModule],
+  imports: [PostsServiceModule, UserSourcesModule],
   providers: [...handlers],
   exports: [...handlers, PostsServiceModule],
 })

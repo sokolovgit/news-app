@@ -142,6 +142,7 @@
         <div
           ref="editorContainer"
           class="article-content prose prose-lg dark:prose-invert max-w-none min-h-[350px]"
+          style="overflow: visible;"
         />
       </div>
     </section>
@@ -311,7 +312,7 @@ const debouncedEmitUpdate = () => {
   if (debounceTimer) clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
     emitUpdate()
-  }, 500)
+  }, 10000)
 }
 
 const triggerCoverUpload = () => {
@@ -837,19 +838,24 @@ watch(
 
 .section-content--editor {
   padding: 1rem 0.5rem 1rem 1.25rem;
+  overflow: visible;
+  position: relative;
 }
 
 .editor-section--content {
   min-height: 400px;
+  overflow: visible;
 }
 
 /* Editor.js Core Styling */
 .article-content :deep(.codex-editor) {
   padding: 0;
+  overflow: visible;
 }
 
 .article-content :deep(.codex-editor__redactor) {
   padding-bottom: 150px !important;
+  overflow: visible;
 }
 
 .article-content :deep(.ce-block__content) {
@@ -864,13 +870,22 @@ watch(
 
 /* Move toolbar buttons to the LEFT */
 .article-content :deep(.ce-toolbar) {
-  left: -2.5rem;
+  left: -3.5rem;
   right: auto;
+  overflow: visible;
+  z-index: 30;
 }
 
 .article-content :deep(.ce-toolbar__plus) {
   left: 0;
   right: auto;
+  position: relative;
+  z-index: 10;
+}
+
+.article-content :deep(.ce-toolbar__settings-btn) {
+  position: relative;
+  z-index: 10;
 }
 
 .article-content :deep(.ce-toolbar__actions) {
@@ -878,13 +893,16 @@ watch(
   right: auto;
   position: absolute;
   top: 100%;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
+  z-index: 20;
 }
 
 /* Toolbox positioning (left side) */
 .article-content :deep(.ce-toolbox) {
   left: 0;
   right: auto;
+  overflow: visible;
+  z-index: 40;
 }
 
 /* Block content styling */
@@ -1080,17 +1098,29 @@ watch(
 .article-content :deep(.ce-toolbar__plus),
 .article-content :deep(.ce-toolbar__settings-btn) {
   color: hsl(var(--muted-foreground));
-  background: hsl(var(--background));
+  background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
   border-radius: 0.375rem;
   transition: all 0.15s ease;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
 .article-content :deep(.ce-toolbar__plus:hover),
 .article-content :deep(.ce-toolbar__settings-btn:hover) {
   color: hsl(var(--foreground));
   background: hsl(var(--muted));
-  border-color: hsl(var(--border));
+  border-color: hsl(var(--primary) / 0.5);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+}
+
+.article-content :deep(.ce-toolbar__plus:active),
+.article-content :deep(.ce-toolbar__settings-btn:active) {
+  transform: scale(0.95);
 }
 
 /* Toolbox and settings panel styling */
@@ -1104,24 +1134,184 @@ watch(
   box-shadow:
     0 4px 12px -2px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: visible;
+  z-index: 50;
 }
 
 .article-content :deep(.ce-toolbox__button),
 .article-content :deep(.ce-settings__button),
 .article-content :deep(.ce-inline-tool) {
-  color: hsl(var(--foreground));
+  color: hsl(var(--foreground)) !important;
   border-radius: 0.25rem;
+  background: transparent !important;
 }
 
 .article-content :deep(.ce-toolbox__button:hover),
 .article-content :deep(.ce-settings__button:hover),
 .article-content :deep(.ce-inline-tool:hover) {
-  background: hsl(var(--muted));
+  background: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.article-content :deep(.ce-toolbox__button.ce-toolbox__button--active),
+.article-content :deep(.ce-settings__button.ce-settings__button--active),
+.article-content :deep(.ce-inline-tool.ce-inline-tool--active) {
+  background: hsl(var(--primary) / 0.15) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+.article-content :deep(.ce-inline-tool svg),
+.article-content :deep(.ce-inline-tool svg path),
+.article-content :deep(.ce-inline-tool svg circle),
+.article-content :deep(.ce-inline-tool svg rect),
+.article-content :deep(.ce-inline-tool svg line) {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  color: currentColor !important;
+}
+
+.article-content :deep(.ce-inline-tool.ce-inline-tool--active svg),
+.article-content :deep(.ce-inline-tool.ce-inline-tool--active svg path),
+.article-content :deep(.ce-inline-tool.ce-inline-tool--active svg circle),
+.article-content :deep(.ce-inline-tool.ce-inline-tool--active svg rect),
+.article-content :deep(.ce-inline-tool.ce-inline-tool--active svg line) {
+  fill: hsl(var(--primary)) !important;
+  stroke: hsl(var(--primary)) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+/* Override Editor.js default colors for inline tools */
+.article-content :deep(.ce-inline-tool[data-tool="bold"]),
+.article-content :deep(.ce-inline-tool[data-tool="italic"]),
+.article-content :deep(.ce-inline-tool[data-tool="underline"]),
+.article-content :deep(.ce-inline-tool[data-tool="link"]),
+.article-content :deep(.ce-inline-tool[data-tool="marker"]),
+.article-content :deep(.ce-inline-tool[data-tool="inlineCode"]) {
+  color: hsl(var(--foreground)) !important;
+}
+
+.article-content :deep(.ce-inline-tool[data-tool="bold"].ce-inline-tool--active),
+.article-content :deep(.ce-inline-tool[data-tool="italic"].ce-inline-tool--active),
+.article-content :deep(.ce-inline-tool[data-tool="underline"].ce-inline-tool--active),
+.article-content :deep(.ce-inline-tool[data-tool="link"].ce-inline-tool--active),
+.article-content :deep(.ce-inline-tool[data-tool="marker"].ce-inline-tool--active),
+.article-content :deep(.ce-inline-tool[data-tool="inlineCode"].ce-inline-tool--active) {
+  background: hsl(var(--primary) / 0.15) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+/* Text selection styling - native browser selection */
+.article-content :deep(::selection) {
+  background: hsl(var(--primary) / 0.3) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.article-content :deep(::-moz-selection) {
+  background: hsl(var(--primary) / 0.3) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Block selection - native selection within blocks */
+.article-content :deep(.ce-block *::selection),
+.article-content :deep(.ce-block *::-moz-selection) {
+  background: hsl(var(--primary) / 0.3) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Override any default selection colors */
+.article-content :deep(*)::selection {
+  background: hsl(var(--primary) / 0.3) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.article-content :deep(*)::-moz-selection {
+  background: hsl(var(--primary) / 0.3) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Focused and selected block styling */
+.article-content :deep(.ce-block--focused) {
+  background: transparent;
+}
+
+.article-content :deep(.ce-block--selected) {
+  background: hsl(var(--primary) / 0.05);
+  border-radius: 0.375rem;
+}
+
+.article-content :deep(.ce-block--focused .ce-block__content) {
+  outline: none;
+}
+
+.article-content :deep(.ce-block--focused.ce-block--selected) {
+  background: hsl(var(--primary) / 0.08);
 }
 
 /* Dark mode adjustments */
 :root.dark .article-content :deep(.ce-block--focused) {
   background: transparent;
+}
+
+:root.dark .article-content :deep(.ce-block--selected) {
+  background: hsl(var(--primary) / 0.15);
+}
+
+:root.dark .article-content :deep(.ce-block--focused.ce-block--selected) {
+  background: hsl(var(--primary) / 0.2);
+}
+
+:root.dark .article-content :deep(::selection) {
+  background: hsl(var(--primary) / 0.4) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+:root.dark .article-content :deep(::-moz-selection) {
+  background: hsl(var(--primary) / 0.4) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+:root.dark .article-content :deep(.ce-block *::selection),
+:root.dark .article-content :deep(.ce-block *::-moz-selection) {
+  background: hsl(var(--primary) / 0.4) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+:root.dark .article-content :deep(*)::selection {
+  background: hsl(var(--primary) / 0.4) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+:root.dark .article-content :deep(*)::-moz-selection {
+  background: hsl(var(--primary) / 0.4) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Dark mode inline tool colors */
+:root.dark .article-content :deep(.ce-inline-tool) {
+  color: hsl(var(--foreground)) !important;
+}
+
+:root.dark .article-content :deep(.ce-inline-tool.ce-inline-tool--active) {
+  background: hsl(var(--primary) / 0.2) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+:root.dark .article-content :deep(.ce-inline-tool svg),
+:root.dark .article-content :deep(.ce-inline-tool svg path),
+:root.dark .article-content :deep(.ce-inline-tool svg circle),
+:root.dark .article-content :deep(.ce-inline-tool svg rect),
+:root.dark .article-content :deep(.ce-inline-tool svg line) {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+:root.dark .article-content :deep(.ce-inline-tool.ce-inline-tool--active svg),
+:root.dark .article-content :deep(.ce-inline-tool.ce-inline-tool--active svg path),
+:root.dark .article-content :deep(.ce-inline-tool.ce-inline-tool--active svg circle),
+:root.dark .article-content :deep(.ce-inline-tool.ce-inline-tool--active svg rect),
+:root.dark .article-content :deep(.ce-inline-tool.ce-inline-tool--active svg line) {
+  fill: hsl(var(--primary)) !important;
+  stroke: hsl(var(--primary)) !important;
 }
 
 :root.dark .editor-section {
