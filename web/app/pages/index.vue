@@ -172,6 +172,18 @@ definePageMeta({
 })
 
 const authStore = useAuthStore()
+const route = useRoute()
+
+// Redirect unauthorized users to landing page
+watch(
+  () => authStore.isAuthenticated,
+  (isAuthenticated) => {
+    if (!isAuthenticated && route.path === '/') {
+      navigateTo('/landing')
+    }
+  },
+  { immediate: true },
+)
 
 const userInitials = computed(() => {
   const email = authStore.userEmail || ''

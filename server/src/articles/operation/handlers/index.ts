@@ -3,6 +3,7 @@ export * from './update-article.handler';
 export * from './delete-article.handler';
 export * from './get-my-articles.handler';
 export * from './get-article-by-id.handler';
+export * from './get-article-by-slug.handler';
 export * from './get-public-articles.handler';
 export * from './publish-article.handler';
 export * from './unpublish-article.handler';

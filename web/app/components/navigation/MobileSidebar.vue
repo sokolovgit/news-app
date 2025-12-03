@@ -9,9 +9,9 @@
         </div>
 
         <!-- Navigation Links -->
-        <nav class="flex flex-col gap-1 flex-1">
+        <nav v-if="authStore.isAuthenticated" class="flex flex-col gap-1 flex-1">
           <MobileNavLink to="/feed" label="Feed" icon="lucide:rss" @click="close" />
-          <MobileNavLink to="/articles" label="Articles" icon="lucide:file-text" @click="close" />
+          <MobileNavLink :to="articlesLink" label="Articles" icon="lucide:file-text" @click="close" />
           <MobileNavLink to="/sources" label="Sources" icon="lucide:book-open" @click="close" />
           <MobileNavLink
             to="/sources/add"
@@ -28,9 +28,15 @@
             @click="close"
           />
         </nav>
+        <nav v-else class="flex flex-col gap-1 flex-1">
+          <MobileNavLink to="/landing" label="Home" icon="lucide:home" @click="close" />
+          <MobileNavLink to="/articles/public" label="Articles" icon="lucide:file-text" @click="close" />
+          <MobileNavLink to="/login" label="Sign In" icon="lucide:log-in" @click="close" />
+          <MobileNavLink to="/register" label="Sign Up" icon="lucide:user-plus" @click="close" />
+        </nav>
 
         <!-- User Section -->
-        <div class="border-t border-border pt-4 mt-auto">
+        <div v-if="authStore.isAuthenticated" class="border-t border-border pt-4 mt-auto">
           <div class="flex items-center gap-3 mb-4 px-2">
             <Avatar class="h-10 w-10">
               <AvatarImage v-if="avatarUrl" :src="avatarUrl" :alt="userEmail || 'User'" />
@@ -86,6 +92,10 @@ const router = useRouter()
 const userEmail = computed(() => authStore.userEmail || 'User')
 const userRoles = computed(() => authStore.userRoles)
 const isAdmin = computed(() => authStore.userRoles.includes(UserRole.ADMIN))
+
+const articlesLink = computed(() => {
+  return authStore.isAuthenticated ? '/articles' : '/articles/public'
+})
 
 const userInitials = computed(() => {
   const email = userEmail.value

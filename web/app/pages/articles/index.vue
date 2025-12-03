@@ -21,118 +21,40 @@
       </Button>
     </div>
 
-    <!-- Filters -->
-    <div
-      class="flex flex-wrap items-center justify-between gap-4 p-4 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50"
-    >
-      <div class="flex flex-wrap items-center gap-3">
-        <!-- Status Filter -->
-        <Select 
-          v-model="articlesStore.filters.status" 
-          @update:model-value="handleStatusFilter"
-        >
-          <SelectTrigger class="w-[140px] border-border/50 bg-background/50">
-            <div class="flex items-center gap-2">
-              <Icon name="lucide:filter" class="h-4 w-4 text-muted-foreground" />
-              <SelectValue placeholder="All" />
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="draft">Drafts</SelectItem>
-            <SelectItem value="published">Published</SelectItem>
-            <SelectItem value="archived">Archived</SelectItem>
-          </SelectContent>
-        </Select>
+    <!-- Tabs -->
+    <Tabs v-model="articlesStore.activeTab" class="w-full" @update:model-value="handleTabChange">
+      <TabsList class="grid w-full max-w-md grid-cols-2">
+        <TabsTrigger value="my">
+          <Icon name="lucide:user" class="h-4 w-4 mr-2" />
+          My Articles
+        </TabsTrigger>
+        <TabsTrigger value="public">
+          <Icon name="lucide:globe" class="h-4 w-4 mr-2" />
+          Public Articles
+        </TabsTrigger>
+      </TabsList>
 
-        <!-- Search -->
-        <div class="relative">
-          <Icon
-            name="lucide:search"
-            class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
-          />
-          <Input
-            v-model="articlesStore.filters.search"
-            placeholder="Search articles..."
-            class="pl-9 w-[200px] md:w-[280px] border-border/50 bg-background/50"
-            @keyup.enter="handleSearch"
-          />
-        </div>
-      </div>
+      <!-- My Articles Tab -->
+      <TabsContent value="my" class="mt-6">
+        <ArticlesList :is-my-articles="true" />
+      </TabsContent>
 
-      <!-- Pagination -->
-      <div v-if="articlesStore.totalPages > 1 && !articlesStore.isLoading && articlesStore.articles.length > 0" class="flex items-center">
-        <Pagination
-          :total="articlesStore.pagination.total"
-          :items-per-page="articlesStore.pagination.limit"
-          :page="articlesStore.currentPage"
-          @update:page="articlesStore.goToPage"
-        >
-          <PaginationContent>
-            <PaginationPrevious />
-            <PaginationItem
-              v-for="page in articlesStore.visiblePages"
-              :key="page"
-              :value="page"
-              :is-active="page === articlesStore.currentPage"
-            >
-              {{ page }}
-            </PaginationItem>
-            <PaginationNext />
-          </PaginationContent>
-        </Pagination>
-      </div>
-    </div>
-
-    <!-- Loading State -->
-    <div
-      v-if="articlesStore.isLoading && articlesStore.articles.length === 0"
-      class="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
-    >
-      <ArticleCardSkeleton v-for="i in 6" :key="i" />
-    </div>
-
-    <!-- Empty State -->
-    <div
-      v-else-if="!articlesStore.isLoading && articlesStore.articles.length === 0"
-      class="text-center py-16 px-4"
-    >
-      <div
-        class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-muted/80 to-muted/30 flex items-center justify-center"
-      >
-        <Icon name="lucide:file-text" class="h-10 w-10 text-muted-foreground" />
-      </div>
-      <h3 class="text-xl font-semibold text-foreground mb-2">No articles yet</h3>
-      <p class="text-muted-foreground mb-8 max-w-md mx-auto">
-        {{ articlesStore.filters.search
-          ? 'No articles match your search. Try different keywords.'
-          : articlesStore.filters.status !== 'all'
-            ? `You don't have any ${articlesStore.filters.status} articles yet.`
-            : 'Start creating your first article to share your news with the world.'
-        }}
+      <!-- Public Articles Tab -->
+      <TabsContent value="public" class="mt-6">
+        <ArticlesList :is-my-articles="false" />
+      </TabsContent>
+    </Tabs>
+    
+    <!-- Link to public articles page for sharing -->
+    <div class="text-center pt-4 border-t border-border">
+      <p class="text-sm text-muted-foreground">
+        Want to share articles? 
+        <NuxtLink to="/articles/public" class="text-primary hover:underline">
+          View public articles page
+        </NuxtLink>
       </p>
-      <Button v-if="!articlesStore.filters.search" class="gap-2" @click="navigateTo('/articles/create')">
-        <Icon name="lucide:plus" class="h-4 w-4" />
-        Create Your First Article
-      </Button>
     </div>
 
-    <!-- Articles Grid -->
-    <div
-      v-else
-      class="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
-    >
-      <ArticleCard
-        v-for="article in articlesStore.articles"
-        :key="article.id"
-        :article="article"
-        :show-actions="true"
-        @edit="handleEdit"
-        @delete="articlesStore.openDeleteDialog"
-        @publish="handlePublish"
-        @unpublish="handleUnpublish"
-      />
-    </div>
 
     <!-- Delete Confirmation Dialog -->
     <Dialog v-model:open="articlesStore.showDeleteDialog">
@@ -158,14 +80,6 @@
 
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -174,44 +88,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination'
-import ArticleCard from '~/components/articles/ArticleCard.vue'
-import ArticleCardSkeleton from '~/components/articles/ArticleCardSkeleton.vue'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import ArticlesList from '~/components/articles/ArticlesList.vue'
 import { useArticlesStore } from '~/stores/articles.store'
+import { useAuthStore } from '~/stores/auth.store'
 import type { Article } from '~/types/articles.types'
-import { useDebounce } from '~/composables/useDebounce'
 import { toast } from 'vue-sonner'
+
+const route = useRoute()
 
 definePageMeta({
   layout: 'default',
 })
 
 const articlesStore = useArticlesStore()
+const authStore = useAuthStore()
 
-// Debounce search query
-const debouncedSearch = useDebounce(toRef(articlesStore.filters, 'search'), 500)
-
-const handleStatusFilter = async () => {
-  await articlesStore.applyFilters()
-}
-
-const handleSearch = async () => {
-  await articlesStore.applyFilters()
-}
-
-// Watch debounced search query
-watch(debouncedSearch, async () => {
-  await articlesStore.applyFilters()
-})
-
-const handleEdit = (article: Article) => {
-  navigateTo(`/articles/${article.id}/edit`)
+const handleTabChange = async (tab: 'my' | 'public') => {
+  articlesStore.setActiveTab(tab)
+  try {
+    if (tab === 'my') {
+      if (!authStore.isAuthenticated) {
+        navigateTo('/articles/public')
+        return
+      }
+      await articlesStore.fetchArticles(1)
+    } else {
+      await articlesStore.fetchPublicArticles(1)
+    }
+  } catch (error) {
+    toast.error('Error', {
+      description: 'Failed to load articles. Please try again.',
+    })
+  }
 }
 
 const confirmDelete = async () => {
@@ -228,37 +137,26 @@ const confirmDelete = async () => {
   }
 }
 
-const handlePublish = async (article: Article) => {
-  try {
-    await articlesStore.publishArticle(article)
-    toast.success('Article published', {
-      description: 'Your article is now live!',
-    })
-  } catch (error) {
-    console.error('Failed to publish article:', error)
-    toast.error('Error', {
-      description: 'Failed to publish article. Please try again.',
-    })
-  }
-}
-
-const handleUnpublish = async (article: Article) => {
-  try {
-    await articlesStore.unpublishArticle(article)
-    toast.success('Article unpublished', {
-      description: 'Your article is now a draft.',
-    })
-  } catch (error) {
-    console.error('Failed to unpublish article:', error)
-    toast.error('Error', {
-      description: 'Failed to unpublish article. Please try again.',
-    })
-  }
-}
+// Redirect unauthorized users to public page
+watch(
+  () => authStore.isAuthenticated,
+  (isAuthenticated) => {
+    if (!isAuthenticated && route.path === '/articles') {
+      navigateTo('/articles/public')
+    }
+  },
+  { immediate: true },
+)
 
 // Fetch articles on mount
 onMounted(async () => {
   try {
+    if (!authStore.isAuthenticated) {
+      navigateTo('/articles/public')
+      return
+    }
+    // Start with my articles tab for authenticated users
+    articlesStore.setActiveTab('my')
     await articlesStore.fetchArticles(1)
   } catch (error) {
     toast.error('Error', {

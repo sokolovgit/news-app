@@ -31,6 +31,7 @@ import {
   DeleteArticleHandler,
   GetMyArticlesHandler,
   GetArticleByIdHandler,
+  GetArticleBySlugHandler,
   GetPublicArticlesHandler,
   PublishArticleHandler,
   UnpublishArticleHandler,
@@ -54,6 +55,7 @@ export class ArticlesController {
     private readonly deleteArticleHandler: DeleteArticleHandler,
     private readonly getMyArticlesHandler: GetMyArticlesHandler,
     private readonly getArticleByIdHandler: GetArticleByIdHandler,
+    private readonly getArticleBySlugHandler: GetArticleBySlugHandler,
     private readonly getPublicArticlesHandler: GetPublicArticlesHandler,
     private readonly publishArticleHandler: PublishArticleHandler,
     private readonly unpublishArticleHandler: UnpublishArticleHandler,
@@ -235,7 +237,7 @@ export class ArticlesController {
   @Get('read/:slug')
   @ApiOperation({
     summary: 'Get article by slug',
-    description: 'Get a published article by its URL slug',
+    description: 'Get a published article by its URL slug (public, no auth required)',
   })
   @ApiOkResponse({
     description: 'Article retrieved successfully',
@@ -245,8 +247,7 @@ export class ArticlesController {
   public async getArticleBySlug(
     @Param('slug') slug: string,
   ): Promise<ArticleDto> {
-    // This would need a separate handler, but for now redirect to getPublicArticles
-    // TODO: Add GetArticleBySlugHandler
-    throw new Error('Not implemented yet');
+    const article = await this.getArticleBySlugHandler.handle(slug);
+    return ArticleDto.fromEntity(article);
   }
 }

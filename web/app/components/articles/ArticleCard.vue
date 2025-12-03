@@ -60,6 +60,18 @@
         </div>
 
         <div class="flex items-center gap-2">
+          <!-- Share Button (only for published articles) -->
+          <Button
+            v-if="article.status === 'published' && article.slug"
+            variant="ghost"
+            size="sm"
+            class="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            @click.stop="handleShare"
+            title="Share article"
+          >
+            <Icon name="lucide:share-2" class="h-3.5 w-3.5" />
+          </Button>
+
           <!-- Edit Button -->
           <Button
             v-if="showActions"
@@ -119,8 +131,10 @@ import { Button } from '@/components/ui/button'
 import type { Article } from '~/types/articles.types'
 import { ArticleStatus } from '~/types/articles.types'
 import { useMediaUrl } from '~/composables/useMediaUrl'
+import { useShare } from '~/composables/useShare'
 
 const { getMediaUrl } = useMediaUrl()
+const { shareArticle } = useShare()
 
 interface Props {
   article: Article
@@ -131,13 +145,19 @@ const props = withDefaults(defineProps<Props>(), {
   showActions: false,
 })
 
-defineEmits<{
+const emit = defineEmits<{
   click: [article: Article]
   edit: [article: Article]
   delete: [article: Article]
   publish: [article: Article]
   unpublish: [article: Article]
+  share: [article: Article]
 }>()
+
+const handleShare = async () => {
+  await shareArticle(props.article)
+  emit('share', props.article)
+}
 
 const statusLabel = computed(() => {
   switch (props.article.status) {
@@ -191,7 +211,7 @@ const handleClick = () => {
   if (props.showActions) {
     navigateTo(`/articles/${props.article.id}/edit`)
   } else if (props.article.slug) {
-    navigateTo(`/discover/${props.article.slug}`)
+    navigateTo(`/articles/read/${props.article.slug}`)
   }
 }
 </script>
